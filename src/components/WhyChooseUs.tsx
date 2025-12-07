@@ -37,7 +37,7 @@ export const WhyChooseUs = () => {
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
   return (
-    <section className="section-padding bg-muted" ref={ref}>
+    <section className="section-padding bg-card" ref={ref}>
       <div className="container-premium">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Content */}
@@ -102,7 +102,7 @@ export const WhyChooseUs = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent" />
             </div>
             {/* Floating Stats Card */}
-            <div className="absolute -bottom-8 -left-8 bg-primary text-primary-foreground p-8 shadow-premium">
+            <div className="absolute -bottom-8 -left-8 bg-foreground text-background p-8 shadow-premium">
               <div className="text-5xl font-display font-light mb-2">500+</div>
               <div className="text-sm tracking-widest uppercase opacity-80">Miembros Activos</div>
             </div>

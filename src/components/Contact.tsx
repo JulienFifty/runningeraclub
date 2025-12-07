@@ -47,7 +47,7 @@ export const Contact = () => {
   };
 
   return (
-    <section id="contacto" className="section-padding bg-muted" ref={ref}>
+    <section id="contacto" className="section-padding bg-card" ref={ref}>
       <div className="container-premium">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
           {/* Info */}

@@ -17,8 +17,8 @@ export const Header = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
       {/* Top Bar */}
-      <div className="bg-primary text-primary-foreground">
-        <div className="container-premium py-2 flex items-center justify-between text-xs tracking-wider">
+      <div className="bg-card border-b border-border/30">
+        <div className="container-premium py-2 flex items-center justify-between text-xs tracking-wider text-foreground">
           <div className="hidden md:flex items-center gap-6">
             <a href="tel:+522221234567" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <Phone className="w-3 h-3" />
@@ -44,7 +44,7 @@ export const Header = () => {
       </div>
 
       {/* Main Header */}
-      <div className="bg-background/95 backdrop-blur-md border-b border-border">
+      <div className="bg-background/95 backdrop-blur-md border-b border-border/30">
         <div className="container-premium py-4 flex items-center justify-between">
           {/* Logo */}
           <a href="#inicio" className="flex items-center gap-2">

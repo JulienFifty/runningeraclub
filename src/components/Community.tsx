@@ -28,7 +28,7 @@ export const Community = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
-            className="text-primary-foreground/60 text-sm tracking-[0.3em] uppercase mb-6 block"
+            className="text-white/60 text-sm tracking-[0.3em] uppercase mb-6 block"
           >
             Nuestra Comunidad
           </motion.span>
@@ -37,7 +37,7 @@ export const Community = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.1 }}
-            className="font-display text-4xl md:text-5xl lg:text-6xl font-light text-primary-foreground leading-tight mb-8"
+            className="font-display text-4xl md:text-5xl lg:text-6xl font-light text-white leading-tight mb-8"
           >
             Correr es solo el inicio.
             <br />
@@ -50,7 +50,7 @@ export const Community = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-primary-foreground/80 text-lg font-light leading-relaxed mb-10 max-w-xl"
+            className="text-white/80 text-lg font-light leading-relaxed mb-10 max-w-xl"
           >
             Cada kilómetro compartido crea lazos que trascienden el deporte. 
             Somos más que corredores, somos una familia que se apoya, celebra y crece junta.
@@ -64,12 +64,12 @@ export const Community = () => {
           >
             <a
               href="#contacto"
-              className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary-foreground text-primary text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-primary-foreground/90 hover:gap-4"
+              className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-white text-black text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-white/90 hover:gap-4"
             >
               Conoce Nuestra Historia
               <ArrowRight className="w-4 h-4" />
             </a>
-            <button className="inline-flex items-center justify-center gap-3 px-8 py-4 border border-primary-foreground/50 text-primary-foreground text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-primary-foreground/10">
+            <button className="inline-flex items-center justify-center gap-3 px-8 py-4 border border-white/50 text-white text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-white/10">
               <Play className="w-4 h-4" />
               Ver Video
             </button>

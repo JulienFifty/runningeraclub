@@ -32,7 +32,7 @@ export const Hero = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-block text-primary-foreground/80 text-sm tracking-[0.3em] uppercase mb-6"
+              className="inline-block text-white/80 text-sm tracking-[0.3em] uppercase mb-6"
             >
               Club de Running Premium • Puebla
             </motion.span>
@@ -41,7 +41,7 @@ export const Hero = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className="font-display text-5xl md:text-7xl lg:text-8xl text-primary-foreground font-light leading-[0.95] mb-6"
+              className="font-display text-5xl md:text-7xl lg:text-8xl text-white font-light leading-[0.95] mb-6"
             >
               La Nueva Era
               <br />
@@ -52,7 +52,7 @@ export const Hero = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-primary-foreground/90 text-lg md:text-xl font-light leading-relaxed max-w-xl mb-10"
+              className="text-white/90 text-lg md:text-xl font-light leading-relaxed max-w-xl mb-10"
             >
               Comunidad, estilo de vida y experiencias deportivas exclusivas en Puebla.
               Únete a la comunidad de corredores más vibrante de México.
@@ -66,14 +66,14 @@ export const Hero = () => {
             >
               <a
                 href="#contacto"
-                className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary-foreground text-primary text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-primary-foreground/90 hover:gap-4"
+                className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-white text-black text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-white/90 hover:gap-4"
               >
                 Unirme al Club
                 <ArrowRight className="w-4 h-4" />
               </a>
               <a
                 href="#eventos"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-primary-foreground/50 text-primary-foreground text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-primary-foreground/10 hover:border-primary-foreground"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-white/50 text-white text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-white/10 hover:border-white"
               >
                 Próximo Evento
               </a>
