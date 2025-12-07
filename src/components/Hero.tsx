@@ -1,12 +1,16 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Users, Dumbbell, Image as ImageIcon, ArrowRight } from 'lucide-react';
+import { Calendar, Users, Dumbbell, Image as ImageIcon, ArrowRight, Route, Trophy, Coffee } from 'lucide-react';
 import heroImage from '@/assets/hero-runners.jpg';
 
 const categoryItems = [
-  { icon: Calendar, label: 'Eventos', href: '#eventos' },
-  { icon: Dumbbell, label: 'Entrenamientos', href: '#experiencias' },
-  { icon: Users, label: 'Comunidad', href: '#comunidad' },
-  { icon: ImageIcon, label: 'Galería', href: '#galeria' },
+  { icon: Calendar, label: 'Eventos', sublabel: 'y Carreras', href: '#eventos', active: true },
+  { icon: Dumbbell, label: 'Entrenamientos', sublabel: 'Profesionales', href: '#experiencias', active: false },
+  { icon: Route, label: 'Trail', sublabel: 'Running', href: '#experiencias', active: false },
+  { icon: Users, label: 'Comunidad', sublabel: '& Networking', href: '#comunidad', active: false },
+  { icon: Coffee, label: 'After', sublabel: 'Runs', href: '#experiencias', active: false },
+  { icon: Trophy, label: 'Colaboraciones', sublabel: 'con Marcas', href: '#experiencias', active: false },
+  { icon: ImageIcon, label: 'Galería', sublabel: 'de Fotos', href: '#galeria', active: false },
 ];
 
 export const Hero = () => {
@@ -82,31 +86,81 @@ export const Hero = () => {
         </div>
       </div>
 
-      {/* Category Bar */}
+      {/* Category Bar - Four Seasons Style */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.5 }}
-        className="relative bg-background"
+        className="relative bg-background border-t border-border/30"
       >
-        <div className="container-premium">
-          <div className="grid grid-cols-2 md:grid-cols-4 -mt-16 md:-mt-12">
+        <div className="container-premium py-10">
+          {/* Scroll to Discover */}
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-[2px] h-4 bg-foreground" />
+            <span className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground">
+              Scroll para descubrir más
+            </span>
+          </div>
+
+          {/* Category Grid */}
+          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-6 lg:gap-8">
             {categoryItems.map((item, index) => (
-              <a
-                key={item.label}
-                href={item.href}
-                className="group bg-card hover:bg-primary transition-all duration-500 p-6 md:p-8 flex flex-col items-center justify-center gap-3 border-r border-b border-border last:border-r-0 md:last:border-r-0"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <item.icon className="w-6 h-6 text-muted-foreground group-hover:text-primary-foreground transition-colors duration-500" />
-                <span className="text-xs font-medium tracking-widest uppercase text-foreground group-hover:text-primary-foreground transition-colors duration-500">
-                  {item.label}
-                </span>
-              </a>
+              <CategoryItem key={item.label} item={item} index={index} />
             ))}
           </div>
         </div>
       </motion.div>
     </section>
+  );
+};
+
+const CategoryItem = ({ item, index }: { item: typeof categoryItems[0]; index: number }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const Icon = item.icon;
+
+  return (
+    <a
+      href={item.href}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="group flex flex-col items-center text-center relative"
+    >
+      {/* Active/Hover indicator line */}
+      <motion.div
+        initial={{ scaleX: item.active ? 1 : 0 }}
+        animate={{ scaleX: isHovered || item.active ? 1 : 0 }}
+        className="absolute -top-10 left-1/2 -translate-x-1/2 w-16 h-[2px] bg-foreground origin-center"
+      />
+
+      {/* Icon */}
+      <div className="mb-4">
+        <Icon
+          className={`w-8 h-8 transition-all duration-300 ${
+            isHovered || item.active
+              ? 'text-foreground'
+              : 'text-muted-foreground'
+          }`}
+          strokeWidth={1}
+        />
+      </div>
+
+      {/* Label */}
+      <span
+        className={`text-[10px] tracking-[0.2em] uppercase font-medium transition-colors duration-300 ${
+          isHovered || item.active ? 'text-foreground' : 'text-muted-foreground'
+        }`}
+      >
+        {item.label}
+      </span>
+      {item.sublabel && (
+        <span
+          className={`text-[10px] tracking-[0.2em] uppercase font-medium transition-colors duration-300 ${
+            isHovered || item.active ? 'text-foreground' : 'text-muted-foreground'
+          }`}
+        >
+          {item.sublabel}
+        </span>
+      )}
+    </a>
   );
 };
