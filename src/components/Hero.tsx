@@ -85,18 +85,18 @@ export const Hero = () => {
         </div>
       </div>
 
-      {/* Category Bar - Four Seasons Style */}
+      {/* Category Bar - Inside Hero */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.5 }}
-        className="relative bg-background border-t border-border/30"
+        className="relative pb-16"
       >
-        <div className="container-premium py-10">
+        <div className="container-premium">
           {/* Scroll to Discover */}
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-[2px] h-4 bg-foreground" />
-            <span className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground">
+            <div className="w-[2px] h-4 bg-white" />
+            <span className="text-[10px] tracking-[0.3em] uppercase text-white/60">
               Scroll para descubrir más
             </span>
           </div>
@@ -128,14 +128,14 @@ const CategoryItem = ({ item, index }: { item: typeof categoryItems[0]; index: n
       <motion.div
         initial={{ scaleX: 0 }}
         animate={{ scaleX: isHovered ? 1 : 0 }}
-        className="absolute -top-10 left-1/2 -translate-x-1/2 w-16 h-[2px] bg-foreground origin-center"
+        className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-[2px] bg-white origin-center"
       />
 
       {/* Icon */}
-      <div className="mb-4">
+      <div className="mb-3">
         <Icon
-          className={`w-8 h-8 transition-all duration-300 ${
-            isHovered ? 'text-foreground' : 'text-muted-foreground'
+          className={`w-7 h-7 transition-all duration-300 ${
+            isHovered ? 'text-white' : 'text-white/60'
           }`}
           strokeWidth={1}
         />
@@ -143,16 +143,16 @@ const CategoryItem = ({ item, index }: { item: typeof categoryItems[0]; index: n
 
       {/* Label */}
       <span
-        className={`text-[10px] tracking-[0.2em] uppercase font-medium transition-colors duration-300 ${
-          isHovered ? 'text-foreground' : 'text-muted-foreground'
+        className={`text-[9px] tracking-[0.2em] uppercase font-medium transition-colors duration-300 ${
+          isHovered ? 'text-white' : 'text-white/60'
         }`}
       >
         {item.label}
       </span>
       {item.sublabel && (
         <span
-          className={`text-[10px] tracking-[0.2em] uppercase font-medium transition-colors duration-300 ${
-            isHovered ? 'text-foreground' : 'text-muted-foreground'
+          className={`text-[9px] tracking-[0.2em] uppercase font-medium transition-colors duration-300 ${
+            isHovered ? 'text-white' : 'text-white/60'
           }`}
         >
           {item.sublabel}
