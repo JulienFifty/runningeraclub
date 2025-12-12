@@ -16,7 +16,7 @@ const categoryItems = [
 
 export const Hero = () => {
   return (
-    <section id="inicio" className="relative min-h-screen flex flex-col">
+    <section id="inicio" className="relative h-screen flex flex-col overflow-hidden">
       {/* Hero Image */}
       <div className="absolute inset-0">
         <img
@@ -29,7 +29,7 @@ export const Hero = () => {
       </div>
 
       {/* Content */}
-      <div className="relative flex-1 flex items-center pt-32 pb-20">
+      <div className="relative flex-1 flex items-center pt-16 pb-8">
         <div className="container-premium">
           <div className="max-w-3xl">
             {/* Logo */}
@@ -39,14 +39,14 @@ export const Hero = () => {
               transition={{ duration: 0.6 }}
               src={logoRunningEra}
               alt="RUNNING ERA Logo"
-              className="w-24 md:w-32 mb-8"
+              className="w-16 md:w-20 mb-4"
             />
 
             <motion.span
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="inline-block text-white/80 text-sm tracking-[0.3em] uppercase mb-6"
+              className="inline-block text-white/80 text-xs tracking-[0.3em] uppercase mb-4"
             >
               Club de Running Premium • Puebla
             </motion.span>
@@ -55,7 +55,7 @@ export const Hero = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className="font-display text-5xl md:text-7xl lg:text-8xl text-white font-light leading-[0.95] mb-6"
+              className="font-display text-4xl md:text-6xl lg:text-7xl text-white font-light leading-[0.95] mb-4"
             >
               La Nueva Era
               <br />
@@ -66,7 +66,7 @@ export const Hero = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-white/90 text-lg md:text-xl font-light leading-relaxed max-w-xl mb-10"
+              className="text-white/90 text-base md:text-lg font-light leading-relaxed max-w-xl mb-6"
             >
               Comunidad, estilo de vida y experiencias deportivas exclusivas en Puebla.
               Únete a la comunidad de corredores más vibrante de México.
@@ -76,18 +76,18 @@ export const Hero = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="flex flex-col sm:flex-row gap-4"
+              className="flex flex-col sm:flex-row gap-3"
             >
               <a
                 href="#contacto"
-                className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-white text-black text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-white/90 hover:gap-4"
+                className="inline-flex items-center justify-center gap-3 px-6 py-3 bg-white text-black text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-white/90 hover:gap-4"
               >
                 Unirme al Club
                 <ArrowRight className="w-4 h-4" />
               </a>
               <a
                 href="#eventos"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-white/50 text-white text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-white/10 hover:border-white"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-white/50 text-white text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-white/10 hover:border-white"
               >
                 Próximo Evento
               </a>
@@ -101,13 +101,13 @@ export const Hero = () => {
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.5 }}
-        className="relative pb-16"
+        className="relative pb-6"
       >
         <div className="container-premium">
           {/* Scroll to Discover */}
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-[2px] h-4 bg-white" />
-            <span className="text-[10px] tracking-[0.3em] uppercase text-white/60">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-[2px] h-3 bg-white" />
+            <span className="text-[9px] tracking-[0.3em] uppercase text-white/60">
               Scroll para descubrir más
             </span>
           </div>
