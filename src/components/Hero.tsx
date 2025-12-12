@@ -24,8 +24,7 @@ export const Hero = () => {
           className="w-full h-full object-cover"
           loading="eager"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/70 via-primary/40 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-primary/20" />
+        <div className="absolute inset-0 bg-black/60" />
       </div>
 
       {/* Content */}
