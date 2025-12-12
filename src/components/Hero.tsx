@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Dumbbell, Calendar, Gift, Handshake, ShoppingBag, Users, Image as ImageIcon, ArrowRight } from 'lucide-react';
 import heroImage from '@/assets/hero-runners.jpg';
+import logoRunningEra from '@/assets/logo-running-era.png';
 
 const categoryItems = [
   { icon: Dumbbell, label: 'Entrenamientos', href: '#experiencias' },
@@ -31,10 +32,20 @@ export const Hero = () => {
       <div className="relative flex-1 flex items-center pt-32 pb-20">
         <div className="container-premium">
           <div className="max-w-3xl">
-            <motion.span
+            {/* Logo */}
+            <motion.img
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
+              src={logoRunningEra}
+              alt="RUNNING ERA Logo"
+              className="w-24 md:w-32 mb-8"
+            />
+
+            <motion.span
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
               className="inline-block text-white/80 text-sm tracking-[0.3em] uppercase mb-6"
             >
               Club de Running Premium • Puebla
