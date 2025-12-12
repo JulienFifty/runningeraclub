@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Users, Dumbbell, Image as ImageIcon, ArrowRight, Route, Trophy, Coffee } from 'lucide-react';
+import { Dumbbell, Calendar, Gift, Handshake, ShoppingBag, Users, Image as ImageIcon, ArrowRight } from 'lucide-react';
 import heroImage from '@/assets/hero-runners.jpg';
 
 const categoryItems = [
-  { icon: Calendar, label: 'Eventos', sublabel: 'y Carreras', href: '#eventos', active: true },
-  { icon: Dumbbell, label: 'Entrenamientos', sublabel: 'Profesionales', href: '#experiencias', active: false },
-  { icon: Route, label: 'Trail', sublabel: 'Running', href: '#experiencias', active: false },
-  { icon: Users, label: 'Comunidad', sublabel: '& Networking', href: '#comunidad', active: false },
-  { icon: Coffee, label: 'After', sublabel: 'Runs', href: '#experiencias', active: false },
-  { icon: Trophy, label: 'Colaboraciones', sublabel: 'con Marcas', href: '#experiencias', active: false },
-  { icon: ImageIcon, label: 'Galería', sublabel: 'de Fotos', href: '#galeria', active: false },
+  { icon: Dumbbell, label: 'Entrenamientos', href: '#experiencias' },
+  { icon: Calendar, label: 'Eventos', href: '#eventos' },
+  { icon: Gift, label: 'Beneficios', href: '#experiencias' },
+  { icon: Handshake, label: 'Marcas &', sublabel: 'Patrocinios', href: '#experiencias' },
+  { icon: ShoppingBag, label: 'Merch', href: '#experiencias' },
+  { icon: Users, label: 'Comunidad', href: '#comunidad' },
+  { icon: ImageIcon, label: 'Galería', href: '#galeria' },
 ];
 
 export const Hero = () => {
@@ -125,10 +125,10 @@ const CategoryItem = ({ item, index }: { item: typeof categoryItems[0]; index: n
       onMouseLeave={() => setIsHovered(false)}
       className="group flex flex-col items-center text-center relative"
     >
-      {/* Active/Hover indicator line */}
+      {/* Hover indicator line */}
       <motion.div
-        initial={{ scaleX: item.active ? 1 : 0 }}
-        animate={{ scaleX: isHovered || item.active ? 1 : 0 }}
+        initial={{ scaleX: 0 }}
+        animate={{ scaleX: isHovered ? 1 : 0 }}
         className="absolute -top-10 left-1/2 -translate-x-1/2 w-16 h-[2px] bg-foreground origin-center"
       />
 
@@ -136,9 +136,7 @@ const CategoryItem = ({ item, index }: { item: typeof categoryItems[0]; index: n
       <div className="mb-4">
         <Icon
           className={`w-8 h-8 transition-all duration-300 ${
-            isHovered || item.active
-              ? 'text-foreground'
-              : 'text-muted-foreground'
+            isHovered ? 'text-foreground' : 'text-muted-foreground'
           }`}
           strokeWidth={1}
         />
@@ -147,7 +145,7 @@ const CategoryItem = ({ item, index }: { item: typeof categoryItems[0]; index: n
       {/* Label */}
       <span
         className={`text-[10px] tracking-[0.2em] uppercase font-medium transition-colors duration-300 ${
-          isHovered || item.active ? 'text-foreground' : 'text-muted-foreground'
+          isHovered ? 'text-foreground' : 'text-muted-foreground'
         }`}
       >
         {item.label}
@@ -155,7 +153,7 @@ const CategoryItem = ({ item, index }: { item: typeof categoryItems[0]; index: n
       {item.sublabel && (
         <span
           className={`text-[10px] tracking-[0.2em] uppercase font-medium transition-colors duration-300 ${
-            isHovered || item.active ? 'text-foreground' : 'text-muted-foreground'
+            isHovered ? 'text-foreground' : 'text-muted-foreground'
           }`}
         >
           {item.sublabel}
