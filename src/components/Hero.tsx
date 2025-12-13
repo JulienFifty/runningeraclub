@@ -144,7 +144,7 @@ export const Hero = () => {
               transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
               className="inline-block text-white/80 text-xs tracking-[0.3em] uppercase mb-4"
             >
-              Club de Running Premium • Puebla
+              Social Running Club • Puebla
             </motion.span>
 
             {/* Main Title with powerful reveal */}
@@ -162,7 +162,7 @@ export const Hero = () => {
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: 0.5 }}
-                className="block"
+                className="block font-medium"
               >
                 Running Era Club
               </motion.span>

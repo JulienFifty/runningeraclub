@@ -32,7 +32,7 @@ export const WellnessCommunity = () => {
               className="w-full h-full object-cover"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-black/60" />
+            <motion.div className="absolute inset-0 bg-black/60 border border-gray-300/20" />
           </div>
 
           {/* Content */}
