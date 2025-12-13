@@ -22,7 +22,8 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const event = await getEventBySlug(slug);
+  // Usar cliente estático para generateMetadata (no tiene contexto de request)
+  const event = await getEventBySlug(slug, true);
 
   if (!event) {
     return {
@@ -43,7 +44,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function EventPage({ params }: PageProps) {
   const { slug } = await params;
-  const event = await getEventBySlug(slug);
+  // Usar cliente estático para evitar problemas con cookies en build time
+  const event = await getEventBySlug(slug, true);
 
   if (!event) {
     notFound();

@@ -1,0 +1,13 @@
+{
+  "/api/events/[id]/route": "/api/events/[id]",
+  "/api/events/route": "/api/events",
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/admin/eventos/[id]/page": "/admin/eventos/[id]",
+  "/admin/eventos/nuevo/page": "/admin/eventos/nuevo",
+  "/admin/eventos/page": "/admin/eventos",
+  "/admin/login/page": "/admin/login",
+  "/admin/page": "/admin",
+  "/page": "/",
+  "/eventos/[slug]/page": "/eventos/[slug]"
+}

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Calendar, Settings, Image, MessageSquare, Users, BarChart3, FileText, Mail, Globe } from 'lucide-react';
+import { Calendar, Settings, Image, MessageSquare, Users, BarChart3, FileText, Mail, Globe, LogOut } from 'lucide-react';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -19,6 +19,11 @@ export default function AdminDashboard() {
     }
   }, [router]);
 
+  const handleLogout = () => {
+    localStorage.removeItem('admin_auth');
+    router.push('/admin/login');
+  };
+
   if (!isAuthenticated) {
     return null;
   }
@@ -27,12 +32,24 @@ export default function AdminDashboard() {
     <main className="min-h-screen bg-background p-8">
       <div className="container-premium">
         <div className="mb-8">
-          <h1 className="font-display text-4xl md:text-5xl text-foreground font-light mb-4">
-            Panel de Administración
-          </h1>
-          <p className="text-muted-foreground">
-            Gestiona los eventos y contenido de RUNNING ERA
-          </p>
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h1 className="font-display text-4xl md:text-5xl text-foreground font-light mb-4">
+                Panel de Administración
+              </h1>
+              <p className="text-muted-foreground">
+                Gestiona los eventos y contenido de RUNNING ERA
+              </p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="inline-flex items-center gap-2 px-4 py-2 text-muted-foreground hover:text-foreground border border-border hover:border-foreground/50 rounded-lg transition-colors"
+              title="Salir del panel"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="text-sm">Salir</span>
+            </button>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

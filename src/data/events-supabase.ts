@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 export interface Event {
   id: string;
@@ -78,9 +79,13 @@ export async function getEvents(): Promise<Event[]> {
   }
 }
 
-export async function getEventBySlug(slug: string): Promise<Event | undefined> {
+export async function getEventBySlug(slug: string, useStaticClient = false): Promise<Event | undefined> {
   try {
-    const supabase = await createClient();
+    // Si useStaticClient es true, usar cliente directo sin cookies (para generateStaticParams)
+    const supabase = useStaticClient 
+      ? createStaticClient()
+      : await createClient();
+    
     const { data, error } = await supabase
       .from('events')
       .select('*')
@@ -98,9 +103,19 @@ export async function getEventBySlug(slug: string): Promise<Event | undefined> {
   }
 }
 
+// Función para obtener slugs sin cookies (para generateStaticParams)
+function createStaticClient() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
+
 export async function getAllEventSlugs(): Promise<string[]> {
   try {
-    const supabase = await createClient();
+    // Para generateStaticParams, usar cliente directo sin cookies
+    // Para otros casos, usar el cliente del servidor
+    const supabase = createStaticClient();
     const { data, error } = await supabase
       .from('events')
       .select('slug');
