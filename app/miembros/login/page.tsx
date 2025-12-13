@@ -88,14 +88,16 @@ export default function MemberLogin() {
           });
 
         if (profileError) {
-          // Error al crear perfil, pero el usuario ya fue creado en auth
-          // Intentamos crear el perfil de nuevo o el usuario puede completarlo después
-          // No bloqueamos el flujo porque el usuario ya existe en auth
+          // Si el perfil ya existe o hay otro error, intentamos continuar
+          // El perfil se puede crear después desde el dashboard
+          toast.warning('Cuenta creada, pero hubo un problema al crear el perfil', {
+            description: 'Serás redirigido al dashboard donde podrás completar tu perfil',
+          });
+        } else {
+          toast.success('¡Registro exitoso!', {
+            description: 'Tu cuenta ha sido creada correctamente',
+          });
         }
-
-        toast.success('¡Registro exitoso!', {
-          description: 'Tu cuenta ha sido creada. Revisa tu email para confirmar.',
-        });
 
         // Auto-login después del registro
         const { data: loginData } = await supabase.auth.signInWithPassword({

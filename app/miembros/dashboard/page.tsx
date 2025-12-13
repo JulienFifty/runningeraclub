@@ -56,18 +56,49 @@ export default function MemberDashboard() {
       }
 
       // Cargar perfil del miembro
-      const { data: memberData, error: memberError } = await supabase
+      let { data: memberData, error: memberError } = await supabase
         .from('members')
         .select('*')
         .eq('id', user.id)
         .single();
 
-      if (memberError) {
-        toast.error('Error al cargar tu perfil');
+      // Si el perfil no existe, crearlo automáticamente
+      if (memberError && memberError.code === 'PGRST116') {
+        // PGRST116 = no rows returned
+        const { data: newMember, error: createError } = await supabase
+          .from('members')
+          .insert({
+            id: user.id,
+            email: user.email || '',
+            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Miembro',
+            phone: user.user_metadata?.phone || null,
+            membership_type: 'regular',
+            membership_status: 'active',
+          })
+          .select()
+          .single();
+
+        if (createError) {
+          toast.error('Error al crear tu perfil', {
+            description: createError.message || 'Por favor, intenta recargar la página',
+          });
+          return;
+        }
+
+        memberData = newMember;
+        toast.success('Perfil creado', {
+          description: 'Tu perfil ha sido creado automáticamente',
+        });
+      } else if (memberError) {
+        toast.error('Error al cargar tu perfil', {
+          description: memberError.message || 'Por favor, intenta recargar la página',
+        });
         return;
       }
 
-      setMember(memberData);
+      if (memberData) {
+        setMember(memberData);
+      }
 
       // Cargar registros de eventos
       const { data: registrationsData, error: registrationsError } = await supabase
