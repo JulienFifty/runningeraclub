@@ -1,11 +1,13 @@
+"use client";
+
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
-import heroImage from '@/assets/hero-runners.jpg';
-import nightRun from '@/assets/night-run.jpg';
-import trailRun from '@/assets/trail-run.jpg';
-import community from '@/assets/community.jpg';
-import urbanRun from '@/assets/urban-run.jpg';
+const heroImage = '/assets/hero-runners.jpg';
+const nightRun = '/assets/night-run.jpg';
+const trailRun = '/assets/trail-run.jpg';
+const community = '/assets/community.jpg';
+const urbanRun = '/assets/urban-run.jpg';
 
 const galleryImages = [
   { src: heroImage, alt: 'Corredores al amanecer', span: 'col-span-2 row-span-2' },

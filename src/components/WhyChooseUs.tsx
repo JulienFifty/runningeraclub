@@ -1,8 +1,10 @@
+"use client";
+
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { Trophy, Users, Star, Handshake, Zap } from 'lucide-react';
-import communityImg from '@/assets/community.jpg';
+const communityImg = '/assets/community.jpg';
 
 const benefits = [
   {

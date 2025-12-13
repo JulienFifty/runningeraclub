@@ -1,11 +1,13 @@
+"use client";
+
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { ArrowRight, Calendar } from 'lucide-react';
-import nightRun from '@/assets/night-run.jpg';
-import trailRun from '@/assets/trail-run.jpg';
-import urbanRun from '@/assets/urban-run.jpg';
-import community from '@/assets/community.jpg';
+const nightRun = '/assets/night-run.jpg';
+const trailRun = '/assets/trail-run.jpg';
+const urbanRun = '/assets/urban-run.jpg';
+const community = '/assets/community.jpg';
 
 const events = [
   {

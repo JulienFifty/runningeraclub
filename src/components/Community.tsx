@@ -1,8 +1,10 @@
+"use client";
+
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef } from 'react';
 import { ArrowRight, Play } from 'lucide-react';
-import heroImage from '@/assets/hero-runners.jpg';
+const heroImage = '/assets/hero-runners.jpg';
 
 export const Community = () => {
   const ref = useRef(null);

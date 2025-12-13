@@ -1,3 +1,5 @@
+"use client";
+
 import { Header } from '@/components/Header';
 import { Hero } from '@/components/Hero';
 import { WellnessCommunity } from '@/components/WellnessCommunity';
@@ -11,7 +13,7 @@ import { Contact } from '@/components/Contact';
 import { Footer } from '@/components/Footer';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 
-const Index = () => {
+export default function Home() {
   return (
     <main className="min-h-screen bg-background">
       <Header />
@@ -27,6 +29,5 @@ const Index = () => {
       <WhatsAppButton />
     </main>
   );
-};
+}
 
-export default Index;

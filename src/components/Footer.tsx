@@ -1,3 +1,5 @@
+"use client";
+
 import { Instagram, Facebook, Twitter, Youtube, ArrowUp } from 'lucide-react';
 
 const footerLinks = {
