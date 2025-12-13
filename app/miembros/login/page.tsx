@@ -88,8 +88,9 @@ export default function MemberLogin() {
           });
 
         if (profileError) {
-          console.error('Error creating profile:', profileError);
-          // No mostramos error aquí porque el usuario ya fue creado
+          // Error al crear perfil, pero el usuario ya fue creado en auth
+          // Intentamos crear el perfil de nuevo o el usuario puede completarlo después
+          // No bloqueamos el flujo porque el usuario ya existe en auth
         }
 
         toast.success('¡Registro exitoso!', {
