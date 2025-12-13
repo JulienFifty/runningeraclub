@@ -43,6 +43,12 @@ CREATE TRIGGER update_members_updated_at BEFORE UPDATE ON members
 ALTER TABLE members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE event_registrations ENABLE ROW LEVEL SECURITY;
 
+-- Función helper para obtener el email del usuario autenticado
+CREATE OR REPLACE FUNCTION auth_user_email()
+RETURNS TEXT AS $$
+  SELECT email FROM auth.users WHERE id = auth.uid();
+$$ LANGUAGE sql SECURITY DEFINER;
+
 -- Políticas para members
 -- Los miembros solo pueden ver y editar su propio perfil
 CREATE POLICY "Members can view own profile" ON members
@@ -58,7 +64,7 @@ CREATE POLICY "Members can insert own profile" ON members
 CREATE POLICY "Admins can view all members" ON members
   FOR SELECT USING (
     EXISTS (
-      SELECT 1 FROM admins WHERE email = (SELECT email FROM auth.users WHERE id = auth.uid())
+      SELECT 1 FROM admins WHERE email = auth_user_email()
     )
   );
 
@@ -79,7 +85,7 @@ CREATE POLICY "Members can update own registrations" ON event_registrations
 CREATE POLICY "Admins can view all registrations" ON event_registrations
   FOR SELECT USING (
     EXISTS (
-      SELECT 1 FROM admins WHERE email = (SELECT email FROM auth.users WHERE id = auth.uid())
+      SELECT 1 FROM admins WHERE email = auth_user_email()
     )
   );
 
@@ -87,7 +93,7 @@ CREATE POLICY "Admins can view all registrations" ON event_registrations
 CREATE POLICY "Admins can manage all registrations" ON event_registrations
   FOR ALL USING (
     EXISTS (
-      SELECT 1 FROM admins WHERE email = (SELECT email FROM auth.users WHERE id = auth.uid())
+      SELECT 1 FROM admins WHERE email = auth_user_email()
     )
   );
 
