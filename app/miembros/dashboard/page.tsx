@@ -124,8 +124,18 @@ export default function MemberDashboard() {
 
       if (registrationsError) {
         // Error al cargar registros, pero no bloqueamos la vista
-      } else {
-        setRegistrations(registrationsData || []);
+      } else if (registrationsData) {
+        // Transformar los datos para asegurar que event sea un objeto, no un array
+        const transformedRegistrations = registrationsData.map((reg: any) => ({
+          id: reg.id,
+          event_id: reg.event_id,
+          registration_date: reg.registration_date,
+          status: reg.status,
+          payment_status: reg.payment_status,
+          event: Array.isArray(reg.event) ? reg.event[0] : reg.event,
+        })).filter((reg: any) => reg.event); // Filtrar registros sin evento
+        
+        setRegistrations(transformedRegistrations);
       }
     } catch (error) {
       toast.error('Error al cargar datos');
