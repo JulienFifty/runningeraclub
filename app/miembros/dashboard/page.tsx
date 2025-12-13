@@ -7,6 +7,9 @@ import { createClient } from '@/lib/supabase/client';
 import { Calendar, User, LogOut, Clock, MapPin, CheckCircle, XCircle, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 
+// Forzar renderizado dinámico
+export const dynamic = 'force-dynamic';
+
 interface Member {
   id: string;
   email: string;

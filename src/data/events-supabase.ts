@@ -105,17 +105,32 @@ export async function getEventBySlug(slug: string, useStaticClient = false): Pro
 
 // Función para obtener slugs sin cookies (para generateStaticParams)
 function createStaticClient() {
-  return createSupabaseClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  
+  if (!url || !key) {
+    return null;
+  }
+  
+  return createSupabaseClient(url, key);
 }
 
 export async function getAllEventSlugs(): Promise<string[]> {
   try {
+    // Verificar que las variables de entorno estén disponibles
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      // Si no hay variables de entorno, retornar array vacío (build time)
+      return [];
+    }
+    
     // Para generateStaticParams, usar cliente directo sin cookies
     // Para otros casos, usar el cliente del servidor
     const supabase = createStaticClient();
+    
+    if (!supabase) {
+      return [];
+    }
+    
     const { data, error } = await supabase
       .from('events')
       .select('slug');
@@ -124,9 +139,9 @@ export async function getAllEventSlugs(): Promise<string[]> {
       return [];
     }
 
-    return data.map(event => event.slug);
+    return data.map((event: { slug: string }) => event.slug);
   } catch (error) {
-    console.error('Error fetching slugs:', error);
+    // En build time, si hay error, retornar array vacío
     return [];
   }
 }
