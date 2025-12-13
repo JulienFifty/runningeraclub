@@ -82,9 +82,17 @@ export async function getEvents(): Promise<Event[]> {
 export async function getEventBySlug(slug: string, useStaticClient = false): Promise<Event | undefined> {
   try {
     // Si useStaticClient es true, usar cliente directo sin cookies (para generateStaticParams)
-    const supabase = useStaticClient 
-      ? createStaticClient()
-      : await createClient();
+    let supabase;
+    
+    if (useStaticClient) {
+      const staticClient = createStaticClient();
+      if (!staticClient) {
+        return undefined;
+      }
+      supabase = staticClient;
+    } else {
+      supabase = await createClient();
+    }
     
     const { data, error } = await supabase
       .from('events')
@@ -98,7 +106,6 @@ export async function getEventBySlug(slug: string, useStaticClient = false): Pro
 
     return transformEvent(data);
   } catch (error) {
-    console.error('Error fetching event:', error);
     return undefined;
   }
 }
