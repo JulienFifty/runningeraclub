@@ -6,6 +6,7 @@ import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { getEventBySlug, getAllEventSlugs } from '@/data/events-supabase';
 import { Calendar, MapPin, Clock, Route, TrendingUp, Users, DollarSign, CheckCircle, ArrowLeft, MessageCircle, Mail, Phone } from 'lucide-react';
 import Link from 'next/link';
+import { EventRegistrationButton } from '@/components/EventRegistrationButton';
 
 interface PageProps {
   params: Promise<{
@@ -228,21 +229,7 @@ export default async function EventPage({ params }: PageProps) {
                   )}
 
                   <div className="space-y-3">
-                    {event.buttonText === 'REGÍSTRATE' ? (
-                      <a
-                        href="#contacto"
-                        className="block w-full bg-foreground text-background px-6 py-4 text-center text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-foreground/90"
-                      >
-                        {event.buttonText}
-                      </a>
-                    ) : (
-                      <a
-                        href="#contacto"
-                        className="block w-full border border-foreground text-foreground px-6 py-4 text-center text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-foreground hover:text-background"
-                      >
-                        {event.buttonText}
-                      </a>
-                    )}
+                    <EventRegistrationButton eventId={event.id} buttonText={event.buttonText} />
                   </div>
 
                   {/* Contact Info */}
