@@ -7,6 +7,9 @@ import { createClient } from '@/lib/supabase/client';
 import { User, Lock, Mail, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 
+// Forzar renderizado dinámico
+export const dynamic = 'force-dynamic';
+
 export default function MemberLogin() {
   const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
