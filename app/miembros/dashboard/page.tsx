@@ -63,7 +63,6 @@ export default function MemberDashboard() {
         .single();
 
       if (memberError) {
-        console.error('Error loading member:', memberError);
         toast.error('Error al cargar tu perfil');
         return;
       }
@@ -93,12 +92,11 @@ export default function MemberDashboard() {
         .order('registration_date', { ascending: false });
 
       if (registrationsError) {
-        console.error('Error loading registrations:', registrationsError);
+        // Error al cargar registros, pero no bloqueamos la vista
       } else {
         setRegistrations(registrationsData || []);
       }
     } catch (error) {
-      console.error('Error:', error);
       toast.error('Error al cargar datos');
     } finally {
       setLoading(false);

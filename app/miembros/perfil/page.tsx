@@ -57,7 +57,6 @@ export default function MemberProfile() {
         .single();
 
       if (memberError) {
-        console.error('Error loading profile:', memberError);
         toast.error('Error al cargar tu perfil');
         return;
       }
@@ -72,7 +71,6 @@ export default function MemberProfile() {
         bio: memberData.bio || '',
       });
     } catch (error) {
-      console.error('Error:', error);
       toast.error('Error al cargar datos');
     } finally {
       setLoading(false);

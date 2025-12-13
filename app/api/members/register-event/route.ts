@@ -94,7 +94,6 @@ export async function POST(request: Request) {
       .single();
 
     if (registrationError) {
-      console.error('Error creating registration:', registrationError);
       return NextResponse.json(
         { error: 'Error al registrar en el evento' },
         { status: 500 }
@@ -106,7 +105,6 @@ export async function POST(request: Request) {
       registration,
     });
   } catch (error: any) {
-    console.error('Error:', error);
     return NextResponse.json(
       { error: 'Error del servidor' },
       { status: 500 }
