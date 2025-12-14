@@ -1,9 +1,96 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+
+export async function POST(request: Request) {
+  try {
+    // Usar service role key si está disponible, sino usar cliente normal
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      return NextResponse.json(
+        { error: 'Configuración de Supabase incompleta' },
+        { status: 500 }
+      );
+    }
+
+    // Usar service role key si está disponible (bypass RLS)
+    const supabase = supabaseServiceKey
+      ? createSupabaseClient(supabaseUrl, supabaseServiceKey, {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false,
+          },
+        })
+      : createSupabaseClient(supabaseUrl, supabaseAnonKey);
+
+    const { name, email, phone, tickets, event_id } = await request.json();
+
+    if (!name || !name.trim()) {
+      return NextResponse.json(
+        { error: 'El nombre es requerido' },
+        { status: 400 }
+      );
+    }
+
+    // Crear el asistente
+    const { data, error } = await supabase
+      .from('attendees')
+      .insert({
+        name: name.trim(),
+        email: email?.trim() || null,
+        phone: phone?.trim() || null,
+        tickets: tickets || 1,
+        status: 'pending',
+        event_id: event_id || null,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      return NextResponse.json(
+        { error: 'Error al crear el asistente', details: error.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      attendee: data,
+    });
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: 'Error del servidor', details: error.message },
+      { status: 500 }
+    );
+  }
+}
 
 export async function GET(request: Request) {
   try {
-    const supabase = await createClient();
+    // Usar service role key si está disponible, sino usar cliente normal
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      return NextResponse.json(
+        { error: 'Configuración de Supabase incompleta' },
+        { status: 500 }
+      );
+    }
+
+    // Usar service role key si está disponible (bypass RLS)
+    const supabase = supabaseServiceKey
+      ? createSupabaseClient(supabaseUrl, supabaseServiceKey, {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false,
+          },
+        })
+      : createSupabaseClient(supabaseUrl, supabaseAnonKey);
+
     const { searchParams } = new URL(request.url);
     const eventId = searchParams.get('event_id');
 

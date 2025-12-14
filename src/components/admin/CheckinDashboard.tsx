@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Search, CheckCircle, Clock, Users } from 'lucide-react';
+import { Search, CheckCircle, Clock, Users, RotateCcw, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
-import { createClient } from '@/lib/supabase/client';
+import { AddAttendeeModal } from './AddAttendeeModal';
 
 interface Attendee {
   id: string;
@@ -26,8 +26,7 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [updatingIds, setUpdatingIds] = useState<Set<string>>(new Set());
-
-  const supabase = createClient();
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   useEffect(() => {
     fetchAttendees();
@@ -50,30 +49,28 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
 
   const fetchAttendees = async () => {
     try {
-      let query = supabase
-        .from('attendees')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (eventId) {
-        query = query.eq('event_id', eventId);
+      const url = eventId 
+        ? `/api/attendees?event_id=${eventId}`
+        : '/api/attendees';
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.details || error.error || 'Error al cargar asistentes');
       }
 
-      const { data, error } = await query;
+      const result = await response.json();
+      const data = result.attendees || [];
 
-      if (error) {
-        toast.error('Error al cargar asistentes', {
-          description: error.message,
-        });
-        return;
-      }
-
-      setAttendees(data || []);
-      setFilteredAttendees(data || []);
+      setAttendees(data);
+      setFilteredAttendees(data);
     } catch (error: any) {
-      toast.error('Error inesperado', {
+      toast.error('Error al cargar asistentes', {
         description: error.message,
       });
+      setAttendees([]);
+      setFilteredAttendees([]);
     } finally {
       setLoading(false);
     }
@@ -126,6 +123,53 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
     }
   };
 
+  const handleUndoCheckIn = async (attendeeId: string) => {
+    // Optimistic UI update
+    setUpdatingIds((prev) => new Set(prev).add(attendeeId));
+    
+    setAttendees((prev) =>
+      prev.map((a) =>
+        a.id === attendeeId
+          ? {
+              ...a,
+              status: 'pending' as const,
+              checked_in_at: undefined,
+            }
+          : a
+      )
+    );
+
+    try {
+      const response = await fetch(`/api/attendees/${attendeeId}/undo-checkin`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al deshacer el check-in');
+      }
+
+      toast.success('Check-in deshecho', {
+        description: 'El asistente ha vuelto a estado pendiente',
+      });
+
+      // Refrescar datos para asegurar consistencia
+      fetchAttendees();
+    } catch (error: any) {
+      // Revertir cambio optimista
+      fetchAttendees();
+      toast.error('Error al deshacer el check-in', {
+        description: error.message,
+      });
+    } finally {
+      setUpdatingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(attendeeId);
+        return next;
+      });
+    }
+  };
+
   const checkedInCount = attendees.filter((a) => a.status === 'checked_in').length;
   const totalCount = attendees.length;
 
@@ -152,11 +196,20 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
               className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-foreground text-lg"
             />
           </div>
-          <div className="flex items-center gap-2 bg-foreground/10 px-4 py-2 rounded-lg">
-            <Users className="w-5 h-5 text-foreground" />
-            <span className="text-foreground font-medium">
-              Asistentes: <span className="text-green-500">{checkedInCount}</span> / {totalCount}
-            </span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 bg-foreground/10 px-4 py-2 rounded-lg">
+              <Users className="w-5 h-5 text-foreground" />
+              <span className="text-foreground font-medium">
+                Asistentes: <span className="text-green-500">{checkedInCount}</span> / {totalCount}
+              </span>
+            </div>
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-foreground text-background rounded-lg hover:bg-foreground/90 transition-colors"
+            >
+              <UserPlus className="w-4 h-4" />
+              <span className="text-sm font-medium">Agregar</span>
+            </button>
           </div>
         </div>
       </div>
@@ -195,41 +248,69 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
                 )}
               </div>
 
-              <button
-                onClick={() => handleCheckIn(attendee.id)}
-                disabled={attendee.status === 'checked_in' || updatingIds.has(attendee.id)}
-                className={`
-                  flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all
-                  min-w-[140px] justify-center
-                  ${attendee.status === 'checked_in'
-                    ? 'bg-green-500 text-white hover:bg-green-600'
-                    : 'bg-muted text-foreground hover:bg-muted/80'
-                  }
-                  ${updatingIds.has(attendee.id) ? 'opacity-50 cursor-not-allowed' : ''}
-                  touch-manipulation
-                `}
-              >
-                {updatingIds.has(attendee.id) ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                    <span>Procesando...</span>
-                  </>
-                ) : attendee.status === 'checked_in' ? (
-                  <>
-                    <CheckCircle className="w-5 h-5" />
-                    <span>¡Adentro!</span>
-                  </>
-                ) : (
-                  <>
-                    <Clock className="w-5 h-5" />
-                    <span>Hacer Check-in</span>
-                  </>
-                )}
-              </button>
+              {attendee.status === 'checked_in' ? (
+                <button
+                  onClick={() => handleUndoCheckIn(attendee.id)}
+                  disabled={updatingIds.has(attendee.id)}
+                  className={`
+                    flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all
+                    min-w-[160px] justify-center
+                    bg-orange-500 text-white hover:bg-orange-600
+                    ${updatingIds.has(attendee.id) ? 'opacity-50 cursor-not-allowed' : ''}
+                    touch-manipulation
+                  `}
+                >
+                  {updatingIds.has(attendee.id) ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                      <span>Procesando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <RotateCcw className="w-5 h-5" />
+                      <span>Deshacer Check-in</span>
+                    </>
+                  )}
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleCheckIn(attendee.id)}
+                  disabled={updatingIds.has(attendee.id)}
+                  className={`
+                    flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all
+                    min-w-[140px] justify-center
+                    bg-muted text-foreground hover:bg-muted/80
+                    ${updatingIds.has(attendee.id) ? 'opacity-50 cursor-not-allowed' : ''}
+                    touch-manipulation
+                  `}
+                >
+                  {updatingIds.has(attendee.id) ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                      <span>Procesando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Clock className="w-5 h-5" />
+                      <span>Hacer Check-in</span>
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           ))}
         </div>
       )}
+
+      {/* Modal para agregar asistente */}
+      <AddAttendeeModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSuccess={() => {
+          fetchAttendees();
+        }}
+        eventId={eventId}
+      />
     </div>
   );
 }

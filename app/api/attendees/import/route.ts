@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
 interface AttendeeData {
@@ -10,16 +10,27 @@ interface AttendeeData {
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    // Usar service role key si está disponible, sino usar cliente normal
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-    // Verificar autenticación (opcional, puede ser público para importación)
-    // if (authError || !user) {
-    //   return NextResponse.json(
-    //     { error: 'No autenticado' },
-    //     { status: 401 }
-    //   );
-    // }
+    if (!supabaseUrl || !supabaseAnonKey) {
+      return NextResponse.json(
+        { error: 'Configuración de Supabase incompleta' },
+        { status: 500 }
+      );
+    }
+
+    // Usar service role key si está disponible (bypass RLS para operaciones administrativas)
+    const supabase = supabaseServiceKey
+      ? createSupabaseClient(supabaseUrl, supabaseServiceKey, {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false,
+          },
+        })
+      : createSupabaseClient(supabaseUrl, supabaseAnonKey);
 
     const { attendees, event_id } = await request.json();
 
@@ -49,7 +60,12 @@ export async function POST(request: Request) {
     if (error) {
       console.error('Error inserting attendees:', error);
       return NextResponse.json(
-        { error: 'Error al importar asistentes', details: error.message },
+        { 
+          error: 'Error al importar asistentes', 
+          details: error.message,
+          code: error.code,
+          hint: error.hint
+        },
         { status: 500 }
       );
     }

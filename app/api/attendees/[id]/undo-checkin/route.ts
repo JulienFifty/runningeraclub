@@ -30,12 +30,12 @@ export async function POST(
         })
       : createSupabaseClient(supabaseUrl, supabaseAnonKey);
 
-    // Actualizar estado a checked_in
+    // Revertir estado a pending y limpiar checked_in_at
     const { data, error } = await supabase
       .from('attendees')
       .update({
-        status: 'checked_in',
-        checked_in_at: new Date().toISOString(),
+        status: 'pending',
+        checked_in_at: null,
       })
       .eq('id', id)
       .select()
@@ -43,7 +43,7 @@ export async function POST(
 
     if (error) {
       return NextResponse.json(
-        { error: 'Error al actualizar el check-in', details: error.message },
+        { error: 'Error al deshacer el check-in', details: error.message },
         { status: 500 }
       );
     }

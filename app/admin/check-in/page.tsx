@@ -6,9 +6,8 @@ import Link from 'next/link';
 import { ArrowLeft, Calendar } from 'lucide-react';
 import { CheckinImporter } from '@/components/admin/CheckinImporter';
 import { CheckinDashboard } from '@/components/admin/CheckinDashboard';
-import { createClient } from '@/lib/supabase/client';
 
-// Forzar renderizado dinámico
+// Forzar renderizado dinámico (evita prerender durante build)
 export const dynamic = 'force-dynamic';
 
 interface Event {
@@ -25,8 +24,6 @@ export default function AdminCheckIn() {
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const supabase = createClient();
-
   useEffect(() => {
     const auth = localStorage.getItem('admin_auth');
     if (auth !== 'true') {
@@ -34,25 +31,30 @@ export default function AdminCheckIn() {
       return;
     }
     setIsAuthenticated(true);
-    fetchEvents();
-  }, [router]);
+    
+    // Importar y crear cliente de Supabase solo en el cliente
+    const loadEvents = async () => {
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+        
+        const { data, error } = await supabase
+          .from('events')
+          .select('id, title, date, slug')
+          .order('date', { ascending: false });
 
-  const fetchEvents = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('events')
-        .select('id, title, date, slug')
-        .order('date', { ascending: false });
+        if (error) {
+          return;
+        }
 
-      if (error) {
-        return;
+        setEvents(data || []);
+      } catch (error) {
+        // Error silencioso
       }
-
-      setEvents(data || []);
-    } catch (error) {
-      // Error silencioso
-    }
-  };
+    };
+    
+    loadEvents();
+  }, [router]);
 
   const handleImportComplete = () => {
     setRefreshKey((prev) => prev + 1);

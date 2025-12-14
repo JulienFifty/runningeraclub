@@ -86,7 +86,10 @@ export function CheckinImporter({ eventId, onImportComplete }: CheckinImporterPr
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Error al importar asistentes');
+      const errorMessage = error.details 
+        ? `${error.error}: ${error.details}` 
+        : error.error || 'Error al importar asistentes';
+      throw new Error(errorMessage);
     }
 
     return response.json();
