@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Calendar } from 'lucide-react';
-import { CheckinImporter } from '@/components/admin/CheckinImporter';
+import { ArrowLeft, Calendar, Upload } from 'lucide-react';
+import { ImportAttendeesModal } from '@/components/admin/ImportAttendeesModal';
 import { CheckinDashboard } from '@/components/admin/CheckinDashboard';
 
 // Forzar renderizado dinámico (evita prerender durante build)
@@ -23,6 +23,7 @@ export default function AdminCheckIn() {
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   useEffect(() => {
     const auth = localStorage.getItem('admin_auth');
@@ -58,6 +59,7 @@ export default function AdminCheckIn() {
 
   const handleImportComplete = () => {
     setRefreshKey((prev) => prev + 1);
+    setIsImportModalOpen(false);
   };
 
   if (!isAuthenticated) {
@@ -113,18 +115,29 @@ export default function AdminCheckIn() {
           </div>
         </div>
 
-        {/* Importador */}
-        <div className="mb-8">
-          <CheckinImporter
-            eventId={selectedEventId || undefined}
-            onImportComplete={handleImportComplete}
-          />
+        {/* Botón para importar */}
+        <div className="mb-6 flex justify-end">
+          <button
+            onClick={() => setIsImportModalOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-foreground text-background rounded-lg hover:bg-foreground/90 transition-colors"
+          >
+            <Upload className="w-4 h-4" />
+            <span className="text-sm font-medium">Importar desde Excel/CSV</span>
+          </button>
         </div>
 
         {/* Dashboard de check-in */}
         <div key={refreshKey}>
           <CheckinDashboard eventId={selectedEventId || undefined} />
         </div>
+
+        {/* Modal de importación */}
+        <ImportAttendeesModal
+          isOpen={isImportModalOpen}
+          onClose={() => setIsImportModalOpen(false)}
+          onImportComplete={handleImportComplete}
+          eventId={selectedEventId || undefined}
+        />
       </div>
     </main>
   );

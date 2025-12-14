@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Search, CheckCircle, Clock, Users, RotateCcw, UserPlus } from 'lucide-react';
+import { Search, CheckCircle, Clock, Users, RotateCcw, UserPlus, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { AddAttendeeModal } from './AddAttendeeModal';
 
@@ -184,31 +184,31 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
   return (
     <div className="space-y-6">
       {/* Header con búsqueda y contador */}
-      <div className="bg-card border border-border p-6 rounded-lg">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+      <div className="bg-card border border-border p-4 md:p-6 rounded-lg">
+        <div className="flex flex-col gap-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-muted-foreground" />
             <input
               type="text"
               placeholder="Buscar por nombre, email o teléfono..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-foreground text-lg"
+              className="w-full pl-9 md:pl-10 pr-4 py-2.5 md:py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-foreground text-sm md:text-base"
             />
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-foreground/10 px-4 py-2 rounded-lg">
-              <Users className="w-5 h-5 text-foreground" />
-              <span className="text-foreground font-medium">
-                Asistentes: <span className="text-green-500">{checkedInCount}</span> / {totalCount}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 bg-foreground/10 px-3 md:px-4 py-2 rounded-lg">
+              <Users className="w-4 h-4 md:w-5 md:h-5 text-foreground" />
+              <span className="text-foreground font-medium text-sm md:text-base">
+                <span className="text-green-500">{checkedInCount}</span> / {totalCount}
               </span>
             </div>
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-foreground text-background rounded-lg hover:bg-foreground/90 transition-colors"
+              className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-2 bg-foreground text-background rounded-lg hover:bg-foreground/90 transition-colors"
             >
               <UserPlus className="w-4 h-4" />
-              <span className="text-sm font-medium">Agregar</span>
+              <span className="text-xs md:text-sm font-medium">Agregar</span>
             </button>
           </div>
         </div>
@@ -223,28 +223,28 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
           </p>
         </div>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-3 md:gap-4">
           {filteredAttendees.map((attendee) => (
             <div
               key={attendee.id}
-              className="bg-card border border-border rounded-lg p-6 flex items-center justify-between gap-4 hover:border-foreground/50 transition-colors"
+              className="bg-card border border-border rounded-lg p-4 md:p-6 flex items-center justify-between gap-3 md:gap-4 hover:border-foreground/50 transition-colors"
             >
               <div className="flex-1 min-w-0">
-                <div className="flex items-start gap-3 mb-2">
-                  <h3 className="font-display text-xl md:text-2xl text-foreground font-semibold">
+                <div className="flex items-start gap-2 md:gap-3 mb-1.5 md:mb-2 flex-wrap">
+                  <h3 className="font-display text-lg md:text-xl lg:text-2xl text-foreground font-semibold break-words">
                     {attendee.name}
                   </h3>
                   {attendee.tickets > 1 && (
-                    <span className="inline-flex items-center gap-1 bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap">
+                    <span className="inline-flex items-center gap-1 bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 px-2 md:px-3 py-0.5 md:py-1 rounded-full text-xs font-medium whitespace-nowrap">
                       ⚠️ GRUPO DE {attendee.tickets}
                     </span>
                   )}
                 </div>
                 {attendee.email && (
-                  <p className="text-sm text-muted-foreground mb-1">{attendee.email}</p>
+                  <p className="text-xs md:text-sm text-muted-foreground mb-0.5 md:mb-1 break-all">{attendee.email}</p>
                 )}
                 {attendee.phone && (
-                  <p className="text-xs text-muted-foreground">{attendee.phone}</p>
+                  <p className="text-xs text-muted-foreground break-all">{attendee.phone}</p>
                 )}
               </div>
 
@@ -253,23 +253,17 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
                   onClick={() => handleUndoCheckIn(attendee.id)}
                   disabled={updatingIds.has(attendee.id)}
                   className={`
-                    flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all
-                    min-w-[160px] justify-center
-                    bg-orange-500 text-white hover:bg-orange-600
+                    flex items-center justify-center p-2.5 md:p-3 rounded-lg transition-all
+                    bg-orange-500 text-white hover:bg-orange-600 active:scale-95
                     ${updatingIds.has(attendee.id) ? 'opacity-50 cursor-not-allowed' : ''}
-                    touch-manipulation
+                    touch-manipulation min-w-[44px] min-h-[44px]
                   `}
+                  title="Deshacer check-in"
                 >
                   {updatingIds.has(attendee.id) ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                      <span>Procesando...</span>
-                    </>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
                   ) : (
-                    <>
-                      <RotateCcw className="w-5 h-5" />
-                      <span>Deshacer Check-in</span>
-                    </>
+                    <RotateCcw className="w-5 h-5 md:w-6 md:h-6" />
                   )}
                 </button>
               ) : (
@@ -277,23 +271,17 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
                   onClick={() => handleCheckIn(attendee.id)}
                   disabled={updatingIds.has(attendee.id)}
                   className={`
-                    flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all
-                    min-w-[140px] justify-center
-                    bg-muted text-foreground hover:bg-muted/80
+                    flex items-center justify-center p-2.5 md:p-3 rounded-lg transition-all
+                    bg-green-500 text-white hover:bg-green-600 active:scale-95
                     ${updatingIds.has(attendee.id) ? 'opacity-50 cursor-not-allowed' : ''}
-                    touch-manipulation
+                    touch-manipulation min-w-[44px] min-h-[44px]
                   `}
+                  title="Hacer check-in"
                 >
                   {updatingIds.has(attendee.id) ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                      <span>Procesando...</span>
-                    </>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
                   ) : (
-                    <>
-                      <Clock className="w-5 h-5" />
-                      <span>Hacer Check-in</span>
-                    </>
+                    <CheckCircle className="w-5 h-5 md:w-6 md:h-6" />
                   )}
                 </button>
               )}
