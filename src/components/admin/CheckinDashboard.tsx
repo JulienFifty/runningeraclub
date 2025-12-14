@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Search, CheckCircle, Clock, Users, UserPlus } from 'lucide-react';
+import { Search, CheckCircle, Clock, Users, UserPlus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { AddAttendeeModal } from './AddAttendeeModal';
 
@@ -170,6 +170,51 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
     }
   };
 
+  const handleDelete = async (attendeeId: string, attendeeName: string) => {
+    // Confirmar antes de eliminar
+    if (!confirm(`¿Estás seguro de que quieres eliminar a ${attendeeName}?`)) {
+      return;
+    }
+
+    // Optimistic UI update
+    setUpdatingIds((prev) => new Set(prev).add(attendeeId));
+    
+    const previousAttendees = [...attendees];
+    setAttendees((prev) => prev.filter((a) => a.id !== attendeeId));
+    setFilteredAttendees((prev) => prev.filter((a) => a.id !== attendeeId));
+
+    try {
+      const response = await fetch(`/api/attendees/${attendeeId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error al eliminar el asistente');
+      }
+
+      toast.success('Asistente eliminado', {
+        description: `${attendeeName} ha sido eliminado de la lista`,
+      });
+
+      // Refrescar datos para asegurar consistencia
+      fetchAttendees();
+    } catch (error: any) {
+      // Revertir cambio optimista
+      setAttendees(previousAttendees);
+      setFilteredAttendees(previousAttendees);
+      toast.error('Error al eliminar el asistente', {
+        description: error.message,
+      });
+    } finally {
+      setUpdatingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(attendeeId);
+        return next;
+      });
+    }
+  };
+
   const checkedInCount = attendees.filter((a) => a.status === 'checked_in').length;
   const totalCount = attendees.length;
 
@@ -248,36 +293,52 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
                 )}
               </div>
 
-              <button
-                onClick={() => {
-                  if (attendee.status === 'checked_in') {
-                    handleUndoCheckIn(attendee.id);
-                  } else {
-                    handleCheckIn(attendee.id);
-                  }
-                }}
-                disabled={updatingIds.has(attendee.id)}
-                className={`
-                  flex items-center justify-center p-2.5 md:p-3 rounded-lg transition-all
-                  active:scale-95
-                  ${updatingIds.has(attendee.id) 
-                    ? 'opacity-50 cursor-not-allowed bg-muted' 
-                    : attendee.status === 'checked_in'
-                      ? 'bg-green-500 text-white hover:bg-green-600'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  }
-                  touch-manipulation min-w-[44px] min-h-[44px]
-                `}
-                title={attendee.status === 'checked_in' ? 'Deshacer check-in' : 'Hacer check-in'}
-              >
-                {updatingIds.has(attendee.id) ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
-                ) : attendee.status === 'checked_in' ? (
-                  <CheckCircle className="w-5 h-5 md:w-6 md:h-6" />
-                ) : (
-                  <Clock className="w-5 h-5 md:w-6 md:h-6" />
-                )}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    if (attendee.status === 'checked_in') {
+                      handleUndoCheckIn(attendee.id);
+                    } else {
+                      handleCheckIn(attendee.id);
+                    }
+                  }}
+                  disabled={updatingIds.has(attendee.id)}
+                  className={`
+                    flex items-center justify-center p-2.5 md:p-3 rounded-lg transition-all
+                    active:scale-95
+                    ${updatingIds.has(attendee.id) 
+                      ? 'opacity-50 cursor-not-allowed bg-muted' 
+                      : attendee.status === 'checked_in'
+                        ? 'bg-green-500 text-white hover:bg-green-600'
+                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                    }
+                    touch-manipulation min-w-[44px] min-h-[44px]
+                  `}
+                  title={attendee.status === 'checked_in' ? 'Deshacer check-in' : 'Hacer check-in'}
+                >
+                  {updatingIds.has(attendee.id) ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
+                  ) : attendee.status === 'checked_in' ? (
+                    <CheckCircle className="w-5 h-5 md:w-6 md:h-6" />
+                  ) : (
+                    <Clock className="w-5 h-5 md:w-6 md:h-6" />
+                  )}
+                </button>
+                
+                <button
+                  onClick={() => handleDelete(attendee.id, attendee.name)}
+                  disabled={updatingIds.has(attendee.id)}
+                  className={`
+                    flex items-center justify-center p-2.5 md:p-3 rounded-lg transition-all
+                    bg-red-500/10 text-red-500 hover:bg-red-500/20 active:scale-95
+                    ${updatingIds.has(attendee.id) ? 'opacity-50 cursor-not-allowed' : ''}
+                    touch-manipulation min-w-[44px] min-h-[44px]
+                  `}
+                  title="Eliminar asistente"
+                >
+                  <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
+                </button>
+              </div>
             </div>
           ))}
         </div>
