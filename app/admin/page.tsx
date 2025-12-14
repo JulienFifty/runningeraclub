@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Calendar, Settings, Image, MessageSquare, Users, BarChart3, FileText, Mail, Globe, LogOut } from 'lucide-react';
+import { Calendar, Settings, Image, MessageSquare, Users, BarChart3, FileText, Mail, Globe, LogOut, CheckSquare } from 'lucide-react';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -61,6 +61,17 @@ export default function AdminDashboard() {
             <h2 className="font-display text-2xl text-foreground mb-2">Eventos</h2>
             <p className="text-muted-foreground text-sm">
               Gestiona todos los eventos del club
+            </p>
+          </Link>
+
+          <Link
+            href="/admin/check-in"
+            className="bg-card border border-border p-6 rounded-lg hover:border-foreground/50 transition-colors group"
+          >
+            <CheckSquare className="w-8 h-8 text-foreground mb-4 group-hover:scale-110 transition-transform" />
+            <h2 className="font-display text-2xl text-foreground mb-2">Check-in</h2>
+            <p className="text-muted-foreground text-sm">
+              Gestiona la asistencia a eventos
             </p>
           </Link>
 
