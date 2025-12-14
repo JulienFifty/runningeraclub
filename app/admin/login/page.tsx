@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock } from 'lucide-react';
+import Link from 'next/link';
+import { Lock, ArrowLeft } from 'lucide-react';
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -16,7 +17,7 @@ export default function AdminLogin() {
     // Por ahora, usar una contraseña simple
     if (password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD || password === 'admin123') {
       localStorage.setItem('admin_auth', 'true');
-      router.push('/admin/eventos');
+      router.push('/admin');
     } else {
       setError('Contraseña incorrecta');
     }
@@ -25,6 +26,14 @@ export default function AdminLogin() {
   return (
     <main className="min-h-screen bg-background flex items-center justify-center p-8">
       <div className="w-full max-w-md">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span className="text-sm">Volver a la página web</span>
+        </Link>
+        
         <div className="bg-card border border-border p-8 rounded-lg">
           <div className="text-center mb-8">
             <Lock className="w-12 h-12 text-foreground mx-auto mb-4" />

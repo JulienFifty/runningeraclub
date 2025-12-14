@@ -16,6 +16,7 @@ export default {
       fontFamily: {
         display: ['Syne', 'sans-serif'],
         body: ['DM Sans', 'sans-serif'],
+        title: ['var(--font-title)', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
