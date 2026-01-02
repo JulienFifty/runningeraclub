@@ -211,3 +211,6 @@ INSERT INTO events (
 -- Verificar que los eventos se insertaron correctamente
 SELECT COUNT(*) as total_eventos FROM events;
 
+
+
+

@@ -102,3 +102,6 @@ Las políticas RLS ya están incluidas en el script SQL, pero puedes ajustarlas 
 - [ ] Subida de foto de perfil
 - [ ] Integración con sistema de pagos
 
+
+
+

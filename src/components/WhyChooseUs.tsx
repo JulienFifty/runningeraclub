@@ -10,27 +10,32 @@ const benefits = [
   {
     icon: Trophy,
     title: 'Entrenadores Expertos',
-    description: 'Coaches certificados que te guiarán en cada paso de tu evolución.',
+    description: 'Coaches certificados que te guiarán en cada paso.',
+    number: '01',
   },
   {
     icon: Users,
     title: 'Comunidad Activa',
-    description: 'Más de 500 miembros activos que comparten tu misma pasión.',
+    description: 'Más de 500 miembros activos compartiendo tu pasión.',
+    number: '02',
   },
   {
     icon: Star,
     title: 'Eventos Premium',
-    description: 'Acceso exclusivo a las mejores carreras y eventos de México.',
+    description: 'Acceso exclusivo a las mejores carreras de México.',
+    number: '03',
   },
   {
     icon: Handshake,
     title: 'Marcas Líderes',
     description: 'Colaboraciones con Nike, Adidas, Lululemon y más.',
+    number: '04',
   },
   {
     icon: Zap,
     title: 'Ambiente Motivador',
-    description: 'Cada entrenamiento es una experiencia que te impulsa a ser mejor.',
+    description: 'Cada entrenamiento te impulsa a ser mejor.',
+    number: '05',
   },
 ];
 
@@ -39,75 +44,89 @@ export const WhyChooseUs = () => {
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
   return (
-    <section className="section-padding bg-card" ref={ref}>
-      <div className="container-premium">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Content */}
+    <section ref={ref} className="section-padding bg-card relative overflow-hidden">
+      {/* Decorative gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black via-card to-black opacity-50" />
+      
+      <div className="container-premium relative z-10">
+        <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+          {/* Left: Text Content */}
           <motion.div
-            initial={{ opacity: 0, x: -40 }}
+            initial={{ opacity: 0, x: -60 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.8 }}
+            className="space-y-8"
           >
-            <span className="text-muted-foreground text-sm tracking-[0.3em] uppercase mb-4 block">
+            <motion.span
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="inline-block text-foreground/60 text-xs tracking-[0.4em] uppercase font-light"
+            >
               Por qué elegirnos
-            </span>
-            <h2 className="font-display text-4xl md:text-5xl font-light text-foreground mb-6">
+            </motion.span>
+
+            <motion.h2
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="font-display text-4xl md:text-5xl lg:text-6xl text-foreground font-bold leading-[1.1] uppercase tracking-tight"
+            >
               Más que un Club,
               <br />
-              <span className="italic">una Familia</span>
-            </h2>
-            <p className="text-muted-foreground text-lg font-light leading-relaxed mb-10">
+              <span className="text-foreground/80">una Familia</span>
+            </motion.h2>
+
+            <motion.p
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="text-foreground/70 text-base md:text-lg font-light leading-relaxed max-w-lg"
+            >
               En RUNNING ERA creemos que correr es solo el inicio. Lo que realmente
               nos define es la comunidad, las experiencias compartidas y el crecimiento
               que logramos juntos.
-            </p>
+            </motion.p>
+          </motion.div>
 
-            <div className="space-y-6">
-              {benefits.map((benefit, index) => (
-                <motion.div
-                  key={benefit.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={isInView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
-                  className="flex items-start gap-4 group"
-                >
-                  <div className="flex-shrink-0 w-12 h-12 bg-primary text-primary-foreground flex items-center justify-center transition-all duration-300 group-hover:scale-110">
-                    <benefit.icon className="w-5 h-5" />
+          {/* Right: Benefits Grid */}
+          <motion.div
+            initial={{ opacity: 0, x: 60 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="space-y-6"
+          >
+            {benefits.map((benefit, index) => (
+              <motion.div
+                key={benefit.title}
+                initial={{ opacity: 0, y: 30 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: 0.4 + index * 0.1 }}
+                className="group relative"
+              >
+                <div className="flex items-start gap-6 p-6 border border-foreground/10 hover:border-foreground/30 bg-card/50 backdrop-blur-sm transition-all duration-500 hover:bg-card/80">
+                  {/* Number Badge */}
+                  <div className="flex-shrink-0 w-16 h-16 flex items-center justify-center border border-foreground/20 bg-foreground/5 group-hover:bg-foreground/10 transition-all duration-500">
+                    <span className="text-foreground/40 font-display text-xl font-bold group-hover:text-foreground/60 transition-colors">
+                      {benefit.number}
+                    </span>
                   </div>
-                  <div>
-                    <h3 className="font-display text-lg text-foreground mb-1">
-                      {benefit.title}
-                    </h3>
-                    <p className="text-muted-foreground text-sm font-light">
+
+                  {/* Content */}
+                  <div className="flex-1 pt-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <benefit.icon className="w-5 h-5 text-foreground/60 group-hover:text-foreground transition-colors" />
+                      <h3 className="font-display text-lg md:text-xl text-foreground font-bold">
+                        {benefit.title}
+                      </h3>
+                    </div>
+                    <p className="text-foreground/60 text-sm font-light leading-relaxed">
                       {benefit.description}
                     </p>
                   </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Image */}
-          <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative"
-          >
-            <div className="relative overflow-hidden">
-              <img
-                src={communityImg}
-                alt="Comunidad RUNNING ERA"
-                className="w-full h-[600px] object-cover"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent" />
-            </div>
-            {/* Floating Stats Card */}
-            <div className="absolute -bottom-8 -left-8 bg-foreground text-background p-8 shadow-premium">
-              <div className="text-5xl font-display font-light mb-2">500+</div>
-              <div className="text-sm tracking-widest uppercase opacity-80">Miembros Activos</div>
-            </div>
+                </div>
+              </motion.div>
+            ))}
           </motion.div>
         </div>
       </div>

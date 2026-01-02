@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { User, Lock, Mail, ArrowRight } from 'lucide-react';
+import { User, Lock, Mail, ArrowRight, Instagram } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Forzar renderizado dinámico
@@ -17,6 +17,7 @@ export default function MemberLogin() {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
+  const [instagram, setInstagram] = useState('');
   const [loading, setLoading] = useState(false);
 
   const supabase = createClient();
@@ -66,6 +67,7 @@ export default function MemberLogin() {
           data: {
             full_name: fullName,
             phone: phone,
+            instagram: instagram,
           },
         },
       });
@@ -86,6 +88,7 @@ export default function MemberLogin() {
             email: email,
             full_name: fullName,
             phone: phone || null,
+            instagram: instagram || null,
             membership_type: 'regular',
             membership_status: 'active',
           });
@@ -179,19 +182,47 @@ export default function MemberLogin() {
             </div>
 
             {!isLogin && (
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-2">
-                  Teléfono (Opcional)
-                </label>
-                <input
-                  id="phone"
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
-                  placeholder="+52 222 123 4567"
-                />
-              </div>
+              <>
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-2">
+                    Teléfono (Opcional)
+                  </label>
+                  <input
+                    id="phone"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
+                    placeholder="+52 222 123 4567"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="instagram" className="block text-sm font-medium text-foreground mb-2">
+                    Instagram (Opcional)
+                  </label>
+                  <div className="relative">
+                    <Instagram className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <input
+                      id="instagram"
+                      type="text"
+                      value={instagram}
+                      onChange={(e) => {
+                        let value = e.target.value;
+                        // Remover @ si el usuario lo agrega manualmente
+                        if (value.startsWith('@')) {
+                          value = value.substring(1);
+                        }
+                        setInstagram(value);
+                      }}
+                      className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
+                      placeholder="@tuusuario"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Solo el nombre de usuario (sin @)
+                  </p>
+                </div>
+              </>
             )}
 
             <div>
@@ -237,6 +268,7 @@ export default function MemberLogin() {
                 setPassword('');
                 setFullName('');
                 setPhone('');
+                setInstagram('');
               }}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >

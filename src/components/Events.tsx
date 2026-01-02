@@ -40,8 +40,15 @@ export const Events = () => {
         .order('date', { ascending: true });
 
       if (error) {
-        console.error('Error fetching events:', error);
+        console.error('Error fetching events:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code,
+          fullError: JSON.stringify(error, Object.getOwnPropertyNames(error)),
+        });
         // Fallback a datos estáticos si hay error
+        setEvents([]);
         return;
       }
 
@@ -57,9 +64,16 @@ export const Events = () => {
           buttonText: event.button_text as 'REGÍSTRATE' | 'VER EVENTO',
         }));
         setEvents(transformedEvents);
+      } else {
+        setEvents([]);
       }
-    } catch (error) {
-      console.error('Error fetching events:', error);
+    } catch (error: any) {
+      console.error('Error fetching events:', {
+        message: error?.message || 'Unknown error',
+        stack: error?.stack,
+        error: error,
+      });
+      setEvents([]);
     } finally {
       setLoading(false);
     }
@@ -121,7 +135,7 @@ export const Events = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-12"
         >
-          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl text-white font-light mb-6">
+          <h2 className="font-title text-4xl md:text-5xl lg:text-6xl text-white font-bold mb-6 uppercase">
             Eventos Mensuales
           </h2>
           
@@ -185,7 +199,7 @@ export const Events = () => {
               <Link
                 key={event.title}
                 href={`/eventos/${event.slug}`}
-                className="flex-shrink-0 w-[85%] md:w-[60%] lg:w-[45%] xl:w-[40%] snap-start group block"
+                className="flex-shrink-0 w-[85%] md:w-[60%] lg:w-[calc(33.333%-16px)] xl:w-[calc(33.333%-16px)] snap-start group block"
               >
                 <motion.div
                   data-event-card
@@ -193,7 +207,7 @@ export const Events = () => {
                   animate={isInView ? { opacity: 1, scale: 1 } : {}}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   whileHover={{ scale: 1.02 }}
-                  className="relative h-[500px] md:h-[600px] overflow-hidden bg-black/40 border border-white/10 cursor-pointer"
+                  className="relative h-[500px] md:h-[550px] lg:h-[500px] overflow-hidden bg-black/40 border border-white/10 cursor-pointer"
                 >
                   {/* Background Image */}
                   <div className="absolute inset-0">
@@ -219,7 +233,7 @@ export const Events = () => {
                     </div>
 
                     {/* Title */}
-                    <h3 className="font-display text-3xl md:text-4xl lg:text-5xl text-white font-light mb-4 leading-tight">
+                    <h3 className="font-title text-3xl md:text-4xl lg:text-5xl text-white font-[500] mb-4 leading-tight">
                       {event.title}
                     </h3>
 

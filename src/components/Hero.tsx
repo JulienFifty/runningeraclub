@@ -185,7 +185,7 @@ export const Hero = () => {
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: 0.5 }}
-                className="block text-[50px]"
+                className="block font-title text-4xl md:text-6xl lg:text-7xl text-white font-[700] leading-[0.95] uppercase tracking-tight"
               >
                 Running Era Club
               </motion.span>

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { User, Mail, Phone, Calendar, ArrowLeft, Save } from 'lucide-react';
+import { User, Mail, Phone, Calendar, ArrowLeft, Save, Instagram } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Forzar renderizado dinámico
@@ -15,6 +15,7 @@ interface Member {
   email: string;
   full_name: string;
   phone?: string;
+  instagram?: string;
   date_of_birth?: string;
   emergency_contact?: string;
   emergency_phone?: string;
@@ -32,6 +33,7 @@ export default function MemberProfile() {
   const [formData, setFormData] = useState({
     full_name: '',
     phone: '',
+    instagram: '',
     date_of_birth: '',
     emergency_contact: '',
     emergency_phone: '',
@@ -69,6 +71,7 @@ export default function MemberProfile() {
             email: user.email || '',
             full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Miembro',
             phone: user.user_metadata?.phone || null,
+            instagram: user.user_metadata?.instagram || null,
             membership_type: 'regular',
             membership_status: 'active',
           })
@@ -99,6 +102,7 @@ export default function MemberProfile() {
       setFormData({
         full_name: memberData.full_name || '',
         phone: memberData.phone || '',
+        instagram: memberData.instagram || '',
         date_of_birth: memberData.date_of_birth || '',
         emergency_contact: memberData.emergency_contact || '',
         emergency_phone: memberData.emergency_phone || '',
@@ -123,6 +127,7 @@ export default function MemberProfile() {
         .update({
           full_name: formData.full_name,
           phone: formData.phone || null,
+          instagram: formData.instagram || null,
           date_of_birth: formData.date_of_birth || null,
           emergency_contact: formData.emergency_contact || null,
           emergency_phone: formData.emergency_phone || null,
@@ -239,6 +244,32 @@ export default function MemberProfile() {
                     placeholder="+52 222 123 4567"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  Instagram
+                </label>
+                <div className="relative">
+                  <Instagram className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={formData.instagram}
+                    onChange={(e) => {
+                      let value = e.target.value;
+                      // Remover @ si el usuario lo agrega manualmente
+                      if (value.startsWith('@')) {
+                        value = value.substring(1);
+                      }
+                      setFormData({ ...formData, instagram: value });
+                    }}
+                    className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
+                    placeholder="@tuusuario"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Solo el nombre de usuario (sin @)
+                </p>
               </div>
 
               <div>

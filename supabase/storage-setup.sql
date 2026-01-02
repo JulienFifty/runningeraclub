@@ -26,3 +26,6 @@ CREATE POLICY "Authenticated users can delete" ON storage.objects
 FOR DELETE
 USING (bucket_id = 'images');
 
+
+
+

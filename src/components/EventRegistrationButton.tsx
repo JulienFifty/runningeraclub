@@ -5,18 +5,21 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { EventRegistrationModal } from '@/components/EventRegistrationModal';
 
 interface EventRegistrationButtonProps {
   eventId: string;
   buttonText: 'REGÍSTRATE' | 'VER EVENTO';
+  eventTitle?: string;
 }
 
-export function EventRegistrationButton({ eventId, buttonText }: EventRegistrationButtonProps) {
+export function EventRegistrationButton({ eventId, buttonText, eventTitle = 'Evento' }: EventRegistrationButtonProps) {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
   const [loading, setLoading] = useState(true);
   const [registering, setRegistering] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -35,15 +38,25 @@ export function EventRegistrationButton({ eventId, buttonText }: EventRegistrati
 
       setIsAuthenticated(true);
 
-      // Verificar si ya está registrado
-      const { data: registration } = await supabase
-        .from('event_registrations')
-        .select('id, status')
-        .eq('member_id', user.id)
-        .eq('event_id', eventId)
-        .single();
+      // Verificar si ya está registrado (tanto en event_registrations como en attendees)
+      const [registrationResult, attendeeResult] = await Promise.all([
+        supabase
+          .from('event_registrations')
+          .select('id, status')
+          .eq('member_id', user.id)
+          .eq('event_id', eventId)
+          .single()
+          .catch(() => ({ data: null, error: null })),
+        supabase
+          .from('attendees')
+          .select('id, status')
+          .eq('event_id', eventId)
+          .eq('email', user.email || '')
+          .single()
+          .catch(() => ({ data: null, error: null })),
+      ]);
 
-      if (registration) {
+      if (registrationResult.data || attendeeResult.data) {
         setIsRegistered(true);
       }
     } catch (error) {
@@ -55,7 +68,7 @@ export function EventRegistrationButton({ eventId, buttonText }: EventRegistrati
 
   const handleRegister = async () => {
     if (!isAuthenticated) {
-      router.push('/miembros/login');
+      setModalOpen(true);
       return;
     }
 
@@ -115,25 +128,39 @@ export function EventRegistrationButton({ eventId, buttonText }: EventRegistrati
 
   if (isAuthenticated && buttonText === 'REGÍSTRATE') {
     return (
-      <button
-        onClick={handleRegister}
-        disabled={registering}
-        className="block w-full bg-foreground text-background px-6 py-4 text-center text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {registering ? 'Registrando...' : buttonText}
-      </button>
+      <>
+        <button
+          onClick={handleRegister}
+          disabled={registering}
+          className="block w-full bg-foreground text-background px-6 py-4 text-center text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {registering ? 'Registrando...' : buttonText}
+        </button>
+      </>
     );
   }
 
-  // Si no está autenticado, mostrar botón que lleva al login
+  // Si no está autenticado, mostrar botón que abre el modal
   if (!isAuthenticated && buttonText === 'REGÍSTRATE') {
     return (
-      <Link
-        href="/miembros/login"
-        className="block w-full bg-foreground text-background px-6 py-4 text-center text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-foreground/90"
-      >
-        {buttonText}
-      </Link>
+      <>
+        <button
+          onClick={() => setModalOpen(true)}
+          className="block w-full bg-foreground text-background px-6 py-4 text-center text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-foreground/90"
+        >
+          {buttonText}
+        </button>
+        <EventRegistrationModal
+          eventId={eventId}
+          eventTitle={eventTitle}
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onRegistrationSuccess={() => {
+            setIsRegistered(true);
+            checkAuthAndRegistration();
+          }}
+        />
+      </>
     );
   }
 
@@ -147,4 +174,7 @@ export function EventRegistrationButton({ eventId, buttonText }: EventRegistrati
     </a>
   );
 }
+
+
+
 

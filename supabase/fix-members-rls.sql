@@ -70,3 +70,6 @@ CREATE POLICY "Admins can manage all registrations" ON event_registrations
     )
   );
 
+
+
+

@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   return {
-    title: `${event.title} | RUNNING ERA`,
+    title: `${event.title} | RUNNING ERA (V2)`,
     description: event.description,
     openGraph: {
       title: `${event.title} | RUNNING ERA`,
@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function EventPage({ params }: PageProps) {
+export default async function EventPageV2({ params }: PageProps) {
   const { slug } = await params;
   // Usar cliente estático para evitar problemas con cookies en build time
   const event = await getEventBySlug(slug, true);
@@ -241,7 +241,7 @@ export default async function EventPage({ params }: PageProps) {
                   )}
 
                   <div className="space-y-3">
-                    <EventRegistrationButton eventId={event.id} buttonText={event.buttonText} eventTitle={event.title} />
+                    <EventRegistrationButton eventId={event.id} buttonText={event.buttonText} />
                   </div>
 
                   {/* Contact Info */}
@@ -334,3 +334,4 @@ export default async function EventPage({ params }: PageProps) {
     </main>
   );
 }
+

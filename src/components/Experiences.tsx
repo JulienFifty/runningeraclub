@@ -65,7 +65,7 @@ export const Experiences = () => {
           <span className="text-muted-foreground text-sm tracking-[0.3em] uppercase mb-4 block">
             Lo que ofrecemos
           </span>
-          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-light text-foreground mb-6">
+          <h2 className="font-title text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 uppercase">
             Experiencias <span className="italic">RUNNING ERA</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto font-light">

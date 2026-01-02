@@ -20,3 +20,6 @@ ALTER COLUMN difficulty SET DEFAULT '[]'::jsonb;
 -- Verificar que los datos se migraron correctamente
 SELECT id, title, difficulty FROM events LIMIT 5;
 
+
+
+

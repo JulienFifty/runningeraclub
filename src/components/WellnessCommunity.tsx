@@ -53,7 +53,7 @@ export const WellnessCommunity = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.1 }}
-                className="font-display text-2xl md:text-3xl lg:text-4xl text-white font-semibold tracking-wide uppercase leading-tight mb-4"
+                className="font-display text-2xl md:text-3xl lg:text-4xl text-white font-bold tracking-wide uppercase leading-tight mb-4"
               >
                 Una Nueva Forma
                 <br />
