@@ -8,6 +8,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createClient } from '@/lib/supabase/client';
 
 interface EventFormData {
   slug: string;
@@ -38,7 +39,9 @@ export default function NewEvent() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const supabase = createClient();
   const [formData, setFormData] = useState<EventFormData>({
     slug: '',
     title: '',
@@ -65,13 +68,40 @@ export default function NewEvent() {
   });
 
   useEffect(() => {
-    const auth = localStorage.getItem('admin_auth');
-    if (auth !== 'true') {
-      router.push('/admin/login');
-      return;
-    }
-    setIsAuthenticated(true);
+    checkAdminAuth();
   }, [router]);
+
+  const checkAdminAuth = async () => {
+    try {
+      // 1. Verificar autenticación de Supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        router.push('/admin/login');
+        return;
+      }
+
+      setIsAuthenticated(true);
+
+      // 2. Verificar que es admin en la tabla admins
+      const { data: admin, error } = await supabase
+        .from('admins')
+        .select('*')
+        .eq('email', user.email)
+        .single();
+
+      if (error || !admin) {
+        toast.error('Acceso denegado. No tienes permisos de administrador.');
+        router.push('/admin/login');
+        return;
+      }
+
+      setIsAdmin(true);
+    } catch (error) {
+      console.error('Error checking admin auth:', error);
+      router.push('/admin/login');
+    }
+  };
 
   const generateSlug = (title: string) => {
     return title
@@ -144,8 +174,12 @@ export default function NewEvent() {
     }
   };
 
-  if (!isAuthenticated) {
-    return null;
+  if (!isAuthenticated || !isAdmin) {
+    return (
+      <main className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-muted-foreground">Verificando autenticación...</div>
+      </main>
+    );
   }
 
   return (

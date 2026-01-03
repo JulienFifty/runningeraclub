@@ -6,6 +6,7 @@ import { WellnessCommunity } from '@/components/WellnessCommunity';
 import { Experiences } from '@/components/Experiences';
 import { WhyChooseUs } from '@/components/WhyChooseUs';
 import { Events } from '@/components/Events';
+import { LeaderboardsSection } from '@/components/LeaderboardsSection';
 import { Community } from '@/components/Community';
 import { Testimonials } from '@/components/Testimonials';
 import { Gallery } from '@/components/Gallery';
@@ -20,6 +21,7 @@ export default function Home() {
       <Hero />
       <WellnessCommunity />
       <Events />
+      <LeaderboardsSection />
       <WhyChooseUs />
       <Community />
       <Gallery />

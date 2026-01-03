@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { User, Lock, Mail, ArrowRight, Instagram } from 'lucide-react';
@@ -10,8 +10,9 @@ import { toast } from 'sonner';
 // Forzar renderizado dinámico
 export const dynamic = 'force-dynamic';
 
-export default function MemberLogin() {
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,6 +22,33 @@ export default function MemberLogin() {
   const [loading, setLoading] = useState(false);
 
   const supabase = createClient();
+
+  useEffect(() => {
+    // Manejar respuestas de Strava
+    const stravaError = searchParams?.get('strava_error');
+    const stravaSignup = searchParams?.get('strava_signup');
+
+    if (stravaError) {
+      const errorMessages: Record<string, string> = {
+        cancelled: 'Conexión con Strava cancelada',
+        invalid: 'Error en la autorización de Strava',
+        config: 'Error de configuración',
+        token: 'Error al obtener tokens de Strava',
+        signup: 'Error al crear la cuenta con Strava',
+        profile: 'Error al crear el perfil',
+        signin: 'Error al iniciar sesión',
+        unknown: 'Error desconocido',
+      };
+      toast.error(errorMessages[stravaError] || 'Error con Strava');
+    } else if (stravaSignup === 'success') {
+      toast.success('¡Cuenta creada con Strava!');
+    }
+  }, [searchParams]);
+
+  const handleStravaSignup = () => {
+    // Redirigir a la API de autenticación de Strava en modo signup
+    window.location.href = '/api/strava/auth?mode=signup&return_url=/miembros/dashboard';
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,6 +169,36 @@ export default function MemberLogin() {
                 : 'Únete a RUNNING ERA Club'}
             </p>
           </div>
+
+          {/* Botón de Strava - Solo para registro */}
+          {!isLogin && (
+            <>
+              <button
+                type="button"
+                onClick={handleStravaSignup}
+                disabled={loading}
+                className="w-full px-6 py-3 bg-[#FC4C02] text-white rounded-lg hover:bg-[#E34402] transition-colors disabled:opacity-50 flex items-center justify-center gap-3 font-medium"
+              >
+                <svg
+                  className="w-5 h-5"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
+                </svg>
+                Continuar con Strava
+              </button>
+
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-border"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-card text-muted-foreground">O continuar con email</span>
+                </div>
+              </div>
+            </>
+          )}
 
           <form onSubmit={isLogin ? handleLogin : handleSignUp} className="space-y-6">
             {!isLogin && (
@@ -289,6 +347,18 @@ export default function MemberLogin() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function MemberLogin() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-muted-foreground">Cargando...</div>
+      </main>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }
 

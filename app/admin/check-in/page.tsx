@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { ArrowLeft, Calendar, Upload } from 'lucide-react';
 import { ImportAttendeesModal } from '@/components/admin/ImportAttendeesModal';
 import { CheckinDashboard } from '@/components/admin/CheckinDashboard';
+import { createClient } from '@/lib/supabase/client';
+import { toast } from 'sonner';
 
 // Forzar renderizado dinámico (evita prerender durante build)
 export const dynamic = 'force-dynamic';
@@ -20,52 +22,79 @@ interface Event {
 export default function AdminCheckIn() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [refreshKey, setRefreshKey] = useState(0);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const supabase = createClient();
 
   useEffect(() => {
-    const auth = localStorage.getItem('admin_auth');
-    if (auth !== 'true') {
-      router.push('/admin/login');
-      return;
-    }
-    setIsAuthenticated(true);
-    
-    // Importar y crear cliente de Supabase solo en el cliente
-    const loadEvents = async () => {
-      try {
-        const { createClient } = await import('@/lib/supabase/client');
-        const supabase = createClient();
-        
-        const { data, error } = await supabase
-          .from('events')
-          .select('id, title, date, slug')
-          .order('date', { ascending: false });
-
-        if (error) {
-          return;
-        }
-
-        setEvents(data || []);
-      } catch (error) {
-        // Error silencioso
-      }
-    };
-    
-    loadEvents();
+    checkAdminAuth();
   }, [router]);
+
+  const checkAdminAuth = async () => {
+    try {
+      // 1. Verificar autenticación de Supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        router.push('/admin/login');
+        return;
+      }
+
+      setIsAuthenticated(true);
+
+      // 2. Verificar que es admin en la tabla admins
+      const { data: admin, error } = await supabase
+        .from('admins')
+        .select('*')
+        .eq('email', user.email)
+        .single();
+
+      if (error || !admin) {
+        toast.error('Acceso denegado. No tienes permisos de administrador.');
+        router.push('/admin/login');
+        return;
+      }
+
+      setIsAdmin(true);
+
+      // 3. Cargar eventos
+      loadEvents();
+    } catch (error) {
+      console.error('Error checking admin auth:', error);
+      router.push('/admin/login');
+    }
+  };
+
+  const loadEvents = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select('id, title, date, slug')
+        .order('date', { ascending: false });
+
+      if (error) {
+        console.error('Error loading events:', error);
+        return;
+      }
+
+      setEvents(data || []);
+    } catch (error) {
+      console.error('Error loading events:', error);
+    }
+  };
 
   const handleImportComplete = () => {
     setRefreshKey((prev) => prev + 1);
     setIsImportModalOpen(false);
   };
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !isAdmin) {
     return (
       <main className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-muted-foreground">Cargando...</div>
+        <div className="text-muted-foreground">Verificando autenticación...</div>
       </main>
     );
   }

@@ -8,6 +8,7 @@ import { DatePicker } from '@/components/ui/date-picker';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createClient } from '@/lib/supabase/client';
 
 interface EventFormData {
   slug: string;
@@ -41,7 +42,9 @@ export default function EditEvent() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const supabase = createClient();
   const [formData, setFormData] = useState<EventFormData>({
     slug: '',
     title: '',
@@ -68,14 +71,43 @@ export default function EditEvent() {
   });
 
   useEffect(() => {
-    const auth = localStorage.getItem('admin_auth');
-    if (auth !== 'true') {
-      router.push('/admin/login');
-      return;
-    }
-    setIsAuthenticated(true);
-    fetchEvent();
+    checkAdminAuth();
   }, [eventId, router]);
+
+  const checkAdminAuth = async () => {
+    try {
+      // 1. Verificar autenticación de Supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        router.push('/admin/login');
+        return;
+      }
+
+      setIsAuthenticated(true);
+
+      // 2. Verificar que es admin en la tabla admins
+      const { data: admin, error } = await supabase
+        .from('admins')
+        .select('*')
+        .eq('email', user.email)
+        .single();
+
+      if (error || !admin) {
+        toast.error('Acceso denegado. No tienes permisos de administrador.');
+        router.push('/admin/login');
+        return;
+      }
+
+      setIsAdmin(true);
+
+      // 3. Cargar el evento
+      fetchEvent();
+    } catch (error) {
+      console.error('Error checking admin auth:', error);
+      router.push('/admin/login');
+    }
+  };
 
   const fetchEvent = async () => {
     try {
@@ -189,10 +221,10 @@ export default function EditEvent() {
     }
   };
 
-  if (!isAuthenticated || loading) {
+  if (!isAuthenticated || !isAdmin || loading) {
     return (
       <main className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-muted-foreground">Cargando...</div>
+        <div className="text-muted-foreground">Verificando autenticación...</div>
       </main>
     );
   }

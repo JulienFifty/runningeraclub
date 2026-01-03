@@ -241,7 +241,7 @@ export default async function EventPage({ params }: PageProps) {
                   )}
 
                   <div className="space-y-3">
-                    <EventRegistrationButton eventId={event.id} buttonText={event.buttonText} eventTitle={event.title} />
+                    <EventRegistrationButton eventId={event.id} buttonText={event.buttonText} eventTitle={event.title} eventPrice={event.price} />
                   </div>
 
                   {/* Contact Info */}

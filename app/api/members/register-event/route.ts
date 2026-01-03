@@ -4,16 +4,9 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
   try {
     const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
-    }
-
     const { event_id } = await request.json();
+
+    console.log('📝 Register event request:', { event_id });
 
     if (!event_id) {
       return NextResponse.json(
@@ -22,30 +15,54 @@ export async function POST(request: Request) {
       );
     }
 
-    // Verificar que el miembro existe
+    // Verificar autenticación
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    console.log('👤 User check:', { user: user?.id, authError });
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'No autenticado' },
+        { status: 401 }
+      );
+    }
+
+    // Obtener información del evento
+    const { data: event, error: eventError } = await supabase
+      .from('events')
+      .select('id, title, price, slug')
+      .eq('id', event_id)
+      .single();
+
+    console.log('🎫 Event check:', { event, eventError });
+
+    if (eventError || !event) {
+      return NextResponse.json(
+        { error: 'Evento no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    // Verificar si el evento requiere pago
+    const requiresPayment = event.price && 
+      event.price !== '0' && 
+      !event.price.toLowerCase().includes('gratis') &&
+      !event.price.toLowerCase().includes('free');
+
+    console.log('💰 Payment check:', { price: event.price, requiresPayment });
+
+    // Verificar si el miembro ya existe en la tabla members
     const { data: member, error: memberError } = await supabase
       .from('members')
       .select('id')
       .eq('id', user.id)
       .single();
 
+    console.log('👥 Member check:', { member, memberError });
+
     if (memberError || !member) {
       return NextResponse.json(
-        { error: 'Perfil de miembro no encontrado' },
-        { status: 404 }
-      );
-    }
-
-    // Verificar que el evento existe
-    const { data: event, error: eventError } = await supabase
-      .from('events')
-      .select('id, max_participants')
-      .eq('id', event_id)
-      .single();
-
-    if (eventError || !event) {
-      return NextResponse.json(
-        { error: 'Evento no encontrado' },
+        { error: 'Miembro no encontrado. Por favor completa tu perfil primero.' },
         { status: 404 }
       );
     }
@@ -58,6 +75,8 @@ export async function POST(request: Request) {
       .eq('event_id', event_id)
       .single();
 
+    console.log('✅ Registration check:', { existingRegistration });
+
     if (existingRegistration) {
       return NextResponse.json(
         { error: 'Ya estás registrado en este evento' },
@@ -65,50 +84,87 @@ export async function POST(request: Request) {
       );
     }
 
-    // Verificar cupo disponible
-    if (event.max_participants) {
-      const { count } = await supabase
-        .from('event_registrations')
-        .select('*', { count: 'exact', head: true })
-        .eq('event_id', event_id)
-        .in('status', ['registered', 'confirmed']);
+    if (requiresPayment) {
+      // Si requiere pago, crear sesión de Stripe
+      console.log('💳 Creating Stripe checkout session...');
+      
+      const checkoutResponse = await fetch(`${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/api/stripe/create-checkout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          event_id,
+          member_id: user.id,
+          is_guest: false,
+        }),
+      });
 
-      if (count && count >= event.max_participants) {
+      const checkoutData = await checkoutResponse.json();
+      
+      console.log('💳 Checkout response:', { ok: checkoutResponse.ok, data: checkoutData });
+
+      if (!checkoutResponse.ok) {
         return NextResponse.json(
-          { error: 'El evento está lleno' },
-          { status: 400 }
+          { error: 'Error al crear sesión de pago', details: checkoutData.error },
+          { status: 500 }
         );
       }
+
+      // Crear registro pendiente de pago
+      const { error: registrationError } = await supabase
+        .from('event_registrations')
+        .insert({
+          member_id: user.id,
+          event_id: event_id,
+          status: 'pending',
+          payment_status: 'pending',
+        });
+
+      console.log('📋 Registration created:', { registrationError });
+
+      if (registrationError) {
+        return NextResponse.json(
+          { error: 'Error al crear registro', details: registrationError.message },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        requires_payment: true,
+        checkout_url: checkoutData.url,
+      });
+    } else {
+      // Registro gratuito
+      const { error: registrationError } = await supabase
+        .from('event_registrations')
+        .insert({
+          member_id: user.id,
+          event_id: event_id,
+          status: 'confirmed',
+          payment_status: 'paid', // Marcar como "pagado" para eventos gratuitos
+        });
+
+      console.log('📋 Free registration created:', { registrationError });
+
+      if (registrationError) {
+        return NextResponse.json(
+          { error: 'Error al registrarse', details: registrationError.message },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        requires_payment: false,
+      });
     }
-
-    // Crear registro
-    const { data: registration, error: registrationError } = await supabase
-      .from('event_registrations')
-      .insert({
-        member_id: user.id,
-        event_id: event_id,
-        status: 'registered',
-        payment_status: 'pending',
-      })
-      .select()
-      .single();
-
-    if (registrationError) {
-      return NextResponse.json(
-        { error: 'Error al registrar en el evento' },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      registration,
-    });
   } catch (error: any) {
+    console.error('❌ Error in register-event:', error);
     return NextResponse.json(
-      { error: 'Error del servidor' },
+      { error: 'Error del servidor', details: error.message },
       { status: 500 }
     );
   }
 }
-

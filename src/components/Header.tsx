@@ -2,12 +2,24 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Phone, MapPin, Instagram } from 'lucide-react';
+import { Menu, X, Phone, MapPin, Instagram, User, LogOut, LayoutDashboard, Trophy } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useRouter } from 'next/navigation';
 
 const navLinks = [
   { name: 'Inicio', href: '#inicio' },
   { name: 'Comunidad', href: '#comunidad' },
   { name: 'Eventos', href: '#eventos' },
+  { name: 'Leaderboard', href: '/leaderboard' },
   { name: 'Experiencias', href: '#experiencias' },
   { name: 'Galería', href: '#galeria' },
   { name: 'Contacto', href: '#contacto' },
@@ -16,6 +28,15 @@ const navLinks = [
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [memberData, setMemberData] = useState<{
+    first_name?: string;
+    last_name?: string;
+    email?: string;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const supabase = createClient();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,6 +46,72 @@ export const Header = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        setIsAuthenticated(false);
+        setLoading(false);
+        return;
+      }
+
+      setIsAuthenticated(true);
+
+      // Obtener información del miembro
+      const { data: member } = await supabase
+        .from('members')
+        .select('first_name, last_name, email')
+        .eq('id', user.id)
+        .single();
+
+      if (member) {
+        setMemberData(member);
+      } else {
+        // Si no existe en members, usar datos del auth
+        setMemberData({
+          email: user.email,
+        });
+      }
+    } catch (error) {
+      console.error('Error checking auth:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setIsAuthenticated(false);
+    setMemberData(null);
+    router.push('/');
+    router.refresh();
+  };
+
+  const getInitials = () => {
+    if (memberData?.first_name && memberData?.last_name) {
+      return `${memberData.first_name[0]}${memberData.last_name[0]}`.toUpperCase();
+    }
+    if (memberData?.email) {
+      return memberData.email[0].toUpperCase();
+    }
+    return 'U';
+  };
+
+  const getUserName = () => {
+    if (memberData?.first_name && memberData?.last_name) {
+      return `${memberData.first_name} ${memberData.last_name}`;
+    }
+    if (memberData?.email) {
+      return memberData.email.split('@')[0];
+    }
+    return 'Usuario';
+  };
 
   return (
     <AnimatePresence>
@@ -88,12 +175,59 @@ export const Header = () => {
 
               {/* CTA + Mobile Menu */}
               <div className="flex items-center gap-4">
-                <a
-                  href="#contacto"
-                  className="hidden md:inline-flex btn-premium text-xs py-3 px-6"
-                >
-                  Únete al Club
-                </a>
+                {!loading && (
+                  <>
+                    {isAuthenticated ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-muted transition-colors">
+                            <Avatar className="w-8 h-8">
+                              <AvatarFallback className="bg-foreground text-background text-xs">
+                                {getInitials()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="text-sm font-medium">{getUserName()}</span>
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-56">
+                          <DropdownMenuLabel>
+                            <div className="flex flex-col space-y-1">
+                              <p className="text-sm font-medium">{getUserName()}</p>
+                              {memberData?.email && (
+                                <p className="text-xs text-muted-foreground">{memberData.email}</p>
+                              )}
+                            </div>
+                          </DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => router.push('/miembros/dashboard')}>
+                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                            Dashboard
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => router.push('/leaderboard')}>
+                            <Trophy className="mr-2 h-4 w-4" />
+                            Leaderboard
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => router.push('/miembros/perfil')}>
+                            <User className="mr-2 h-4 w-4" />
+                            Mi Perfil
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={handleLogout}>
+                            <LogOut className="mr-2 h-4 w-4" />
+                            Cerrar Sesión
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : (
+                      <a
+                        href="/miembros/login"
+                        className="hidden md:inline-flex btn-premium text-xs py-3 px-6"
+                      >
+                        Iniciar Sesión
+                      </a>
+                    )}
+                  </>
+                )}
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   className="lg:hidden p-2 hover:bg-muted rounded-sm transition-colors"
@@ -125,13 +259,41 @@ export const Header = () => {
                       {link.name}
                     </a>
                   ))}
-                  <a
-                    href="#contacto"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="btn-premium mt-4 text-center"
-                  >
-                    Únete al Club
-                  </a>
+                  {isAuthenticated ? (
+                    <>
+                      <a
+                        href="/miembros/dashboard"
+                        onClick={() => setIsMenuOpen(false)}
+                        className="text-lg font-medium tracking-wider text-foreground hover:text-muted-foreground transition-colors py-2"
+                      >
+                        Dashboard
+                      </a>
+                      <a
+                        href="/miembros/perfil"
+                        onClick={() => setIsMenuOpen(false)}
+                        className="text-lg font-medium tracking-wider text-foreground hover:text-muted-foreground transition-colors py-2"
+                      >
+                        Mi Perfil
+                      </a>
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          setIsMenuOpen(false);
+                        }}
+                        className="text-lg font-medium tracking-wider text-foreground hover:text-muted-foreground transition-colors py-2 text-left"
+                      >
+                        Cerrar Sesión
+                      </button>
+                    </>
+                  ) : (
+                    <a
+                      href="/miembros/login"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="btn-premium mt-4 text-center"
+                    >
+                      Iniciar Sesión
+                    </a>
+                  )}
                 </nav>
               </motion.div>
             )}

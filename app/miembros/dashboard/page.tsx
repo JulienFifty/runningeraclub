@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { Calendar, User, LogOut, Clock, MapPin, CheckCircle, XCircle, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
+import { StravaConnectButton } from '@/components/strava/StravaConnectButton';
+import { StravaStats } from '@/components/strava/StravaStats';
 
 // Forzar renderizado dinámico
 export const dynamic = 'force-dynamic';
@@ -37,17 +39,70 @@ interface EventRegistration {
   };
 }
 
-export default function MemberDashboard() {
+interface StravaConnection {
+  strava_athlete_id: number;
+  athlete_data?: {
+    username?: string;
+    firstname?: string;
+    lastname?: string;
+    profile?: string;
+  };
+}
+
+function DashboardContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [member, setMember] = useState<Member | null>(null);
   const [registrations, setRegistrations] = useState<EventRegistration[]>([]);
+  const [stravaConnection, setStravaConnection] = useState<StravaConnection | null>(null);
   const [loading, setLoading] = useState(true);
 
   const supabase = createClient();
 
   useEffect(() => {
     checkAuthAndLoadData();
-  }, []);
+
+    // Verificar parámetros de Strava en la URL
+    const stravaConnected = searchParams?.get('strava_connected');
+    const stravaError = searchParams?.get('strava_error');
+
+    if (stravaConnected === 'true') {
+      toast.success('¡Strava conectado exitosamente!');
+      // Limpiar URL
+      window.history.replaceState({}, '', '/miembros/dashboard');
+    } else if (stravaError) {
+      const errorMessages: Record<string, string> = {
+        cancelled: 'Conexión con Strava cancelada',
+        invalid: 'Error en la autorización de Strava',
+        config: 'Error de configuración',
+        token: 'Error al obtener tokens de Strava',
+        db: 'Error al guardar la conexión',
+        unknown: 'Error desconocido',
+      };
+      toast.error(errorMessages[stravaError] || 'Error al conectar con Strava');
+      // Limpiar URL
+      window.history.replaceState({}, '', '/miembros/dashboard');
+    }
+  }, [searchParams]);
+
+  const loadStravaConnection = async (memberId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('strava_connections')
+        .select('strava_athlete_id, athlete_data')
+        .eq('member_id', memberId)
+        .single();
+
+      if (!error && data) {
+        setStravaConnection(data as StravaConnection);
+      } else {
+        setStravaConnection(null);
+      }
+    } catch (error) {
+      console.error('Error loading Strava connection:', error);
+      setStravaConnection(null);
+    }
+  };
 
   const checkAuthAndLoadData = async () => {
     try {
@@ -101,6 +156,8 @@ export default function MemberDashboard() {
 
       if (memberData) {
         setMember(memberData);
+        // Cargar conexión de Strava
+        await loadStravaConnection(memberData.id);
       }
 
       // Cargar registros de eventos
@@ -242,6 +299,48 @@ export default function MemberDashboard() {
               </p>
             </div>
           </div>
+
+          {/* Strava Connection Card */}
+          {!stravaConnection ? (
+            <div className="bg-card border border-border p-6 rounded-lg mb-8">
+              <h2 className="font-display text-xl text-foreground font-light mb-4">
+                Conecta tu Strava
+              </h2>
+              <p className="text-sm text-muted-foreground mb-6">
+                Conecta tu cuenta de Strava para sincronizar tus actividades y competir en el leaderboard del club.
+              </p>
+              <StravaConnectButton
+                isConnected={!!stravaConnection}
+                athleteData={stravaConnection ? (stravaConnection as any).athlete_data : undefined}
+                onConnectionChange={() => {
+                  if (member) {
+                    loadStravaConnection(member.id);
+                  }
+                }}
+              />
+            </div>
+          ) : (
+            <div className="space-y-6 mb-8">
+              {/* Strava Connection Status */}
+              <div className="bg-card border border-border p-6 rounded-lg">
+                <h2 className="font-display text-xl text-foreground font-light mb-4">
+                  Conexión Strava
+                </h2>
+                <StravaConnectButton
+                  isConnected={!!stravaConnection}
+                  athleteData={stravaConnection?.athlete_data || undefined}
+                  onConnectionChange={() => {
+                    if (member) {
+                      loadStravaConnection(member.id);
+                    }
+                  }}
+                />
+              </div>
+
+              {/* Strava Stats */}
+              <StravaStats />
+            </div>
+          )}
         </div>
 
         {/* My Events */}
@@ -326,6 +425,18 @@ export default function MemberDashboard() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function MemberDashboard() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-muted-foreground">Cargando...</div>
+      </main>
+    }>
+      <DashboardContent />
+    </Suspense>
   );
 }
 

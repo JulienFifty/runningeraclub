@@ -11,9 +11,10 @@ interface EventRegistrationButtonProps {
   eventId: string;
   buttonText: 'REGÍSTRATE' | 'VER EVENTO';
   eventTitle?: string;
+  eventPrice?: string;
 }
 
-export function EventRegistrationButton({ eventId, buttonText, eventTitle = 'Evento' }: EventRegistrationButtonProps) {
+export function EventRegistrationButton({ eventId, buttonText, eventTitle = 'Evento', eventPrice }: EventRegistrationButtonProps) {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
@@ -39,23 +40,21 @@ export function EventRegistrationButton({ eventId, buttonText, eventTitle = 'Eve
       setIsAuthenticated(true);
 
       // Verificar si ya está registrado (tanto en event_registrations como en attendees)
-      const [registrationResult, attendeeResult] = await Promise.all([
-        supabase
-          .from('event_registrations')
-          .select('id, status')
-          .eq('member_id', user.id)
-          .eq('event_id', eventId)
-          .single()
-          .catch(() => ({ data: null, error: null })),
-        supabase
-          .from('attendees')
-          .select('id, status')
-          .eq('event_id', eventId)
-          .eq('email', user.email || '')
-          .single()
-          .catch(() => ({ data: null, error: null })),
-      ]);
+      const registrationResult = await supabase
+        .from('event_registrations')
+        .select('id, status')
+        .eq('member_id', user.id)
+        .eq('event_id', eventId)
+        .single();
 
+      const attendeeResult = await supabase
+        .from('attendees')
+        .select('id, status')
+        .eq('event_id', eventId)
+        .eq('email', user.email || '')
+        .single();
+
+      // Verificar si alguna query tuvo éxito
       if (registrationResult.data || attendeeResult.data) {
         setIsRegistered(true);
       }
@@ -92,12 +91,18 @@ export function EventRegistrationButton({ eventId, buttonText, eventTitle = 'Eve
         return;
       }
 
-      toast.success('¡Registro exitoso!', {
-        description: 'Te has registrado correctamente al evento',
-      });
+      if (data.requires_payment && data.checkout_url) {
+        // Redirigir a Stripe Checkout
+        window.location.href = data.checkout_url;
+      } else {
+        // Registro exitoso (evento gratuito)
+        toast.success('¡Registro exitoso!', {
+          description: 'Te has registrado correctamente al evento',
+        });
 
-      setIsRegistered(true);
-      router.push('/miembros/dashboard');
+        setIsRegistered(true);
+        router.push('/miembros/dashboard');
+      }
     } catch (error: any) {
       toast.error('Error inesperado', {
         description: error.message || 'Ocurrió un error al registrarse',
@@ -153,6 +158,7 @@ export function EventRegistrationButton({ eventId, buttonText, eventTitle = 'Eve
         <EventRegistrationModal
           eventId={eventId}
           eventTitle={eventTitle}
+          eventPrice={eventPrice}
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           onRegistrationSuccess={() => {

@@ -2,24 +2,70 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
-import { Lock, ArrowLeft } from 'lucide-react';
+import { Lock, ArrowLeft, Mail } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AdminLogin() {
   const router = useRouter();
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const supabase = createClient();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Autenticación simple (en producción usar Supabase Auth)
-    // Por ahora, usar una contraseña simple
-    if (password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD || password === 'admin123') {
-      localStorage.setItem('admin_auth', 'true');
+    setLoading(true);
+
+    try {
+      // Iniciar sesión con Supabase
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (authError) {
+        toast.error('Error al iniciar sesión', {
+          description: authError.message,
+        });
+        setLoading(false);
+        return;
+      }
+
+      if (!authData.user) {
+        toast.error('Error al iniciar sesión');
+        setLoading(false);
+        return;
+      }
+
+      // Verificar que el usuario sea admin
+      const { data: admin, error: adminError } = await supabase
+        .from('admins')
+        .select('*')
+        .eq('email', authData.user.email)
+        .single();
+
+      if (adminError || !admin) {
+        // No es admin, cerrar sesión
+        await supabase.auth.signOut();
+        toast.error('Acceso denegado', {
+          description: 'No tienes permisos de administrador',
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Éxito - redirigir al dashboard
+      toast.success('Bienvenido, ' + admin.email);
       router.push('/admin');
-    } else {
-      setError('Contraseña incorrecta');
+      router.refresh();
+    } catch (error: any) {
+      toast.error('Error inesperado', {
+        description: error.message,
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -41,11 +87,30 @@ export default function AdminLogin() {
               Acceso de Administrador
             </h1>
             <p className="text-muted-foreground text-sm">
-              Ingresa tu contraseña para continuar
+              Ingresa tus credenciales para continuar
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
+                Email
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
+                  placeholder="admin@ejemplo.com"
+                  required
+                  disabled={loading}
+                />
+              </div>
+            </div>
+
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-foreground mb-2">
                 Contraseña
@@ -58,29 +123,24 @@ export default function AdminLogin() {
                 className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
                 placeholder="Ingresa tu contraseña"
                 required
+                disabled={loading}
               />
             </div>
 
-            {error && (
-              <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
-
             <button
               type="submit"
-              className="w-full bg-foreground text-background px-6 py-3 rounded-lg font-medium hover:bg-foreground/90 transition-colors"
+              disabled={loading}
+              className="w-full bg-foreground text-background px-6 py-3 rounded-lg font-medium hover:bg-foreground/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Iniciar Sesión
+              {loading ? 'Verificando...' : 'Iniciar Sesión'}
             </button>
           </form>
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
-            Por seguridad, cambia la contraseña en producción
+            Sistema de autenticación seguro con Supabase
           </p>
         </div>
       </div>
     </main>
   );
 }
-

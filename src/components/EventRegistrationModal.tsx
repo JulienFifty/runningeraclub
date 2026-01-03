@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import Link from 'next/link';
-import { X, User, Mail, Phone, ArrowRight } from 'lucide-react';
+import { X, User, Mail, Phone, ArrowRight, Tag, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 interface EventRegistrationModalProps {
   eventId: string;
   eventTitle: string;
+  eventPrice?: string;
   isOpen: boolean;
   onClose: () => void;
   onRegistrationSuccess?: () => void;
@@ -21,6 +22,7 @@ interface EventRegistrationModalProps {
 export function EventRegistrationModal({
   eventId,
   eventTitle,
+  eventPrice,
   isOpen,
   onClose,
   onRegistrationSuccess,
@@ -33,46 +35,159 @@ export function EventRegistrationModal({
     name: '',
     email: '',
     phone: '',
+    coupon: '',
   });
   const [loading, setLoading] = useState(false);
+  const [couponValidating, setCouponValidating] = useState(false);
+  const [couponData, setCouponData] = useState<any>(null);
+  const [couponError, setCouponError] = useState<string>('');
 
-  const handleGuestRegistration = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  // Verificar si el evento requiere pago
+  const requiresPayment = eventPrice && 
+    eventPrice !== '0' && 
+    !eventPrice.toLowerCase().includes('gratis') &&
+    !eventPrice.toLowerCase().includes('free');
+
+  // Validar cupón
+  const validateCoupon = async (code: string) => {
+    if (!code.trim() || !requiresPayment) return;
+
+    setCouponValidating(true);
+    setCouponError('');
+    setCouponData(null);
 
     try {
-      const response = await fetch('/api/attendees', {
+      // Extraer precio numérico
+      const priceMatch = eventPrice?.match(/\d+/);
+      if (!priceMatch) return;
+      const amount = parseInt(priceMatch[0]);
+
+      const response = await fetch('/api/coupons/validate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: guestForm.name,
-          email: guestForm.email || null,
-          phone: guestForm.phone || null,
+          code: code.trim().toUpperCase(),
           event_id: eventId,
-          tickets: 1,
+          amount: amount,
         }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        toast.error('Error al registrarse', {
-          description: data.error || 'No se pudo completar el registro',
-        });
+        setCouponError(data.error || 'Cupón no válido');
         return;
       }
 
-      toast.success('¡Registro exitoso!', {
-        description: 'Te has registrado correctamente al evento',
+      if (data.valid) {
+        setCouponData(data);
+        toast.success('¡Cupón aplicado!', {
+          description: `Descuento: $${data.discount_amount.toFixed(2)} MXN`,
+        });
+      }
+    } catch (error: any) {
+      setCouponError('Error al validar cupón');
+    } finally {
+      setCouponValidating(false);
+    }
+  };
+
+  const handleGuestRegistration = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      if (requiresPayment) {
+        // Primero crear el attendee
+        const response = await fetch('/api/attendees', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: guestForm.name,
+            email: guestForm.email || null,
+            phone: guestForm.phone || null,
+            event_id: eventId,
+            tickets: 1,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          toast.error('Error al registrarse', {
+            description: data.error || 'No se pudo completar el registro',
+          });
+          setLoading(false);
+          return;
+        }
+
+        // Crear sesión de pago de Stripe
+        const checkoutResponse = await fetch('/api/stripe/create-checkout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        body: JSON.stringify({
+          event_id: eventId,
+          attendee_id: data.attendee.id,
+          is_guest: true,
+          coupon_code: guestForm.coupon || undefined,
+        }),
       });
 
-      setGuestForm({ name: '', email: '', phone: '' });
-      setMode('choose');
-      onClose();
-      if (onRegistrationSuccess) {
-        onRegistrationSuccess();
+        const checkoutData = await checkoutResponse.json();
+
+        if (!checkoutResponse.ok) {
+          toast.error('Error al iniciar pago', {
+            description: checkoutData.error || 'No se pudo iniciar el proceso de pago',
+          });
+          setLoading(false);
+          return;
+        }
+
+        // Redirigir a Stripe Checkout
+        if (checkoutData.url) {
+          window.location.href = checkoutData.url;
+        }
+      } else {
+        // Registro sin pago
+        const response = await fetch('/api/attendees', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: guestForm.name,
+            email: guestForm.email || null,
+            phone: guestForm.phone || null,
+            event_id: eventId,
+            tickets: 1,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          toast.error('Error al registrarse', {
+            description: data.error || 'No se pudo completar el registro',
+          });
+          return;
+        }
+
+        toast.success('¡Registro exitoso!', {
+          description: 'Te has registrado correctamente al evento',
+        });
+
+        setGuestForm({ name: '', email: '', phone: '', coupon: '' });
+        setMode('choose');
+        onClose();
+        if (onRegistrationSuccess) {
+          onRegistrationSuccess();
+        }
       }
     } catch (error: any) {
       toast.error('Error inesperado', {
@@ -119,6 +234,11 @@ export function EventRegistrationModal({
             <div className="space-y-4">
               <p className="text-muted-foreground mb-6">
                 Elige cómo deseas registrarte a <span className="font-medium text-foreground">{eventTitle}</span>
+                {requiresPayment && (
+                  <span className="block mt-2 text-sm">
+                    Precio: <span className="font-semibold text-foreground">{eventPrice}</span>
+                  </span>
+                )}
               </p>
 
               <button
@@ -217,6 +337,58 @@ export function EventRegistrationModal({
                 </div>
               </div>
 
+              {/* Campo de cupón (solo si requiere pago) */}
+              {requiresPayment && (
+                <div>
+                  <Label htmlFor="guest-coupon" className="mb-2">
+                    Cupón de Descuento (Opcional)
+                  </Label>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                      <Input
+                        id="guest-coupon"
+                        type="text"
+                        value={guestForm.coupon}
+                        onChange={(e) => {
+                          setGuestForm({ ...guestForm, coupon: e.target.value.toUpperCase() });
+                          setCouponError('');
+                          setCouponData(null);
+                        }}
+                        className="pl-10"
+                        placeholder="CÓDIGO"
+                        disabled={loading}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => validateCoupon(guestForm.coupon)}
+                      disabled={!guestForm.coupon.trim() || couponValidating || loading}
+                    >
+                      {couponValidating ? 'Validando...' : couponData ? <Check className="w-4 h-4" /> : 'Aplicar'}
+                    </Button>
+                  </div>
+                  {couponError && (
+                    <p className="text-sm text-red-500 mt-1">{couponError}</p>
+                  )}
+                  {couponData && (
+                    <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm text-green-800 font-medium">✓ Cupón aplicado</p>
+                      <p className="text-xs text-green-700 mt-1">
+                        Precio original: ${couponData.original_amount.toFixed(2)} MXN
+                      </p>
+                      <p className="text-xs text-green-700">
+                        Descuento: -${couponData.discount_amount.toFixed(2)} MXN
+                      </p>
+                      <p className="text-sm text-green-800 font-semibold mt-1">
+                        Total a pagar: ${couponData.final_amount.toFixed(2)} MXN
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="flex gap-3 pt-4">
                 <Button
                   type="button"
@@ -231,7 +403,7 @@ export function EventRegistrationModal({
                   disabled={loading || !guestForm.name.trim()}
                   className="flex-1"
                 >
-                  {loading ? 'Registrando...' : 'Registrarse'}
+                  {loading ? 'Procesando...' : requiresPayment ? 'Continuar al Pago' : 'Registrarse'}
                 </Button>
               </div>
             </form>
