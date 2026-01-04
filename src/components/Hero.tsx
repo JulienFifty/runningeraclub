@@ -4,7 +4,11 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { Dumbbell, Calendar, Gift, Handshake, ShoppingBag, Users, Image as ImageIcon, ArrowRight, User } from 'lucide-react';
 const heroImage = '/assets/hero-runners.jpg';
-const heroVideo = '/assets/hero-video.mp4'; // Ruta del video de fondo
+// CDN Cloudinary - Video optimizado con transformaciones automáticas
+// MP4 con optimización automática
+const heroVideoMP4 = 'https://res.cloudinary.com/dhqq37qlu/video/upload/f_auto,q_auto:low,w_1920/v1767493735/Creaci%C3%B3n_de_Video_Din%C3%A1mico_para_Social_Club_lqyunz.mp4';
+// WebM para mejor compresión (navegadores modernos)
+const heroVideoWebM = 'https://res.cloudinary.com/dhqq37qlu/video/upload/f_webm,q_auto:low,w_1920/v1767493735/Creaci%C3%B3n_de_Video_Din%C3%A1mico_para_Social_Club_lqyunz.mp4';
 const logoRunningEra = '/assets/logo-running-era.png';
 
 const categoryItems = [
@@ -56,7 +60,7 @@ export const Hero = () => {
 
   return (
     <section ref={heroRef} id="inicio" className="relative h-screen flex flex-col overflow-hidden">
-      {/* Hero Image with Zoom Effect */}
+      {/* Hero Video/Image with Zoom Effect */}
       <motion.div 
         className="absolute inset-0"
         initial={{ scale: 1.3, opacity: 0 }}
@@ -73,11 +77,12 @@ export const Hero = () => {
         }}
       >
         <motion.video
-          src={heroVideo}
+          poster={heroImage}
           autoPlay
           loop
           muted
           playsInline
+          preload="metadata"
           className="w-full h-full object-cover"
           initial={{ scale: 1.4, filter: "blur(10px)" }}
           animate={{ scale: 1, filter: "blur(0px)" }}
@@ -85,7 +90,18 @@ export const Hero = () => {
             duration: 2,
             ease: [0.25, 0.46, 0.45, 0.94]
           }}
-        />
+        >
+          {/* WebM - Mejor compresión, carga más rápida */}
+          <source src={heroVideoWebM} type="video/webm" />
+          {/* MP4 - Fallback para compatibilidad */}
+          <source src={heroVideoMP4} type="video/mp4" />
+          {/* Fallback a imagen si el video no carga */}
+          <img
+            src={heroImage}
+            alt="Corredores de RUNNING ERA"
+            className="w-full h-full object-cover"
+          />
+        </motion.video>
         <motion.div 
           className="absolute inset-0 bg-black/60"
           initial={{ opacity: 0.8 }}

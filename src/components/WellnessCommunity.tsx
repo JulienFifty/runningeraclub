@@ -3,7 +3,7 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { useRef } from 'react';
-const communityImage = '/assets/community.jpg';
+const communityImage = 'https://res.cloudinary.com/dhqq37qlu/image/upload/v1767493219/dji_mimo_20250614_082516_20250614082516_1749913890434_photo_1_z8o3ko.jpg';
 
 export const WellnessCommunity = () => {
   const sectionRef = useRef<HTMLElement>(null);
@@ -25,25 +25,31 @@ export const WellnessCommunity = () => {
           style={{ opacity, y, scale }}
         >
           {/* Background Image */}
-          <div className="absolute inset-0">
+          <div className="absolute inset-0 overflow-hidden">
             <img
               src={communityImage}
               alt="Comunidad RUNNING ERA"
               className="w-full h-full object-cover"
+              style={{
+                objectPosition: 'center bottom',
+                transform: 'scale(1.4)',
+                width: '100%',
+                height: '100%',
+              }}
               loading="lazy"
             />
-            <motion.div className="absolute inset-0 bg-black/60 border border-gray-300/20" />
+            <motion.div className="absolute inset-0 bg-black/70 border border-gray-300/20" />
           </div>
 
           {/* Content */}
-          <div className="relative px-6 md:px-12 py-8">
-            <div className="max-w-xl">
+          <div className="relative px-8 md:px-16 py-12 md:py-16">
+            <div className="max-w-lg">
               <motion.span
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
-                className="inline-block text-white/70 text-sm italic mb-4"
+                className="inline-block text-white/50 text-xs italic mb-3"
               >
                 Wellness Community
               </motion.span>
@@ -53,7 +59,7 @@ export const WellnessCommunity = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.1 }}
-                className="font-display text-2xl md:text-3xl lg:text-4xl text-white font-bold tracking-wide uppercase leading-tight mb-4"
+                className="font-display text-xl md:text-2xl lg:text-3xl text-white/90 font-bold tracking-wide uppercase leading-tight mb-3"
               >
                 Una Nueva Forma
                 <br />
@@ -65,10 +71,10 @@ export const WellnessCommunity = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="text-white/80 text-sm md:text-base font-light leading-relaxed mb-6"
+                className="text-white/60 text-xs md:text-sm font-light leading-relaxed mb-5"
               >
                 Más que un club de running, somos una{' '}
-                <span className="italic text-white">tribu que transforma vidas</span>.
+                <span className="italic text-white/70">tribu que transforma vidas</span>.
                 {' '}Cada kilómetro compartido construye amistades reales, 
                 cada entrenamiento nos acerca más a nuestra mejor versión.
               </motion.p>
@@ -79,10 +85,10 @@ export const WellnessCommunity = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.3 }}
                 href="#comunidad"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-black text-xs font-medium tracking-wider uppercase transition-all duration-300 hover:bg-white/90 hover:gap-3"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white/90 text-black text-[10px] font-medium tracking-wider uppercase transition-all duration-300 hover:bg-white hover:gap-3"
               >
                 Explora la Comunidad
-                <ArrowRight className="w-3 h-3" />
+                <ArrowRight className="w-2.5 h-2.5" />
               </motion.a>
             </div>
           </div>
