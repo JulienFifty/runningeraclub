@@ -127,7 +127,7 @@
 
 @layer components {
   .container-premium {
-    @apply mx-auto w-full max-w-[1400px] px-6 lg:px-12;
+    @apply mx-auto w-full max-w-[1400px] px-[60px];
   }
 
   .section-padding {

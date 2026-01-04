@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { Dumbbell, Calendar, Gift, Handshake, ShoppingBag, Users, Image as ImageIcon, ArrowRight, User } from 'lucide-react';
 const heroImage = '/assets/hero-runners.jpg';
+const heroVideo = '/assets/hero-video.mp4'; // Ruta del video de fondo
 const logoRunningEra = '/assets/logo-running-era.png';
 
 const categoryItems = [
@@ -71,11 +72,13 @@ export const Hero = () => {
           opacity: { duration: 1.2 }
         }}
       >
-        <motion.img
-          src={heroImage}
-          alt="Corredores de RUNNING ERA al amanecer"
+        <motion.video
+          src={heroVideo}
+          autoPlay
+          loop
+          muted
+          playsInline
           className="w-full h-full object-cover"
-          loading="eager"
           initial={{ scale: 1.4, filter: "blur(10px)" }}
           animate={{ scale: 1, filter: "blur(0px)" }}
           transition={{ 
