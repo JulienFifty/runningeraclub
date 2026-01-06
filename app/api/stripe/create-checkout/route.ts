@@ -127,19 +127,20 @@ export async function POST(request: NextRequest) {
       // Para miembros
       const { data: member } = await supabase
         .from('members')
-        .select('stripe_customer_id, email, first_name, last_name')
+        .select('stripe_customer_id, email, full_name')
         .eq('id', member_id)
         .single();
 
       if (member) {
         customerEmail = member.email;
-        customerName = `${member.first_name} ${member.last_name}`;
+        customerName = member.full_name || member.email?.split('@')[0] || 'Miembro';
 
         if (member.stripe_customer_id) {
-          // Cliente ya existe en Stripe
+          // Cliente ya existe en Stripe - reutilizar para futuros pagos
           stripeCustomerId = member.stripe_customer_id;
+          console.log('✅ Cliente Stripe existente reutilizado:', stripeCustomerId);
         } else {
-          // Crear nuevo cliente en Stripe
+          // Crear nuevo cliente en Stripe y vincularlo al miembro
           const customer = await stripe.customers.create({
             email: member.email,
             name: customerName,
@@ -150,8 +151,9 @@ export async function POST(request: NextRequest) {
           });
 
           stripeCustomerId = customer.id;
+          console.log('✅ Nuevo cliente Stripe creado:', stripeCustomerId);
 
-          // Guardar stripe_customer_id en la BD
+          // Guardar stripe_customer_id en la BD para futuros pagos
           await supabase
             .from('members')
             .update({ stripe_customer_id: customer.id })
