@@ -24,6 +24,15 @@ function LoginContent() {
   const supabase = createClient();
 
   useEffect(() => {
+    // Manejar error de confirmación de email
+    const confirmationError = searchParams?.get('error');
+    if (confirmationError === 'confirmation_failed') {
+      toast.error('Error al confirmar el email', {
+        description: 'El enlace puede haber expirado. Intenta registrarte nuevamente.',
+      });
+      window.history.replaceState({}, '', '/miembros/login');
+    }
+
     // Manejar respuestas de Strava
     const stravaError = searchParams?.get('strava_error');
     const stravaSignup = searchParams?.get('strava_signup');
@@ -61,6 +70,15 @@ function LoginContent() {
       });
 
       if (error) {
+        // Manejar error de email no confirmado
+        if (error.message.includes('Email not confirmed')) {
+          toast.error('Email no confirmado', {
+            description: 'Por favor, revisa tu correo y confirma tu cuenta',
+          });
+          router.push(`/miembros/confirmar-email?email=${encodeURIComponent(email)}`);
+          return;
+        }
+        
         toast.error('Error al iniciar sesión', {
           description: error.message,
         });
@@ -122,26 +140,16 @@ function LoginContent() {
           });
 
         if (profileError) {
-          // Si el perfil ya existe o hay otro error, intentamos continuar
+          console.error('Error al crear perfil:', profileError);
           // El perfil se puede crear después desde el dashboard
-          toast.warning('Cuenta creada, pero hubo un problema al crear el perfil', {
-            description: 'Serás redirigido al dashboard donde podrás completar tu perfil',
-          });
-        } else {
-          toast.success('¡Registro exitoso!', {
-            description: 'Tu cuenta ha sido creada correctamente',
-          });
         }
 
-        // Auto-login después del registro
-        const { data: loginData } = await supabase.auth.signInWithPassword({
-          email,
-          password,
+        // Redirigir a la página de confirmación de email
+        toast.success('¡Registro exitoso!', {
+          description: 'Revisa tu correo para confirmar tu cuenta',
         });
-
-        if (loginData.user) {
-          router.push('/miembros/dashboard');
-        }
+        
+        router.push(`/miembros/confirmar-email?email=${encodeURIComponent(email)}`);
       }
     } catch (error: any) {
       toast.error('Error inesperado', {

@@ -61,6 +61,16 @@ function DashboardContent() {
   useEffect(() => {
     checkAuthAndLoadData();
 
+    // Verificar parámetro de confirmación de email
+    const emailConfirmed = searchParams?.get('email_confirmed');
+    if (emailConfirmed === 'true') {
+      toast.success('¡Email confirmado exitosamente!', {
+        description: 'Bienvenido a RUNNING ERA Club',
+      });
+      // Limpiar URL
+      window.history.replaceState({}, '', '/miembros/dashboard');
+    }
+
     // Verificar parámetros de Strava en la URL
     const stravaConnected = searchParams?.get('strava_connected');
     const stravaError = searchParams?.get('strava_error');
