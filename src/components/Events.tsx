@@ -175,7 +175,7 @@ export const Events = () => {
             {/* Navigation Buttons */}
             <button
               onClick={prevSlide}
-              className="fixed left-2 md:left-4 top-1/2 -translate-y-1/2 z-20 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 p-2 md:p-3 transition-all duration-300 rounded-full"
+              className="absolute -left-4 md:-left-8 top-1/2 -translate-y-1/2 z-20 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 p-2 md:p-3 transition-all duration-300 rounded-full"
               aria-label="Anterior"
             >
               <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-white" />
@@ -183,7 +183,7 @@ export const Events = () => {
             
             <button
               onClick={nextSlide}
-              className="fixed right-2 md:right-4 top-1/2 -translate-y-1/2 z-20 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 p-2 md:p-3 transition-all duration-300 rounded-full"
+              className="absolute -right-4 md:-right-8 top-1/2 -translate-y-1/2 z-20 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 p-2 md:p-3 transition-all duration-300 rounded-full"
               aria-label="Siguiente"
             >
               <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-white" />
