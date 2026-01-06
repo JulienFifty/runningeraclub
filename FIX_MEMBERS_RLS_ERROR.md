@@ -20,7 +20,15 @@ Esto sucede porque:
 
 ---
 
-## ✅ SOLUCIÓN: Ejecutar Script SQL
+## ⚠️ PROBLEMA ADICIONAL: Políticas Duplicadas
+
+Si ves políticas duplicadas en la tabla (algunas con `roles: {public}` y otras con `roles: {authenticated}`), necesitas limpiarlas primero.
+
+**Ejecuta PRIMERO el script de limpieza**, luego el script de creación.
+
+---
+
+## ✅ SOLUCIÓN: Ejecutar Scripts SQL
 
 ### **PASO 1: Abrir SQL Editor en Supabase**
 
@@ -30,7 +38,23 @@ Esto sucede porque:
 
 ---
 
-### **PASO 2: Ejecutar el Script**
+### **PASO 2: Limpiar Políticas Duplicadas (SI HAY DUPLICADAS)**
+
+Si ves políticas duplicadas (como en la imagen que compartiste):
+
+1. **Abre el archivo**: `supabase/cleanup-duplicate-rls-policies.sql`
+
+2. **Copia TODO el contenido** del archivo
+
+3. **Pega en el SQL Editor** de Supabase
+
+4. Click en el botón **"Run"**
+
+5. **Verifica**: Deberías ver solo 4 políticas después
+
+---
+
+### **PASO 3: Crear Políticas Correctas**
 
 1. **Abre el archivo**: `supabase/fix-members-rls-policies.sql`
 
