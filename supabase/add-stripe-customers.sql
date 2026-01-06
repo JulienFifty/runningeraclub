@@ -16,3 +16,4 @@ COMMENT ON COLUMN attendees.stripe_customer_id IS 'ID del cliente en Stripe para
 
 
 
+

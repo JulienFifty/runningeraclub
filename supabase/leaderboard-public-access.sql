@@ -21,3 +21,4 @@ CREATE POLICY "Public can view Strava activities for leaderboard" ON strava_acti
 
 
 
+

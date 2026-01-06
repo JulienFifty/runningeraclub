@@ -76,3 +76,4 @@ Verifica que las políticas RLS se hayan creado correctamente en Storage > Polic
 ### Las imágenes no se muestran
 Verifica que el bucket `avatars` esté marcado como **Público**
 
+
