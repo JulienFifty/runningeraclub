@@ -8,6 +8,10 @@ import { Calendar, MapPin, Clock, Route, TrendingUp, Users, DollarSign, CheckCir
 import Link from 'next/link';
 import { EventRegistrationButton } from '@/components/EventRegistrationButton';
 
+// Forzar renderizado dinámico para obtener datos actualizados
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface PageProps {
   params: Promise<{
     slug: string;
@@ -23,8 +27,8 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  // Usar cliente estático para generateMetadata (no tiene contexto de request)
-  const event = await getEventBySlug(slug, true);
+  // Obtener datos dinámicos actualizados
+  const event = await getEventBySlug(slug);
 
   if (!event) {
     return {
@@ -45,8 +49,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function EventPage({ params }: PageProps) {
   const { slug } = await params;
-  // Usar cliente estático para evitar problemas con cookies en build time
-  const event = await getEventBySlug(slug, true);
+  // Obtener datos actualizados directamente de Supabase
+  const event = await getEventBySlug(slug);
 
   if (!event) {
     notFound();
