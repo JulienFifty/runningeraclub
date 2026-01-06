@@ -8,8 +8,7 @@ export async function GET(request: Request) {
   const next = requestUrl.searchParams.get('next') || '/miembros/dashboard';
 
   if (code) {
-    const cookieStore = cookies();
-    const supabase = createClient();
+    const supabase = await createClient();
     
     // Intercambiar el código por una sesión
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
