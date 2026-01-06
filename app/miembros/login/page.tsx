@@ -187,24 +187,9 @@ function LoginContent() {
       }
 
       if (authData.user) {
-        // Crear perfil de miembro
-        const { error: profileError } = await supabase
-          .from('members')
-          .insert({
-            id: authData.user.id,
-            email: email,
-            full_name: fullName,
-            phone: phone || null,
-            instagram: instagram || null,
-            membership_type: 'regular',
-            membership_status: 'active',
-          });
-
-        if (profileError) {
-          console.error('Error al crear perfil:', profileError);
-          // El perfil se puede crear después desde el dashboard
-        }
-
+        // El perfil se creará automáticamente cuando el usuario confirme su email
+        // mediante un trigger en la base de datos (ver: create-member-profile-trigger.sql)
+        
         // Redirigir a la página de confirmación de email
         toast.success('¡Registro exitoso!', {
           description: 'Revisa tu correo para confirmar tu cuenta',
