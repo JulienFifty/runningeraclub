@@ -80,12 +80,20 @@ export async function POST(request: Request) {
 
       console.log('👥 Member created:', { newMember, createError });
 
-      if (createError) {
+      if (createError || !newMember) {
+        console.error('❌ Failed to create member profile:', createError);
         return NextResponse.json(
-          { error: 'Error al crear perfil de miembro', details: createError.message },
+          { 
+            error: 'Error al crear perfil de miembro', 
+            details: createError?.message || 'No se pudo crear el perfil. Por favor intenta de nuevo.'
+          },
           { status: 500 }
         );
       }
+
+      // Actualizar la variable member para usar el perfil recién creado
+      member = newMember;
+      console.log('✅ Member profile created successfully, proceeding with registration');
     }
 
     // Verificar si ya está registrado

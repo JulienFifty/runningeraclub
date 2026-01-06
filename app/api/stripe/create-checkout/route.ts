@@ -125,19 +125,64 @@ export async function POST(request: NextRequest) {
 
     if (member_id) {
       // Para miembros
-      const { data: member, error: memberError } = await supabase
+      let member = null;
+      let memberError = null;
+      
+      // Intentar obtener el miembro
+      const memberResult = await supabase
         .from('members')
         .select('stripe_customer_id, email, full_name')
         .eq('id', member_id)
         .maybeSingle();
+      
+      member = memberResult.data;
+      memberError = memberResult.error;
 
       console.log('👤 Member lookup:', { member_id, found: !!member, error: memberError });
 
+      // Si el miembro no existe, intentar crearlo (fallback adicional)
       if (!member) {
-        return NextResponse.json(
-          { error: 'Perfil de miembro no encontrado. Por favor recarga la página e intenta de nuevo.' },
-          { status: 404 }
-        );
+        console.log('⚠️ Member not found in Stripe checkout, attempting to create profile...');
+        
+        // Obtener datos del usuario autenticado
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError || !user) {
+          return NextResponse.json(
+            { error: 'No se pudo obtener información del usuario autenticado' },
+            { status: 401 }
+          );
+        }
+
+        // Crear perfil del miembro
+        const { data: newMember, error: createError } = await supabase
+          .from('members')
+          .insert({
+            id: member_id,
+            email: user.email || '',
+            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Miembro',
+            phone: user.user_metadata?.phone || null,
+            instagram: user.user_metadata?.instagram || null,
+            membership_type: 'regular',
+            membership_status: 'active',
+          })
+          .select('stripe_customer_id, email, full_name')
+          .single();
+
+        console.log('👥 Member created in Stripe checkout:', { newMember, createError });
+
+        if (createError || !newMember) {
+          console.error('❌ Failed to create member profile:', createError);
+          return NextResponse.json(
+            { 
+              error: 'Error al crear perfil de miembro', 
+              details: createError?.message || 'No se pudo crear el perfil'
+            },
+            { status: 500 }
+          );
+        }
+
+        member = newMember;
       }
 
       if (member) {
