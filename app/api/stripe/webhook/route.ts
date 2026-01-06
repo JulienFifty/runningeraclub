@@ -75,16 +75,26 @@ export async function POST(request: NextRequest) {
               .eq('id', attendee_id);
           } else if (member_id) {
             // Actualizar event_registration
-            await supabase
+            const { data: updateData, error: updateError } = await supabase
               .from('event_registrations')
               .update({
                 payment_status: 'paid',
+                status: 'confirmed',
                 stripe_session_id: session.id,
                 stripe_payment_intent_id: session.payment_intent as string,
                 amount_paid: session.amount_total ? session.amount_total / 100 : 0,
+                currency: session.currency || 'mxn',
+                payment_method: session.payment_method_types?.[0] || 'card',
               })
               .eq('member_id', member_id)
-              .eq('event_id', event_id);
+              .eq('event_id', event_id)
+              .select();
+
+            if (updateError) {
+              console.error('Error updating event registration:', updateError);
+            } else {
+              console.log('✅ Event registration updated successfully:', updateData);
+            }
           }
         }
         break;
