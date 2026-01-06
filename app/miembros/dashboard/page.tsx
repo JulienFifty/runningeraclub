@@ -185,7 +185,8 @@ function DashboardContent() {
             date,
             location,
             image,
-            category
+            category,
+            price
           )
         `)
         .eq('member_id', user.id)
@@ -194,15 +195,26 @@ function DashboardContent() {
       if (registrationsError) {
         // Error al cargar registros, pero no bloqueamos la vista
       } else if (registrationsData) {
-        // Transformar los datos para asegurar que event sea un objeto, no un array
-        const transformedRegistrations = registrationsData.map((reg: any) => ({
-          id: reg.id,
-          event_id: reg.event_id,
-          registration_date: reg.registration_date,
-          status: reg.status,
-          payment_status: reg.payment_status,
-          event: Array.isArray(reg.event) ? reg.event[0] : reg.event,
-        })).filter((reg: any) => reg.event); // Filtrar registros sin evento
+        // Transformar los datos y filtrar solo registros con pago completado o eventos gratuitos
+        const transformedRegistrations = registrationsData
+          .map((reg: any) => ({
+            id: reg.id,
+            event_id: reg.event_id,
+            registration_date: reg.registration_date,
+            status: reg.status,
+            payment_status: reg.payment_status,
+            event: Array.isArray(reg.event) ? reg.event[0] : reg.event,
+          }))
+          .filter((reg: any) => {
+            if (!reg.event) return false;
+            
+            // Verificar si el evento es gratuito
+            const price = reg.event.price?.toString().toLowerCase();
+            const isFreeEvent = !price || price === 'gratis' || price === '0' || price === 'free';
+            
+            // Solo mostrar si está pagado o es gratuito
+            return reg.payment_status === 'paid' || isFreeEvent;
+          });
         
         setRegistrations(transformedRegistrations);
       }

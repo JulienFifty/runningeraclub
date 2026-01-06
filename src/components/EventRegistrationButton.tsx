@@ -42,7 +42,7 @@ export function EventRegistrationButton({ eventId, buttonText, eventTitle = 'Eve
       // Verificar si ya está registrado (tanto en event_registrations como en attendees)
       const registrationResult = await supabase
         .from('event_registrations')
-        .select('id, status')
+        .select('id, status, payment_status')
         .eq('member_id', user.id)
         .eq('event_id', eventId)
         .single();
@@ -54,8 +54,17 @@ export function EventRegistrationButton({ eventId, buttonText, eventTitle = 'Eve
         .eq('email', user.email || '')
         .single();
 
-      // Verificar si alguna query tuvo éxito
-      if (registrationResult.data || attendeeResult.data) {
+      // Solo considerar registrado si:
+      // 1. El pago está completado (payment_status = 'paid')
+      // 2. O es un evento gratuito (eventPrice = 'gratis' o '0')
+      // 3. O está en la tabla de attendees
+      const hasValidRegistration = registrationResult.data && 
+        (registrationResult.data.payment_status === 'paid' || 
+         !eventPrice || 
+         eventPrice.toLowerCase() === 'gratis' || 
+         eventPrice === '0');
+
+      if (hasValidRegistration || attendeeResult.data) {
         setIsRegistered(true);
       }
     } catch (error) {
