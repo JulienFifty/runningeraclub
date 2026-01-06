@@ -54,17 +54,38 @@ export async function POST(request: Request) {
     // Verificar si el miembro ya existe en la tabla members
     const { data: member, error: memberError } = await supabase
       .from('members')
-      .select('id')
+      .select('id, email, full_name')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
 
     console.log('👥 Member check:', { member, memberError });
 
-    if (memberError || !member) {
-      return NextResponse.json(
-        { error: 'Miembro no encontrado. Por favor completa tu perfil primero.' },
-        { status: 404 }
-      );
+    // Si el miembro no existe, intentar crearlo (fallback si el trigger falló)
+    if (!member) {
+      console.log('⚠️ Member not found, creating profile...');
+      
+      const { data: newMember, error: createError } = await supabase
+        .from('members')
+        .insert({
+          id: user.id,
+          email: user.email || '',
+          full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Miembro',
+          phone: user.user_metadata?.phone || null,
+          instagram: user.user_metadata?.instagram || null,
+          membership_type: 'regular',
+          membership_status: 'active',
+        })
+        .select('id, email, full_name')
+        .single();
+
+      console.log('👥 Member created:', { newMember, createError });
+
+      if (createError) {
+        return NextResponse.json(
+          { error: 'Error al crear perfil de miembro', details: createError.message },
+          { status: 500 }
+        );
+      }
     }
 
     // Verificar si ya está registrado
@@ -73,7 +94,7 @@ export async function POST(request: Request) {
       .select('id')
       .eq('member_id', user.id)
       .eq('event_id', event_id)
-      .single();
+      .maybeSingle();
 
     console.log('✅ Registration check:', { existingRegistration });
 
