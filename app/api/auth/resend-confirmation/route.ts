@@ -6,6 +6,7 @@ export async function POST(request: Request) {
     const { email } = await request.json();
 
     if (!email) {
+      console.error('❌ Email no proporcionado');
       return NextResponse.json(
         { error: 'Email es requerido' },
         { status: 400 }
@@ -14,12 +15,19 @@ export async function POST(request: Request) {
 
     const supabase = await createClient();
 
+    // Log del intento
+    console.log('👤 Intentando reenviar para:', { email });
+
     // Reenviar email de confirmación con URL de callback configurada
     const redirectUrl = `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/auth/callback`;
     
-    console.log('📧 Reenviando email de confirmación:', { email, redirectUrl });
+    console.log('📧 Intentando reenviar email:', { 
+      email, 
+      redirectUrl,
+      timestamp: new Date().toISOString()
+    });
     
-    const { error } = await supabase.auth.resend({
+    const { data, error } = await supabase.auth.resend({
       type: 'signup',
       email: email,
       options: {
@@ -27,24 +35,62 @@ export async function POST(request: Request) {
       },
     });
     
-    console.log('📧 Resultado de reenvío:', { error: error?.message });
+    console.log('📧 Respuesta de Supabase:', { 
+      success: !error,
+      data,
+      error: error?.message,
+      errorDetails: error
+    });
 
     if (error) {
-      console.error('Error al reenviar email:', error);
+      console.error('❌ Error al reenviar email:', {
+        message: error.message,
+        status: error.status,
+        code: error.code,
+        fullError: error
+      });
+      
+      // Mensajes más descriptivos según el error
+      if (error.message?.includes('rate limit') || error.message?.includes('too many')) {
+        return NextResponse.json(
+          { 
+            error: 'Demasiados intentos. Espera 60 segundos antes de reenviar.',
+            code: 'RATE_LIMIT'
+          },
+          { status: 429 }
+        );
+      }
+      
+      if (error.message?.includes('already confirmed')) {
+        return NextResponse.json(
+          { 
+            error: 'Este email ya está confirmado. Intenta iniciar sesión.',
+            code: 'ALREADY_CONFIRMED'
+          },
+          { status: 400 }
+        );
+      }
+      
       return NextResponse.json(
-        { error: error.message },
+        { error: error.message, code: error.code || 'UNKNOWN' },
         { status: 400 }
       );
     }
 
+    console.log('✅ Email reenviado exitosamente:', { email, timestamp: new Date().toISOString() });
+    
     return NextResponse.json({
       success: true,
-      message: 'Email de confirmación reenviado exitosamente',
+      message: 'Email de confirmación reenviado exitosamente. Revisa tu bandeja (y spam) en 2-5 minutos.',
     });
   } catch (error: any) {
-    console.error('Error en resend-confirmation:', error);
+    console.error('💥 Error inesperado en resend-confirmation:', {
+      message: error.message,
+      stack: error.stack,
+      error
+    });
     return NextResponse.json(
-      { error: 'Error al procesar la solicitud' },
+      { error: 'Error al procesar la solicitud', details: error.message },
       { status: 500 }
     );
   }
