@@ -21,9 +21,9 @@ export default function Home() {
       <Hero />
       <WellnessCommunity />
       <Events />
+      <Community />
       <LeaderboardsSection />
       <WhyChooseUs />
-      <Community />
       <Gallery />
       <Testimonials />
       <Contact />
