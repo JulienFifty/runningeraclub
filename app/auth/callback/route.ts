@@ -5,7 +5,9 @@ import { cookies } from 'next/headers';
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
-  const next = requestUrl.searchParams.get('next') || '/miembros/dashboard';
+  const next = requestUrl.searchParams.get('next') || '/cuenta-confirmada';
+  const eventSlug = requestUrl.searchParams.get('event_slug');
+  const eventTitle = requestUrl.searchParams.get('event_title');
 
   if (code) {
     const supabase = await createClient();
@@ -34,10 +36,18 @@ export async function GET(request: Request) {
         });
       }
 
-      // Redirigir al dashboard con un mensaje de éxito
-      return NextResponse.redirect(
-        new URL(`${next}?email_confirmed=true`, requestUrl.origin)
-      );
+      // Construir URL de redirección con contexto del evento
+      let redirectUrl = new URL(next, requestUrl.origin);
+      redirectUrl.searchParams.set('email_confirmed', 'true');
+      
+      if (eventSlug) {
+        redirectUrl.searchParams.set('event', eventSlug);
+      }
+      if (eventTitle) {
+        redirectUrl.searchParams.set('event_title', eventTitle);
+      }
+
+      return NextResponse.redirect(redirectUrl);
     }
   }
 
