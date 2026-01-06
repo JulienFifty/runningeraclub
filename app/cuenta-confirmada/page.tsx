@@ -31,6 +31,7 @@ function CuentaConfirmadaContent() {
   const [event, setEvent] = useState<Event | null>(null);
   const [loadingEvent, setLoadingEvent] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
@@ -46,13 +47,18 @@ function CuentaConfirmadaContent() {
           setLoadingEvent(true);
           
           // Cargar información completa del evento
-          const { data: eventData, error } = await supabase
+          const { data: eventData, error: eventError } = await supabase
             .from('events')
             .select('*')
             .eq('slug', slug)
             .single();
 
-          if (!error && eventData && isMounted) {
+          if (eventError) {
+            console.error('Error loading event:', eventError);
+            if (isMounted) {
+              setError('No se pudo cargar la información del evento');
+            }
+          } else if (eventData && isMounted) {
             setEvent(eventData);
           }
           
@@ -70,6 +76,7 @@ function CuentaConfirmadaContent() {
       } catch (error) {
         console.error('Error loading event data:', error);
         if (isMounted) {
+          setError('Ocurrió un error al cargar los datos');
           setLoading(false);
           setLoadingEvent(false);
         }
@@ -129,6 +136,12 @@ function CuentaConfirmadaContent() {
                 Tu email ha sido verificado exitosamente.
               </p>
 
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-600">{error}</p>
+                </div>
+              )}
+
               {eventSlug && event ? (
                 <>
                   {/* Event Card */}
@@ -162,18 +175,32 @@ function CuentaConfirmadaContent() {
                         
                         <div className="space-y-2">
                           {/* Date */}
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Calendar className="w-4 h-4" />
-                            <span>
-                              {format(new Date(event.date), "d 'de' MMMM, yyyy", { locale: es })}
-                            </span>
-                          </div>
+                          {event.date && (
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <Calendar className="w-4 h-4" />
+                              <span>
+                                {(() => {
+                                  try {
+                                    const eventDate = new Date(event.date);
+                                    if (isNaN(eventDate.getTime())) {
+                                      return event.date; // Mostrar la fecha tal cual si no es válida
+                                    }
+                                    return format(eventDate, "d 'de' MMMM, yyyy", { locale: es });
+                                  } catch (error) {
+                                    return event.date; // Fallback en caso de error
+                                  }
+                                })()}
+                              </span>
+                            </div>
+                          )}
                           
                           {/* Location */}
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <MapPin className="w-4 h-4" />
-                            <span>{event.location}</span>
-                          </div>
+                          {event.location && (
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <MapPin className="w-4 h-4" />
+                              <span>{event.location}</span>
+                            </div>
+                          )}
                           
                           {/* Price */}
                           {event.price && (
