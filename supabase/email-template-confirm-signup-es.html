@@ -1,0 +1,178 @@
+<!-- Email de Confirmación de Cuenta - RUNNING ERA Club -->
+<!-- Para usar en Supabase: Authentication > Email Templates > Confirm signup -->
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>Confirma tu cuenta - RUNNING ERA</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+    .email-wrapper {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+    }
+    .header {
+      background-color: #000000;
+      padding: 40px 20px;
+      text-align: center;
+    }
+    .header h1 {
+      color: #ffffff;
+      margin: 0;
+      font-size: 32px;
+      font-weight: 300;
+      letter-spacing: 2px;
+    }
+    .content {
+      padding: 40px 30px;
+    }
+    .content h2 {
+      color: #000000;
+      font-size: 24px;
+      font-weight: 600;
+      margin: 0 0 20px 0;
+    }
+    .content p {
+      color: #666666;
+      font-size: 16px;
+      line-height: 1.6;
+      margin: 0 0 20px 0;
+    }
+    .button-container {
+      text-align: center;
+      margin: 40px 0;
+    }
+    .button {
+      display: inline-block;
+      background-color: #000000;
+      color: #ffffff !important;
+      text-decoration: none;
+      padding: 16px 40px;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+    .button:hover {
+      background-color: #333333;
+    }
+    .info-box {
+      background-color: #f8f8f8;
+      border-left: 4px solid #000000;
+      padding: 20px;
+      margin: 30px 0;
+    }
+    .info-box p {
+      margin: 0;
+      font-size: 14px;
+      color: #666666;
+    }
+    .footer {
+      background-color: #f8f8f8;
+      padding: 30px;
+      text-align: center;
+      border-top: 1px solid #e0e0e0;
+    }
+    .footer p {
+      color: #999999;
+      font-size: 14px;
+      margin: 5px 0;
+    }
+    .footer a {
+      color: #000000;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .social-links {
+      margin: 20px 0;
+    }
+    .social-links a {
+      display: inline-block;
+      margin: 0 10px;
+      color: #666666;
+      text-decoration: none;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-wrapper">
+    <!-- Header -->
+    <div class="header">
+      <h1>RUNNING ERA</h1>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <h2>¡Bienvenido a RUNNING ERA Club! 🎉</h2>
+      
+      <p>Hola,</p>
+      
+      <p>Gracias por registrarte en <strong>RUNNING ERA</strong>, tu comunidad de running y bienestar.</p>
+      
+      <p>Para completar tu registro y acceder a todos los beneficios del club, necesitamos confirmar tu dirección de correo electrónico.</p>
+
+      <!-- Call to Action Button -->
+      <div class="button-container">
+        <a href="{{ .ConfirmationURL }}" class="button">
+          CONFIRMAR MI EMAIL
+        </a>
+      </div>
+
+      <!-- Info Box -->
+      <div class="info-box">
+        <p><strong>¿El botón no funciona?</strong></p>
+        <p>Copia y pega este enlace en tu navegador:</p>
+        <p style="word-break: break-all; color: #000000; margin-top: 10px;">
+          {{ .ConfirmationURL }}
+        </p>
+      </div>
+
+      <p style="margin-top: 30px;">Una vez confirmado tu email, podrás:</p>
+      
+      <ul style="color: #666666; font-size: 16px; line-height: 1.8;">
+        <li>Registrarte en eventos y carreras exclusivas</li>
+        <li>Acceder a tu dashboard personalizado</li>
+        <li>Conectar con Strava</li>
+        <li>Ver el leaderboard de la comunidad</li>
+        <li>Disfrutar de beneficios exclusivos</li>
+      </ul>
+
+      <p style="margin-top: 30px; font-size: 14px; color: #999999;">
+        <strong>Nota:</strong> Este enlace expira en 24 horas. Si no solicitaste esta cuenta, puedes ignorar este correo de forma segura.
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p style="margin-bottom: 15px;">
+        ¿Necesitas ayuda? 
+        <a href="mailto:support@runningeraclub.com">Contáctanos</a>
+      </p>
+      
+      <div class="social-links">
+        <a href="https://www.instagram.com/runningeraclub">Instagram</a>
+        <a href="https://runningeraclub.com">Sitio Web</a>
+      </div>
+      
+      <p style="margin-top: 20px; font-size: 12px;">
+        © {{ .CurrentYear }} RUNNING ERA Club. Todos los derechos reservados.
+      </p>
+      
+      <p style="font-size: 12px; color: #999999; margin-top: 15px;">
+        CDMX, México
+      </p>
+    </div>
+  </div>
+</body>
+</html>
+
