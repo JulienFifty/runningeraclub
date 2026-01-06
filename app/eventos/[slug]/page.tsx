@@ -236,7 +236,17 @@ export default async function EventPage({ params }: PageProps) {
                   {event.price && (
                     <div>
                       <p className="text-sm text-muted-foreground uppercase tracking-wider mb-2">Precio</p>
-                      <p className="text-2xl font-display text-foreground">{event.price}</p>
+                      <p className="text-2xl font-display text-foreground">
+                        {(() => {
+                          const priceStr = event.price.toString().toLowerCase();
+                          // Si es "gratis" o ya tiene "$", no agregar nada
+                          if (priceStr === 'gratis' || priceStr.includes('$')) {
+                            return event.price;
+                          }
+                          // Si es solo un número, agregar "$"
+                          return `$${event.price}`;
+                        })()}
+                      </p>
                     </div>
                   )}
 

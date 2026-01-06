@@ -15,9 +15,9 @@ interface Event {
   shortDescription: string;
   image: string;
   buttonText: 'REGÍSTRATE' | 'VER EVENTO';
-  price?: string;
-  category?: string;
-  spots_available?: number;
+  price?: string | null;
+  category?: string | null;
+  spots_available?: number | null;
 }
 
 export const Events = () => {
@@ -237,14 +237,16 @@ export const Events = () => {
                               </span>
                             </div>
                             
-                            {/* Price Badge */}
-                            {event.price && (
+                            {/* Spots Available Badge */}
+                            {event.spots_available !== null && event.spots_available !== undefined && (
                               <div className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold shadow-sm ${
-                                event.price.toLowerCase() === 'gratis' || event.price === '$0'
+                                event.spots_available > 10 
                                   ? 'bg-green-500 text-white'
-                                  : 'bg-black text-white'
+                                  : event.spots_available > 0 
+                                    ? 'bg-orange-500 text-white'
+                                    : 'bg-red-500 text-white'
                               }`}>
-                                {event.price.toLowerCase() === 'gratis' ? 'GRATIS' : event.price}
+                                {event.spots_available > 0 ? `${event.spots_available}` : 'AGOTADO'}
                               </div>
                             )}
                           </div>
@@ -253,7 +255,13 @@ export const Events = () => {
                           {event.category && (
                             <div className="absolute bottom-4 left-4">
                               <span className="inline-block bg-white backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-semibold text-black uppercase tracking-wider shadow-sm">
-                                {event.category}
+                                {(() => {
+                                  // Limpiar la categoría: eliminar precio si está incluido
+                                  let cleanCategory = event.category;
+                                  // Eliminar cualquier texto que incluya " - $" o "- $" o precio
+                                  cleanCategory = cleanCategory.split(' - $')[0].split('- $')[0].split(' $')[0];
+                                  return cleanCategory.trim();
+                                })()}
                               </span>
                             </div>
                           )}
@@ -271,24 +279,42 @@ export const Events = () => {
                             {event.shortDescription}
                           </p>
 
-                          {/* Location & Spots */}
-                          <div className="flex items-center justify-between mb-4 pb-4 border-b border-border">
-                            <p className="text-muted-foreground/70 text-xs tracking-wider uppercase">
-                              {event.location}
-                            </p>
+                          {/* Location & Price/Spots */}
+                          <div className="space-y-2 mb-4 pb-4 border-b border-border">
+                            <div className="flex items-center justify-between">
+                              <p className="text-muted-foreground/70 text-xs tracking-wider uppercase">
+                                {event.location}
+                              </p>
+                              {event.price && (
+                                <span className="text-lg font-bold text-black">
+                                  {(() => {
+                                    const priceStr = event.price.toString().toLowerCase();
+                                    if (priceStr === 'gratis') {
+                                      return 'GRATIS';
+                                    }
+                                    if (priceStr.includes('$')) {
+                                      return event.price;
+                                    }
+                                    return `$${event.price}`;
+                                  })()}
+                                </span>
+                              )}
+                            </div>
                             {event.spots_available !== undefined && event.spots_available !== null && (
-                              <span className={`text-xs font-medium ${
-                                event.spots_available > 10 
-                                  ? 'text-green-600' 
-                                  : event.spots_available > 0 
-                                    ? 'text-orange-600' 
-                                    : 'text-red-600'
-                              }`}>
-                                {event.spots_available > 0 
-                                  ? `${event.spots_available} cupos` 
-                                  : 'Agotado'
-                                }
-                              </span>
+                              <div className="flex items-center justify-end">
+                                <span className={`text-xs font-medium ${
+                                  event.spots_available > 10 
+                                    ? 'text-green-600' 
+                                    : event.spots_available > 0 
+                                      ? 'text-orange-600' 
+                                      : 'text-red-600'
+                                }`}>
+                                  {event.spots_available > 0 
+                                    ? `${event.spots_available} cupos disponibles` 
+                                    : 'Agotado'
+                                  }
+                                </span>
+                              </div>
                             )}
                           </div>
 
