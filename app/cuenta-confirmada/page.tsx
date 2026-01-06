@@ -2,32 +2,64 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { CheckCircle, Loader2, ArrowRight } from 'lucide-react';
+import { CheckCircle, Loader2, ArrowRight, Calendar, MapPin, DollarSign } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 // Forzar renderizado dinámico
 export const dynamic = 'force-dynamic';
+
+interface Event {
+  id: string;
+  slug: string;
+  title: string;
+  date: string;
+  location: string;
+  image: string;
+  price: string;
+  category: string;
+  description?: string;
+}
 
 function CuentaConfirmadaContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [eventSlug, setEventSlug] = useState<string | null>(null);
-  const [eventTitle, setEventTitle] = useState<string>('');
+  const [event, setEvent] = useState<Event | null>(null);
+  const [loadingEvent, setLoadingEvent] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
-    const slug = searchParams?.get('event');
-    const title = searchParams?.get('event_title');
-    
-    if (slug) {
-      setEventSlug(slug);
-      setEventTitle(title || '');
-    }
+    const loadEventData = async () => {
+      // Buscar event_slug en los parámetros (puede venir como 'event' o 'event_slug')
+      const slug = searchParams?.get('event_slug') || searchParams?.get('event');
+      
+      if (slug) {
+        setEventSlug(slug);
+        setLoadingEvent(true);
+        
+        // Cargar información completa del evento
+        const { data: eventData, error } = await supabase
+          .from('events')
+          .select('*')
+          .eq('slug', slug)
+          .single();
 
-    setTimeout(() => setLoading(false), 1500);
+        if (!error && eventData) {
+          setEvent(eventData);
+        }
+        
+        setLoadingEvent(false);
+      }
+
+      setTimeout(() => setLoading(false), 1500);
+    };
+
+    loadEventData();
   }, [searchParams]);
 
   const handleContinueToEvent = () => {
@@ -75,22 +107,74 @@ function CuentaConfirmadaContent() {
                 Tu email ha sido verificado exitosamente.
               </p>
 
-              {eventSlug ? (
+              {eventSlug && event ? (
                 <>
-                  {/* Continue to Event */}
-                  <div className="bg-muted/50 border border-border rounded-lg p-4 mb-6">
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Ahora puedes continuar con tu registro en:
+                  {/* Event Card */}
+                  <div className="mb-6">
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Continúa con tu registro en:
                     </p>
-                    <p className="text-foreground font-semibold">
-                      {eventTitle || 'el evento que seleccionaste'}
-                    </p>
+                    
+                    <div className="bg-white border border-border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">
+                      {/* Event Image */}
+                      {event.image && (
+                        <div className="relative h-40 overflow-hidden">
+                          <img
+                            src={event.image}
+                            alt={event.title}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute top-3 left-3">
+                            <span className="inline-block bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-black uppercase">
+                              {event.category?.replace(/_/g, ' ')}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Event Info */}
+                      <div className="p-4 text-left">
+                        <h3 className="font-display text-lg font-bold text-black mb-3 leading-tight">
+                          {event.title}
+                        </h3>
+                        
+                        <div className="space-y-2">
+                          {/* Date */}
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Calendar className="w-4 h-4" />
+                            <span>
+                              {format(new Date(event.date), "d 'de' MMMM, yyyy", { locale: es })}
+                            </span>
+                          </div>
+                          
+                          {/* Location */}
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <MapPin className="w-4 h-4" />
+                            <span>{event.location}</span>
+                          </div>
+                          
+                          {/* Price */}
+                          {event.price && (
+                            <div className="flex items-center gap-2 text-sm font-semibold text-black">
+                              <DollarSign className="w-4 h-4" />
+                              <span className="text-lg">
+                                {event.price.toLowerCase() === 'gratis' 
+                                  ? 'GRATIS' 
+                                  : event.price.includes('$') 
+                                    ? event.price 
+                                    : `$${event.price}`}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <button
                     onClick={handleContinueToEvent}
                     disabled={isRegistering}
-                    className="w-full bg-primary text-primary-foreground py-4 rounded-lg hover:bg-primary/90 transition-colors font-medium flex items-center justify-center gap-2 mb-4"
+                    className="w-full bg-black text-white py-4 rounded-lg hover:bg-black/90 transition-colors font-medium flex items-center justify-center gap-2 mb-4"
                   >
                     {isRegistering ? (
                       <>
@@ -99,7 +183,7 @@ function CuentaConfirmadaContent() {
                       </>
                     ) : (
                       <>
-                        Continuar con el Registro
+                        Seguir con mi Registro
                         <ArrowRight className="w-5 h-5" />
                       </>
                     )}
@@ -111,6 +195,16 @@ function CuentaConfirmadaContent() {
                   >
                     O ir al dashboard →
                   </Link>
+                </>
+              ) : eventSlug && loadingEvent ? (
+                <>
+                  {/* Loading Event */}
+                  <div className="flex flex-col items-center justify-center py-8">
+                    <Loader2 className="w-8 h-8 text-primary animate-spin mb-2" />
+                    <p className="text-sm text-muted-foreground">
+                      Cargando información del evento...
+                    </p>
+                  </div>
                 </>
               ) : (
                 <>

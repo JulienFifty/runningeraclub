@@ -9,12 +9,13 @@ import { EventRegistrationModal } from '@/components/EventRegistrationModal';
 
 interface EventRegistrationButtonProps {
   eventId: string;
+  eventSlug?: string;
   buttonText: 'REGÍSTRATE' | 'VER EVENTO';
   eventTitle?: string;
   eventPrice?: string;
 }
 
-export function EventRegistrationButton({ eventId, buttonText, eventTitle = 'Evento', eventPrice }: EventRegistrationButtonProps) {
+export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventTitle = 'Evento', eventPrice }: EventRegistrationButtonProps) {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
@@ -166,6 +167,7 @@ export function EventRegistrationButton({ eventId, buttonText, eventTitle = 'Eve
         </button>
         <EventRegistrationModal
           eventId={eventId}
+          eventSlug={eventSlug}
           eventTitle={eventTitle}
           eventPrice={eventPrice}
           isOpen={modalOpen}

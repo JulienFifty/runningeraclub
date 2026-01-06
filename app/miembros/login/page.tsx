@@ -106,11 +106,25 @@ function LoginContent() {
 
     try {
       // Crear usuario en Supabase Auth
+      // Capturar información del evento desde los query parameters si existe
+      const searchParams = new URLSearchParams(window.location.search);
+      const eventSlug = searchParams.get('event_slug');
+      const eventTitle = searchParams.get('event_title');
+      
+      // Construir emailRedirectTo con contexto del evento
+      let redirectUrl = `${window.location.origin}/auth/callback`;
+      if (eventSlug) {
+        const callbackParams = new URLSearchParams();
+        callbackParams.set('event_slug', eventSlug);
+        if (eventTitle) callbackParams.set('event_title', eventTitle);
+        redirectUrl += `?${callbackParams.toString()}`;
+      }
+
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: redirectUrl,
           data: {
             full_name: fullName,
             phone: phone,

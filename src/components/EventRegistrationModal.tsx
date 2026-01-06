@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 
 interface EventRegistrationModalProps {
   eventId: string;
+  eventSlug?: string;
   eventTitle: string;
   eventPrice?: string;
   isOpen: boolean;
@@ -21,6 +22,7 @@ interface EventRegistrationModalProps {
 
 export function EventRegistrationModal({
   eventId,
+  eventSlug,
   eventTitle,
   eventPrice,
   isOpen,
@@ -200,7 +202,13 @@ export function EventRegistrationModal({
 
   const handleLoginClick = () => {
     onClose();
-    router.push('/miembros/login');
+    // Pasar información del evento para mantener el contexto después de la confirmación
+    const params = new URLSearchParams();
+    if (eventSlug) params.set('event_slug', eventSlug);
+    if (eventTitle) params.set('event_title', eventTitle);
+    
+    const url = params.toString() ? `/miembros/login?${params.toString()}` : '/miembros/login';
+    router.push(url);
   };
 
   if (!isOpen) return null;

@@ -41,7 +41,7 @@ export async function GET(request: Request) {
       redirectUrl.searchParams.set('email_confirmed', 'true');
       
       if (eventSlug) {
-        redirectUrl.searchParams.set('event', eventSlug);
+        redirectUrl.searchParams.set('event_slug', eventSlug);
       }
       if (eventTitle) {
         redirectUrl.searchParams.set('event_title', eventTitle);
