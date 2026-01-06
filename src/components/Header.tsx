@@ -69,9 +69,10 @@ export const Header = () => {
 
   const checkAuth = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
       
-      if (!user) {
+      // Si hay error de auth o no hay usuario, simplemente no hacer nada
+      if (authError || !user) {
         setIsAuthenticated(false);
         setLoading(false);
         return;
@@ -80,13 +81,13 @@ export const Header = () => {
       setIsAuthenticated(true);
 
       // Obtener información del miembro
-      const { data: member } = await supabase
+      const { data: member, error: memberError } = await supabase
         .from('members')
         .select('full_name, email')
         .eq('id', user.id)
         .single();
 
-      if (member) {
+      if (!memberError && member) {
         setMemberData(member);
       } else {
         // Si no existe en members, usar datos del auth
@@ -95,7 +96,9 @@ export const Header = () => {
         });
       }
     } catch (error) {
-      console.error('Error checking auth:', error);
+      // Silenciar errores de auth en usuarios no autenticados
+      setIsAuthenticated(false);
+      setMemberData(null);
     } finally {
       setLoading(false);
     }
