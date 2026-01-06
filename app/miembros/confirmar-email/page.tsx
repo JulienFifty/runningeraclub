@@ -33,18 +33,24 @@ function ConfirmarEmailContent() {
 
     setResending(true);
     try {
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: email,
+      const response = await fetch('/api/auth/resend-confirmation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
       });
 
-      if (error) {
+      const data = await response.json();
+
+      if (!response.ok) {
         toast.error('Error al reenviar el correo', {
-          description: error.message,
+          description: data.error || 'No se pudo reenviar el correo',
         });
       } else {
-        toast.success('Correo reenviado', {
-          description: 'Revisa tu bandeja de entrada',
+        toast.success('¡Correo reenviado exitosamente!', {
+          description: 'Revisa tu bandeja de entrada y carpeta de spam',
+          duration: 5000,
         });
       }
     } catch (error: any) {

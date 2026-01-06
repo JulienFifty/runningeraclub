@@ -119,6 +119,21 @@ function LoginContent() {
       });
 
       if (authError) {
+        // Detectar si el usuario ya existe pero el email no está confirmado
+        if (authError.message.includes('already registered') || 
+            authError.message.includes('User already registered') ||
+            authData?.user?.identities?.length === 0) {
+          toast.error('Esta cuenta ya existe', {
+            description: 'Si no confirmaste tu email, revisa tu correo o solicita uno nuevo',
+            duration: 6000,
+          });
+          // Redirigir a la página de confirmación
+          setTimeout(() => {
+            router.push(`/miembros/confirmar-email?email=${encodeURIComponent(email)}`);
+          }, 2000);
+          return;
+        }
+        
         toast.error('Error al registrarse', {
           description: authError.message,
         });
