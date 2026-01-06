@@ -30,8 +30,7 @@ export const Header = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [memberData, setMemberData] = useState<{
-    first_name?: string;
-    last_name?: string;
+    full_name?: string;
     email?: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -83,7 +82,7 @@ export const Header = () => {
       // Obtener información del miembro
       const { data: member } = await supabase
         .from('members')
-        .select('first_name, last_name, email')
+        .select('full_name, email')
         .eq('id', user.id)
         .single();
 
@@ -111,8 +110,12 @@ export const Header = () => {
   };
 
   const getInitials = () => {
-    if (memberData?.first_name && memberData?.last_name) {
-      return `${memberData.first_name[0]}${memberData.last_name[0]}`.toUpperCase();
+    if (memberData?.full_name) {
+      const names = memberData.full_name.split(' ');
+      if (names.length >= 2) {
+        return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
+      }
+      return memberData.full_name[0].toUpperCase();
     }
     if (memberData?.email) {
       return memberData.email[0].toUpperCase();
@@ -121,8 +124,8 @@ export const Header = () => {
   };
 
   const getUserName = () => {
-    if (memberData?.first_name && memberData?.last_name) {
-      return `${memberData.first_name} ${memberData.last_name}`;
+    if (memberData?.full_name) {
+      return memberData.full_name;
     }
     if (memberData?.email) {
       return memberData.email.split('@')[0];
