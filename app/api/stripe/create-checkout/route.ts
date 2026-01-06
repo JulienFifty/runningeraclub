@@ -125,11 +125,20 @@ export async function POST(request: NextRequest) {
 
     if (member_id) {
       // Para miembros
-      const { data: member } = await supabase
+      const { data: member, error: memberError } = await supabase
         .from('members')
         .select('stripe_customer_id, email, full_name')
         .eq('id', member_id)
-        .single();
+        .maybeSingle();
+
+      console.log('👤 Member lookup:', { member_id, found: !!member, error: memberError });
+
+      if (!member) {
+        return NextResponse.json(
+          { error: 'Perfil de miembro no encontrado. Por favor recarga la página e intenta de nuevo.' },
+          { status: 404 }
+        );
+      }
 
       if (member) {
         customerEmail = member.email;
@@ -141,6 +150,8 @@ export async function POST(request: NextRequest) {
           console.log('✅ Cliente Stripe existente reutilizado:', stripeCustomerId);
         } else {
           // Crear nuevo cliente en Stripe y vincularlo al miembro
+          console.log('💳 Creando nuevo cliente en Stripe para:', customerEmail);
+          
           const customer = await stripe.customers.create({
             email: member.email,
             name: customerName,
@@ -162,11 +173,13 @@ export async function POST(request: NextRequest) {
       }
     } else if (attendee_id) {
       // Para invitados
-      const { data: attendee } = await supabase
+      const { data: attendee, error: attendeeError } = await supabase
         .from('attendees')
         .select('stripe_customer_id, email, name')
         .eq('id', attendee_id)
-        .single();
+        .maybeSingle();
+
+      console.log('👤 Attendee lookup:', { attendee_id, found: !!attendee, error: attendeeError });
 
       if (attendee) {
         customerEmail = attendee.email || undefined;
@@ -306,9 +319,37 @@ export async function POST(request: NextRequest) {
       final_amount: amount / 100,
     });
   } catch (error: any) {
-    console.error('Error creating checkout session:', error);
+    console.error('❌ Error creating checkout session:', error);
+    
+    // Errores específicos de Stripe
+    if (error.type === 'StripeInvalidRequestError') {
+      return NextResponse.json(
+        { 
+          error: 'Error de configuración de pago', 
+          details: error.message,
+          hint: 'Verifica que las claves de Stripe estén configuradas correctamente en Vercel'
+        },
+        { status: 500 }
+      );
+    }
+    
+    if (error.type === 'StripeAuthenticationError') {
+      return NextResponse.json(
+        { 
+          error: 'Error de autenticación con Stripe', 
+          details: 'Las credenciales de Stripe son inválidas',
+          hint: 'Configura STRIPE_SECRET_KEY en las variables de entorno de Vercel'
+        },
+        { status: 500 }
+      );
+    }
+    
     return NextResponse.json(
-      { error: 'Error al crear sesión de pago', details: error.message },
+      { 
+        error: 'Error al crear sesión de pago', 
+        details: error.message,
+        type: error.type || 'Unknown'
+      },
       { status: 500 }
     );
   }
