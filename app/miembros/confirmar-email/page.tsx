@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Mail, CheckCircle, ArrowLeft, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
-export default function ConfirmarEmail() {
+// Forzar renderizado dinámico
+export const dynamic = 'force-dynamic';
+
+function ConfirmarEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
@@ -149,6 +152,21 @@ export default function ConfirmarEmail() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ConfirmarEmail() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Cargando...</p>
+        </div>
+      </div>
+    }>
+      <ConfirmarEmailContent />
+    </Suspense>
   );
 }
 
