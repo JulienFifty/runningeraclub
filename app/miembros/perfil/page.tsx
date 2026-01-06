@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { User, Mail, Phone, Calendar, ArrowLeft, Save, Instagram, Camera, Upload } from 'lucide-react';
+import { User, Mail, Phone, Calendar, ArrowLeft, Save, Instagram, Camera, Upload, Trash2, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Forzar renderizado dinámico
@@ -31,6 +31,9 @@ export default function MemberProfile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
@@ -242,6 +245,41 @@ export default function MemberProfile() {
       });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+
+    try {
+      const response = await fetch('/api/members/delete-account', {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al eliminar cuenta');
+      }
+
+      // Mostrar mensaje de éxito
+      toast.success('Cuenta eliminada', {
+        description: 'Tu cuenta ha sido eliminada permanentemente',
+        duration: 3000,
+      });
+
+      // Esperar un poco y redirigir al home
+      setTimeout(() => {
+        router.push('/');
+      }, 2000);
+    } catch (error: any) {
+      console.error('Error al eliminar cuenta:', error);
+      toast.error('Error al eliminar cuenta', {
+        description: error.message || 'Intenta de nuevo más tarde',
+      });
+      setDeleting(false);
+      setShowDeleteModal(false);
+      setDeleteConfirmText('');
     }
   };
 
@@ -477,8 +515,99 @@ export default function MemberProfile() {
               {saving ? 'Guardando...' : 'Guardar Cambios'}
             </button>
           </div>
+
+          {/* Zona Peligrosa - Eliminar Cuenta */}
+          <div className="pt-8 border-t border-red-200">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+              <div className="flex items-start gap-3 mb-4">
+                <AlertTriangle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h3 className="text-lg font-semibold text-red-900 mb-2">
+                    Zona Peligrosa
+                  </h3>
+                  <p className="text-sm text-red-700 mb-4">
+                    Una vez que elimines tu cuenta, no hay vuelta atrás. Toda tu información será eliminada permanentemente.
+                  </p>
+                  <button
+                    onClick={() => setShowDeleteModal(true)}
+                    className="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Eliminar Cuenta
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Modal de Confirmación de Eliminación */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <AlertTriangle className="w-6 h-6 text-red-600" />
+              </div>
+              <h2 className="text-xl font-bold text-gray-900">
+                ¿Eliminar tu cuenta?
+              </h2>
+            </div>
+
+            <div className="mb-6 space-y-3">
+              <p className="text-gray-700">
+                Esta acción es <strong className="text-red-600">permanente e irreversible</strong>.
+              </p>
+              
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-sm text-red-800 font-medium mb-2">
+                  Se eliminará toda tu información:
+                </p>
+                <ul className="text-sm text-red-700 space-y-1 list-disc list-inside">
+                  <li>Perfil y datos personales</li>
+                  <li>Registros de eventos</li>
+                  <li>Fotos y archivos</li>
+                  <li>Conexiones y configuraciones</li>
+                  <li>Cuenta de autenticación</li>
+                </ul>
+              </div>
+
+              <p className="text-sm text-gray-600">
+                Para confirmar, escribe <strong className="font-mono bg-gray-100 px-2 py-0.5 rounded">ELIMINAR</strong> a continuación:
+              </p>
+
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="Escribe ELIMINAR"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-900"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteConfirmText('');
+                }}
+                disabled={deleting}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleteConfirmText !== 'ELIMINAR' || deleting}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              >
+                {deleting ? 'Eliminando...' : 'Eliminar Cuenta'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
