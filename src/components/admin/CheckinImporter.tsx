@@ -23,19 +23,50 @@ export function CheckinImporter({ eventId, onImportComplete }: CheckinImporterPr
 
   const parseFile = async (file: File): Promise<AttendeeRow[]> => {
     return new Promise((resolve, reject) => {
+      // Timeout de seguridad (30 segundos máximo)
+      const timeout = setTimeout(() => {
+        reject(new Error('Tiempo de procesamiento excedido. El archivo puede ser demasiado complejo o estar corrupto.'));
+      }, 30000);
+
       const reader = new FileReader();
       
       reader.onload = (e) => {
         try {
+          clearTimeout(timeout);
           const data = e.target?.result;
+          
+          // Límite de seguridad: máximo 10MB de datos procesados
+          if (typeof data === 'string' && data.length > 10 * 1024 * 1024) {
+            throw new Error('Archivo demasiado grande para procesar de forma segura.');
+          }
+
           const workbook = XLSX.read(data, { type: 'binary' });
+          
+          // Validar que tenga al menos una hoja
+          if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+            throw new Error('El archivo no contiene hojas válidas.');
+          }
+
           const sheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[sheetName];
           const jsonData = XLSX.utils.sheet_to_json(worksheet, { raw: false });
 
+          // Límite de filas para prevenir procesamiento excesivo (máximo 10,000 filas)
+          const MAX_ROWS = 10000;
+          if (Array.isArray(jsonData) && jsonData.length > MAX_ROWS) {
+            throw new Error(`El archivo contiene demasiadas filas (${jsonData.length}). Máximo permitido: ${MAX_ROWS}.`);
+          }
+
           const attendees: AttendeeRow[] = [];
+          let rowCount = 0;
 
           for (const row of jsonData as any[]) {
+            rowCount++;
+            
+            // Límite adicional de seguridad por fila
+            if (rowCount > MAX_ROWS) {
+              break;
+            }
             // Buscar las columnas exactas
             const cantidad = row['Cantidad'] || row['cantidad'] || row['CANTIDAD'] || 1;
             const name = row['Customer Name'] || row['customer name'] || row['CUSTOMER NAME'] || row['Nombre'] || row['nombre'];
@@ -63,11 +94,16 @@ export function CheckinImporter({ eventId, onImportComplete }: CheckinImporterPr
 
           resolve(attendees);
         } catch (error) {
+          clearTimeout(timeout);
           reject(error);
         }
       };
 
-      reader.onerror = () => reject(new Error('Error al leer el archivo'));
+      reader.onerror = () => {
+        clearTimeout(timeout);
+        reject(new Error('Error al leer el archivo'));
+      };
+      
       reader.readAsBinaryString(file);
     });
   };
@@ -96,9 +132,27 @@ export function CheckinImporter({ eventId, onImportComplete }: CheckinImporterPr
   };
 
   const handleFile = async (file: File) => {
+    // Validar tipo de archivo
     if (!file.name.match(/\.(xlsx|xls|csv)$/i)) {
       toast.error('Formato no válido', {
         description: 'Por favor, sube un archivo Excel (.xlsx, .xls) o CSV',
+      });
+      return;
+    }
+
+    // Validar tamaño de archivo (máximo 5MB para prevenir ReDoS)
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error('Archivo demasiado grande', {
+        description: 'El archivo no debe exceder 5MB. Por favor, divide el archivo en partes más pequeñas.',
+      });
+      return;
+    }
+
+    // Validar tamaño mínimo (archivos vacíos o corruptos)
+    if (file.size < 100) {
+      toast.error('Archivo inválido', {
+        description: 'El archivo parece estar vacío o corrupto.',
       });
       return;
     }
