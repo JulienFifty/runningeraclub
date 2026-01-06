@@ -14,14 +14,20 @@ export async function POST(request: Request) {
 
     const supabase = await createClient();
 
-    // Reenviar email de confirmación
+    // Reenviar email de confirmación con URL de callback configurada
+    const redirectUrl = `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/auth/callback`;
+    
+    console.log('📧 Reenviando email de confirmación:', { email, redirectUrl });
+    
     const { error } = await supabase.auth.resend({
       type: 'signup',
       email: email,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/auth/callback`,
+        emailRedirectTo: redirectUrl,
       },
     });
+    
+    console.log('📧 Resultado de reenvío:', { error: error?.message });
 
     if (error) {
       console.error('Error al reenviar email:', error);
