@@ -46,14 +46,14 @@ export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventT
         .select('id, status, payment_status')
         .eq('member_id', user.id)
         .eq('event_id', eventId)
-        .single();
+        .maybeSingle();
 
       const attendeeResult = await supabase
         .from('attendees')
         .select('id, status')
         .eq('event_id', eventId)
         .eq('email', user.email || '')
-        .single();
+        .maybeSingle();
 
       // Solo considerar registrado si:
       // 1. El pago está completado (payment_status = 'paid')
