@@ -245,57 +245,154 @@ function DashboardContent() {
     return null;
   }
 
+  // Función para obtener las iniciales del nombre
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
-    <main className="min-h-screen bg-background p-8">
+    <main className="min-h-screen bg-background p-4 md:p-8">
       <div className="container-premium">
-        {/* Header */}
+        {/* Header con Perfil */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="font-display text-4xl md:text-5xl text-foreground font-light mb-2">
-                Mi Dashboard
-              </h1>
-              <p className="text-muted-foreground">
-                Bienvenido, {member.full_name}
-              </p>
+          {/* Profile Header Card */}
+          <div className="bg-card border border-border rounded-lg overflow-hidden mb-6">
+            {/* Background Pattern */}
+            <div className="h-32 bg-gradient-to-r from-foreground/10 via-foreground/5 to-foreground/10 relative">
+              <div className="absolute inset-0 opacity-20">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-foreground rounded-full blur-3xl"></div>
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-              <Link
-                href="/miembros/perfil"
-                className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-card transition-colors"
-              >
-                <User className="w-4 h-4" />
-                Mi Perfil
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-card transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                Salir
-              </button>
+            
+            {/* Profile Info */}
+            <div className="px-6 pb-6 -mt-16 relative">
+              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                <div className="flex items-end gap-4">
+                  {/* Avatar */}
+                  <div className="relative">
+                    {member.profile_image ? (
+                      <img
+                        src={member.profile_image}
+                        alt={member.full_name}
+                        className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-background object-cover"
+                      />
+                    ) : (
+                      <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-background bg-foreground/10 flex items-center justify-center">
+                        <span className="text-2xl md:text-4xl font-display font-bold text-foreground">
+                          {getInitials(member.full_name)}
+                        </span>
+                      </div>
+                    )}
+                    {/* Status Indicator */}
+                    <div className="absolute bottom-2 right-2 w-4 h-4 bg-green-500 rounded-full border-2 border-background"></div>
+                  </div>
+                  
+                  {/* Name and Info */}
+                  <div className="mb-2">
+                    <h1 className="font-display text-2xl md:text-3xl text-foreground font-bold mb-1">
+                      {member.full_name}
+                    </h1>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {member.email}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-foreground/10 text-foreground rounded-full">
+                        <CheckCircle className="w-3 h-3" />
+                        Miembro {member.membership_status === 'active' ? 'Activo' : member.membership_status}
+                      </span>
+                      <span className="inline-flex items-center text-xs px-2 py-1 bg-primary/10 text-primary rounded-full capitalize">
+                        {member.membership_type}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Actions */}
+                <div className="flex items-center gap-2">
+                  <Link
+                    href="/miembros/perfil"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-foreground text-background rounded-lg hover:bg-foreground/90 transition-colors text-sm"
+                  >
+                    <User className="w-4 h-4" />
+                    Editar Perfil
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-card transition-colors text-sm"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Salir
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Member Info Cards */}
-          <div className="grid md:grid-cols-3 gap-4 mb-8">
-            <div className="bg-card border border-border p-6 rounded-lg">
-              <p className="text-sm text-muted-foreground mb-2">Tipo de Membresía</p>
-              <p className="text-2xl font-display text-foreground capitalize">
-                {member.membership_type}
-              </p>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            {/* Eventos Registrados */}
+            <div className="bg-card border border-border p-4 rounded-lg hover:border-foreground/30 transition-all">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                  <Calendar className="w-5 h-5 text-blue-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Eventos</p>
+                  <p className="text-2xl font-display font-bold text-foreground">
+                    {registrations.length}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="bg-card border border-border p-6 rounded-lg">
-              <p className="text-sm text-muted-foreground mb-2">Estado</p>
-              <p className="text-2xl font-display text-foreground capitalize">
-                {member.membership_status === 'active' ? 'Activo' : member.membership_status}
-              </p>
+
+            {/* Eventos Completados */}
+            <div className="bg-card border border-border p-4 rounded-lg hover:border-foreground/30 transition-all">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Completados</p>
+                  <p className="text-2xl font-display font-bold text-foreground">
+                    {registrations.filter(r => r.status === 'attended').length}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="bg-card border border-border p-6 rounded-lg">
-              <p className="text-sm text-muted-foreground mb-2">Eventos Registrados</p>
-              <p className="text-2xl font-display text-foreground">
-                {registrations.length}
-              </p>
+
+            {/* Kilómetros */}
+            <div className="bg-card border border-border p-4 rounded-lg hover:border-foreground/30 transition-all">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-orange-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Kilómetros</p>
+                  <p className="text-2xl font-display font-bold text-foreground">
+                    0
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Posición */}
+            <div className="bg-card border border-border p-4 rounded-lg hover:border-foreground/30 transition-all">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center">
+                  <Trophy className="w-5 h-5 text-yellow-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Posición</p>
+                  <p className="text-2xl font-display font-bold text-foreground">
+                    --
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 

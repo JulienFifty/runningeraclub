@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { User, Mail, Phone, Calendar, ArrowLeft, Save, Instagram } from 'lucide-react';
+import { User, Mail, Phone, Calendar, ArrowLeft, Save, Instagram, Camera, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Forzar renderizado dinámico
@@ -30,6 +30,9 @@ export default function MemberProfile() {
   const [member, setMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     full_name: '',
     phone: '',
@@ -113,6 +116,92 @@ export default function MemberProfile() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo de archivo
+    if (!file.type.startsWith('image/')) {
+      toast.error('Por favor selecciona una imagen válida');
+      return;
+    }
+
+    // Validar tamaño (máximo 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('La imagen debe ser menor a 5MB');
+      return;
+    }
+
+    // Mostrar preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setProfileImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    // Subir imagen
+    handleImageUpload(file);
+  };
+
+  const handleImageUpload = async (file: File) => {
+    setUploading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Generar nombre único para el archivo
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `profile-images/${fileName}`;
+
+      // Subir imagen a Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true,
+        });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Obtener URL pública
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Actualizar perfil con la nueva URL
+      const { error: updateError } = await supabase
+        .from('members')
+        .update({ profile_image: publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      toast.success('Foto de perfil actualizada');
+      loadProfile();
+    } catch (error: any) {
+      console.error('Error uploading image:', error);
+      toast.error('Error al subir la imagen', {
+        description: error.message,
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const handleSave = async () => {
@@ -205,6 +294,56 @@ export default function MemberProfile() {
                 <p className="text-sm text-muted-foreground mb-1">Estado</p>
                 <p className="text-foreground capitalize">
                   {member.membership_status === 'active' ? 'Activo' : member.membership_status}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Foto de Perfil */}
+          <div className="pb-6 border-b border-border">
+            <h2 className="font-display text-xl text-foreground mb-4">Foto de Perfil</h2>
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+              {/* Avatar Preview */}
+              <div className="relative">
+                {profileImagePreview || member.profile_image ? (
+                  <img
+                    src={profileImagePreview || member.profile_image}
+                    alt={member.full_name}
+                    className="w-32 h-32 rounded-full object-cover border-4 border-border"
+                  />
+                ) : (
+                  <div className="w-32 h-32 rounded-full border-4 border-border bg-foreground/10 flex items-center justify-center">
+                    <span className="text-4xl font-display font-bold text-foreground">
+                      {getInitials(member.full_name)}
+                    </span>
+                  </div>
+                )}
+                {uploading && (
+                  <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                    <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
+              </div>
+
+              {/* Upload Button */}
+              <div className="flex-1">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-foreground text-background rounded-lg hover:bg-foreground/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Camera className="w-4 h-4" />
+                  {uploading ? 'Subiendo...' : 'Cambiar Foto'}
+                </button>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Formatos: JPG, PNG o GIF. Tamaño máximo: 5MB
                 </p>
               </div>
             </div>
