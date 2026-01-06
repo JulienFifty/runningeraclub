@@ -3,7 +3,7 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { useRef } from 'react';
-const heroImage = 'https://res.cloudinary.com/dhqq37qlu/image/upload/v1767661532/_VXV9482_orrpim.jpg';
+const heroImage = 'https://res.cloudinary.com/dhqq37qlu/image/upload/v1767661563/_VXV9510-Enhanced-NR_qhsic0.jpg';
 
 export const Community = () => {
   const sectionRef = useRef<HTMLElement>(null);
