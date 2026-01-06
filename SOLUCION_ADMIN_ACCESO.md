@@ -124,3 +124,5 @@ ALTER TABLE admins DISABLE ROW LEVEL SECURITY;
 
 **Después de ejecutar el script, el login debería funcionar** ✅
 
+
+

@@ -5,3 +5,5 @@ export default function CatchAllPage() {
   redirect('/proximamente');
 }
 
+
+

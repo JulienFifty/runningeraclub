@@ -11,3 +11,5 @@ ADD COLUMN IF NOT EXISTS payment_method TEXT;
 CREATE INDEX IF NOT EXISTS idx_event_registrations_payment_status ON event_registrations(payment_status);
 CREATE INDEX IF NOT EXISTS idx_event_registrations_stripe_pi ON event_registrations(stripe_payment_intent_id);
 
+
+

@@ -76,3 +76,5 @@ El `STRAVA_WEBHOOK_CLIENT_SECRET` lo configuraremos más adelante cuando hagamos
 
 ¿Ya tienes el Client ID y el Client Secret? Si sí, podemos continuar! 🎯
 
+
+

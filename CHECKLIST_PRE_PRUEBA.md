@@ -124,3 +124,5 @@ stripe listen --forward-to localhost:3000/api/stripe/webhook
 
 **¿Listo para probar?** Sigue el checklist de arriba y luego prueba con un evento de prueba! 🚀
 
+
+

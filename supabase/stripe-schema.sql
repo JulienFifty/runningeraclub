@@ -74,3 +74,5 @@ COMMENT ON COLUMN payment_transactions.stripe_session_id IS 'ID de la sesión de
 COMMENT ON COLUMN payment_transactions.status IS 'Estado del pago';
 COMMENT ON COLUMN payment_transactions.refund_reason IS 'Razón del reembolso si aplica';
 
+
+

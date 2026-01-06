@@ -105,3 +105,5 @@ Las políticas RLS ya están incluidas en el script SQL, pero puedes ajustarlas 
 
 
 
+
+

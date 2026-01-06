@@ -33,3 +33,5 @@ END $$;
 -- Verificar que se creó correctamente
 SELECT * FROM admins WHERE email = 'tu@email.com';
 
+
+

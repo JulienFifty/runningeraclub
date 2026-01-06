@@ -81,3 +81,5 @@ Deberías ver las columnas:
 
 **Nota**: Los webhooks ya funcionan (200 OK), solo falta que la tabla esté lista para recibir los registros iniciales.
 
+
+

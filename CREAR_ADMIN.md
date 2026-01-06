@@ -109,3 +109,5 @@ SELECT email FROM auth.users WHERE email = 'tu@email.com';
 
 **Listo! Ahora puedes hacer login en `/admin/login` con tu email y contraseña** 🎉
 
+
+

@@ -19,3 +19,5 @@ CREATE POLICY "Public can view Strava profile images" ON strava_connections
 CREATE POLICY "Public can view Strava activities for leaderboard" ON strava_activities
   FOR SELECT USING (true);
 
+
+

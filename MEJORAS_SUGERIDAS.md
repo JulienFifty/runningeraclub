@@ -567,3 +567,5 @@ CREATE TABLE invoices (
 **Última actualización**: 2026-01-XX  
 **Estado del sistema**: Funcional y listo para producción con mejoras opcionales
 
+
+

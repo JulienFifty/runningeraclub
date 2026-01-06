@@ -89,3 +89,5 @@ COMMENT ON COLUMN coupons.min_amount IS 'Monto mínimo requerido para aplicar el
 COMMENT ON COLUMN coupons.max_discount IS 'Descuento máximo (para porcentajes)';
 COMMENT ON COLUMN coupons.event_id IS 'ID del evento (NULL = aplicable a todos)';
 
+
+

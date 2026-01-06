@@ -4,7 +4,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef, useState } from 'react';
 import { Send } from 'lucide-react';
 import { toast } from 'sonner';
-const contactImage = '/assets/community.jpg';
+const contactImage = 'https://res.cloudinary.com/dhqq37qlu/image/upload/v1767661531/_VXV9427_zpulgr.jpg';
 
 export const Contact = () => {
   const sectionRef = useRef<HTMLElement>(null);
@@ -33,7 +33,7 @@ export const Contact = () => {
     <section id="contacto" ref={sectionRef} className="bg-background py-16 md:py-24 overflow-hidden">
       <div className="container-premium">
         <motion.div 
-          className="relative h-[50vh] md:h-[55vh] flex items-center overflow-hidden border border-black/20"
+          className="relative min-h-[600px] md:min-h-[700px] lg:min-h-[800px] flex items-center overflow-hidden border border-black/20 rounded-lg"
           style={{ opacity, y, scale }}
         >
           {/* Background Image */}
@@ -48,7 +48,7 @@ export const Contact = () => {
           </div>
 
           {/* Content */}
-          <div className="relative px-6 md:px-12 py-8 w-full">
+          <div className="relative px-6 md:px-12 lg:px-16 py-12 md:py-16 lg:py-20 w-full">
             <div className="max-w-2xl mx-auto">
               <motion.span
                 initial={{ opacity: 0, y: 20 }}
@@ -77,7 +77,7 @@ export const Contact = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="text-white/80 text-sm md:text-base font-light leading-relaxed mb-8"
+                className="text-white/80 text-sm md:text-base lg:text-lg font-light leading-relaxed mb-8 md:mb-10"
               >
                 Contáctanos para conocer más sobre nuestros entrenamientos, eventos
                 y cómo puedes ser parte de la comunidad de corredores más vibrante de Puebla.
@@ -89,7 +89,7 @@ export const Contact = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.8, delay: 0.3 }}
                 onSubmit={handleSubmit}
-                className="space-y-4"
+                className="space-y-4 md:space-y-5"
               >
                 <div>
                   <input
@@ -119,10 +119,10 @@ export const Contact = () => {
                   <textarea
                     id="message"
                     required
-                    rows={4}
+                    rows={5}
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-white/50 transition-colors resize-none"
+                    className="w-full px-4 py-3 md:px-5 md:py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-white/50 focus:outline-none focus:border-white/50 transition-colors resize-none"
                     placeholder="¿Cómo podemos ayudarte?"
                   />
                 </div>

@@ -4,3 +4,5 @@ export default function EntrenamientosPage() {
   redirect('/proximamente');
 }
 
+
+

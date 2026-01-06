@@ -243,3 +243,5 @@ const migrateExistingPayments = async () => {
 
 **Conclusión**: Ahora cada miembro tiene una cuenta única en Stripe, y todos sus pagos quedan registrados en la misma cuenta de cliente. Esto mejora significativamente la gestión y experiencia de usuario.
 
+
+

@@ -193,3 +193,5 @@ Ver `STRIPE_SETUP.md` para instrucciones detalladas de configuración.
 
 **Nota**: Recuerda cambiar a las keys de producción y configurar el webhook de producción antes de lanzar a producción.
 
+
+

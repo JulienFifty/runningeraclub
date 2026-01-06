@@ -193,3 +193,5 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 COMMENT ON FUNCTION calculate_member_stats IS 'Calcula y guarda estadísticas de un miembro para un período específico';
 
+
+

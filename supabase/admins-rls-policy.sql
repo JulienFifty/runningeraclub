@@ -25,3 +25,5 @@ CREATE POLICY "Users can check if they are admin" ON admins
 -- CREATE POLICY "Authenticated users can view admins" ON admins
 --   FOR SELECT USING (auth.uid() IS NOT NULL);
 
+
+

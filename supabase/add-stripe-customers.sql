@@ -14,3 +14,5 @@ CREATE INDEX IF NOT EXISTS idx_attendees_stripe_customer ON attendees(stripe_cus
 COMMENT ON COLUMN members.stripe_customer_id IS 'ID del cliente en Stripe para vincular todos los pagos';
 COMMENT ON COLUMN attendees.stripe_customer_id IS 'ID del cliente en Stripe para invitados recurrentes';
 
+
+

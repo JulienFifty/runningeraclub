@@ -170,14 +170,13 @@ function LoginContent() {
             </p>
           </div>
 
-          {/* Botón de Strava - Solo para registro */}
+          {/* Botón de Strava - Solo para registro - PRÓXIMAMENTE */}
           {!isLogin && (
             <>
               <button
                 type="button"
-                onClick={handleStravaSignup}
-                disabled={loading}
-                className="w-full px-6 py-3 bg-[#FC4C02] text-white rounded-lg hover:bg-[#E34402] transition-colors disabled:opacity-50 flex items-center justify-center gap-3 font-medium"
+                disabled={true}
+                className="w-full px-6 py-3 bg-[#FC4C02]/50 text-white rounded-lg transition-colors opacity-60 cursor-not-allowed flex items-center justify-center gap-3 font-medium"
               >
                 <svg
                   className="w-5 h-5"
@@ -186,7 +185,7 @@ function LoginContent() {
                 >
                   <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
                 </svg>
-                Continuar con Strava
+                Próximamente - Conéctate con Strava
               </button>
 
               <div className="relative my-6">

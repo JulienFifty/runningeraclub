@@ -2,18 +2,19 @@
 
 import { motion } from 'framer-motion';
 import { useRef } from 'react';
-const heroImage = '/assets/hero-runners.jpg';
-const nightRun = '/assets/night-run.jpg';
-const trailRun = '/assets/trail-run.jpg';
-const community = '/assets/community.jpg';
-const urbanRun = '/assets/urban-run.jpg';
 
 const galleryImages = [
-  { src: heroImage, alt: 'Corredores al amanecer', span: 'col-span-2 row-span-2' },
-  { src: nightRun, alt: 'Night run en la ciudad', span: 'col-span-1 row-span-1' },
-  { src: trailRun, alt: 'Trail running en montaña', span: 'col-span-1 row-span-1' },
-  { src: community, alt: 'Comunidad RUNNING ERA', span: 'col-span-1 row-span-1' },
-  { src: urbanRun, alt: 'Entrenamiento urbano', span: 'col-span-1 row-span-1' },
+  { src: 'https://res.cloudinary.com/dhqq37qlu/image/upload/v1767661557/_VXV9636_fogsaj.jpg', alt: 'Momentos RUNNING ERA', span: 'col-span-2 row-span-2' },
+  { src: 'https://res.cloudinary.com/dhqq37qlu/image/upload/v1767661552/_VXV8999_eaxz2q.jpg', alt: 'Momentos RUNNING ERA', span: 'col-span-1 row-span-1' },
+  { src: 'https://res.cloudinary.com/dhqq37qlu/image/upload/v1767661563/_VXV9510-Enhanced-NR_qhsic0.jpg', alt: 'Momentos RUNNING ERA', span: 'col-span-1 row-span-1' },
+  { src: 'https://res.cloudinary.com/dhqq37qlu/image/upload/v1767661540/L1520021_ehg2da.jpg', alt: 'Momentos RUNNING ERA', span: 'col-span-1 row-span-1' },
+  { src: 'https://res.cloudinary.com/dhqq37qlu/image/upload/v1767661534/_VXV9755_pmsbcw.jpg', alt: 'Momentos RUNNING ERA', span: 'col-span-1 row-span-1' },
+  { src: 'https://res.cloudinary.com/dhqq37qlu/image/upload/v1767661535/_VXV9830_vz1kqh.jpg', alt: 'Momentos RUNNING ERA', span: 'col-span-1 row-span-1' },
+  { src: 'https://res.cloudinary.com/dhqq37qlu/image/upload/v1767661533/_VXV9754_kzjobb.jpg', alt: 'Momentos RUNNING ERA', span: 'col-span-1 row-span-1' },
+  { src: 'https://res.cloudinary.com/dhqq37qlu/image/upload/v1767661536/BLANCA-NIETO-blancaanj_q7buwy.jpg', alt: 'Momentos RUNNING ERA', span: 'col-span-1 row-span-1' },
+  { src: 'https://res.cloudinary.com/dhqq37qlu/image/upload/v1767661532/_VXV9490_fpqmv4.jpg', alt: 'Momentos RUNNING ERA', span: 'col-span-1 row-span-1' },
+  { src: 'https://res.cloudinary.com/dhqq37qlu/image/upload/v1767661530/_VXV9402_m6ah2y.jpg', alt: 'Momentos RUNNING ERA', span: 'col-span-1 row-span-1' },
+  { src: 'https://res.cloudinary.com/dhqq37qlu/image/upload/v1767661528/_VXV8993_adgaf4.jpg', alt: 'Momentos RUNNING ERA', span: 'col-span-1 row-span-1' },
 ];
 
 export const Gallery = () => {

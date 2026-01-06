@@ -1,39 +1,36 @@
 "use client";
 
-import { Instagram, Facebook, Twitter, Youtube, ArrowUp } from 'lucide-react';
+import { Instagram, ArrowUp } from 'lucide-react';
 
 const footerLinks = {
   'Sobre Nosotros': [
-    { name: 'Nuestra Historia', href: '#comunidad' },
-    { name: 'El Equipo', href: '#' },
-    { name: 'Valores', href: '#' },
-    { name: 'Prensa', href: '#' },
+    { name: 'Nuestra Historia', href: '/proximamente' },
+    { name: 'El Equipo', href: '/proximamente' },
+    { name: 'Valores', href: '/proximamente' },
+    { name: 'Prensa', href: '/proximamente' },
   ],
   'Comunidad': [
-    { name: 'Únete al Club', href: '#contacto' },
-    { name: 'Miembros', href: '#' },
-    { name: 'Testimonios', href: '#' },
-    { name: 'Galería', href: '#galeria' },
+    { name: 'Únete al Club', href: '/proximamente' },
+    { name: 'Miembros', href: '/proximamente' },
+    { name: 'Testimonios', href: '/proximamente' },
+    { name: 'Galería', href: '/proximamente' },
   ],
   'Eventos': [
-    { name: 'Calendario', href: '#eventos' },
-    { name: 'Night Runs', href: '#' },
-    { name: 'Trail Runs', href: '#' },
-    { name: 'Colaboraciones', href: '#' },
+    { name: 'Calendario', href: '/proximamente' },
+    { name: 'Night Runs', href: '/proximamente' },
+    { name: 'Trail Runs', href: '/proximamente' },
+    { name: 'Colaboraciones', href: '/proximamente' },
   ],
   'Entrenamientos': [
-    { name: 'Horarios', href: '#experiencias' },
-    { name: 'Ubicaciones', href: '#' },
-    { name: 'Coaches', href: '#' },
-    { name: 'Programas', href: '#' },
+    { name: 'Horarios', href: '/proximamente' },
+    { name: 'Ubicaciones', href: '/proximamente' },
+    { name: 'Coaches', href: '/proximamente' },
+    { name: 'Programas', href: '/proximamente' },
   ],
 };
 
 const socialLinks = [
   { icon: Instagram, href: 'https://instagram.com/runningera', label: 'Instagram' },
-  { icon: Facebook, href: '#', label: 'Facebook' },
-  { icon: Twitter, href: '#', label: 'Twitter' },
-  { icon: Youtube, href: '#', label: 'YouTube' },
 ];
 
 export const Footer = () => {
@@ -104,13 +101,13 @@ export const Footer = () => {
           </p>
           <div className="flex items-center gap-6">
             <a
-              href="#"
+              href="/proximamente"
               className="text-primary-foreground/50 text-xs tracking-wider hover:text-primary-foreground transition-colors"
             >
               Privacidad
             </a>
             <a
-              href="#"
+              href="/proximamente"
               className="text-primary-foreground/50 text-xs tracking-wider hover:text-primary-foreground transition-colors"
             >
               Términos
