@@ -3,7 +3,7 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { useRef } from 'react';
-const communityImage = 'https://res.cloudinary.com/dhqq37qlu/image/upload/v1767661531/_VXV9427_zpulgr.jpg';
+const communityImage = 'https://res.cloudinary.com/dhqq37qlu/image/upload/v1767661563/_VXV9510-Enhanced-NR_qhsic0.jpg';
 
 export const WellnessCommunity = () => {
   const sectionRef = useRef<HTMLElement>(null);

@@ -15,6 +15,9 @@ interface Event {
   shortDescription: string;
   image: string;
   buttonText: 'REGÍSTRATE' | 'VER EVENTO';
+  price?: string;
+  category?: string;
+  spots_available?: number;
 }
 
 export const Events = () => {
@@ -33,7 +36,7 @@ export const Events = () => {
       const supabase = createClient();
       const { data, error } = await supabase
         .from('events')
-        .select('id, slug, title, date, location, short_description, image, button_text')
+        .select('*')
         .order('date', { ascending: true });
 
       if (error) {
@@ -58,6 +61,9 @@ export const Events = () => {
           shortDescription: event.short_description,
           image: event.image,
           buttonText: event.button_text as 'REGÍSTRATE' | 'VER EVENTO',
+          price: event.price || null,
+          category: event.category || null,
+          spots_available: event.spots_available !== undefined ? event.spots_available : null,
         }));
         setEvents(transformedEvents);
       } else {
@@ -169,7 +175,7 @@ export const Events = () => {
             {/* Navigation Buttons */}
             <button
               onClick={prevSlide}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 p-2 md:p-3 transition-all duration-300"
+              className="fixed left-2 md:left-4 top-1/2 -translate-y-1/2 z-20 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 p-2 md:p-3 transition-all duration-300 rounded-full"
               aria-label="Anterior"
             >
               <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-white" />
@@ -177,14 +183,14 @@ export const Events = () => {
             
             <button
               onClick={nextSlide}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 p-2 md:p-3 transition-all duration-300"
+              className="fixed right-2 md:right-4 top-1/2 -translate-y-1/2 z-20 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 p-2 md:p-3 transition-all duration-300 rounded-full"
               aria-label="Siguiente"
             >
               <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </button>
 
             {/* Cards Carousel */}
-            <div className="relative h-[550px] md:h-[600px] flex items-center justify-center overflow-visible">
+            <div className="relative h-[650px] md:h-[700px] flex items-center justify-center overflow-visible">
               {events.map((event, index) => {
                 const offset = index - activeIndex;
                 const isActive = index === activeIndex;
@@ -206,53 +212,92 @@ export const Events = () => {
                       duration: 0.7, 
                       ease: [0.32, 0.72, 0, 1]
                     }}
-                    className="absolute w-[80%] md:w-[350px] cursor-pointer"
+                    className="absolute w-[85%] md:w-[380px] cursor-pointer"
                     onClick={() => setActiveIndex(index)}
                   >
                     <Link href={`/eventos/${event.slug}`}>
-                      <div className="group bg-black/40 border border-white/10 overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-500">
-                  {/* Background Image */}
-                        <div className="relative h-60 md:h-64 overflow-hidden">
-                    <img
-                      src={event.image}
-                      alt={event.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      loading="lazy"
-                    />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-black/30" />
+                      <div className="group bg-white border border-border overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 h-full flex flex-col">
+                        {/* Background Image */}
+                        <div className="relative h-48 md:h-56 overflow-hidden">
+                          <img
+                            src={event.image}
+                            alt={event.title}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            loading="lazy"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
-                    {/* Date Badge */}
-                          <div className="absolute top-6 left-6">
-                      <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white px-4 py-2">
-                        <Calendar className="w-4 h-4" />
-                        <span className="text-xs font-medium tracking-wider uppercase">
-                          {event.date}
-                        </span>
-                      </div>
-                    </div>
-
-                          {/* Title on Image */}
-                          <div className="absolute bottom-0 left-0 right-0 p-6">
-                            <h3 className="font-title text-3xl md:text-4xl text-white font-bold mb-2 leading-tight uppercase tracking-wide">
-                      {event.title}
-                    </h3>
+                          {/* Badges Top */}
+                          <div className="absolute top-4 left-4 right-4 flex items-start justify-between gap-2">
+                            {/* Date Badge */}
+                            <div className="inline-flex items-center gap-1.5 bg-white backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm">
+                              <Calendar className="w-3.5 h-3.5 text-black" />
+                              <span className="text-xs font-semibold text-black">
+                                {event.date}
+                              </span>
+                            </div>
+                            
+                            {/* Price Badge */}
+                            {event.price && (
+                              <div className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold shadow-sm ${
+                                event.price.toLowerCase() === 'gratis' || event.price === '$0'
+                                  ? 'bg-green-500 text-white'
+                                  : 'bg-black text-white'
+                              }`}>
+                                {event.price.toLowerCase() === 'gratis' ? 'GRATIS' : event.price}
+                              </div>
+                            )}
                           </div>
+
+                          {/* Category Badge Bottom Left */}
+                          {event.category && (
+                            <div className="absolute bottom-4 left-4">
+                              <span className="inline-block bg-white backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-semibold text-black uppercase tracking-wider shadow-sm">
+                                {event.category}
+                              </span>
+                            </div>
+                          )}
                         </div>
 
                         {/* Content */}
-                        <div className="p-6 md:p-8 bg-white">
-                          <p className="text-muted-foreground font-light leading-relaxed mb-4 text-sm md:text-base">
-                      {event.shortDescription}
-                    </p>
+                        <div className="p-6 flex-1 flex flex-col">
+                          {/* Title */}
+                          <h3 className="font-display text-xl md:text-2xl text-black font-bold mb-3 leading-tight group-hover:text-black/80 transition-colors">
+                            {event.title}
+                          </h3>
 
-                          <p className="text-muted-foreground/60 text-xs tracking-widest uppercase mb-6">
-                      {event.location}
-                    </p>
+                          {/* Description */}
+                          <p className="text-muted-foreground text-sm leading-relaxed mb-4 flex-1">
+                            {event.shortDescription}
+                          </p>
 
-                          <div className="w-full bg-black text-white px-8 py-4 text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-black/80 text-center">
-                      {event.buttonText}
-                    </div>
-                  </div>
+                          {/* Location & Spots */}
+                          <div className="flex items-center justify-between mb-4 pb-4 border-b border-border">
+                            <p className="text-muted-foreground/70 text-xs tracking-wider uppercase">
+                              {event.location}
+                            </p>
+                            {event.spots_available !== undefined && event.spots_available !== null && (
+                              <span className={`text-xs font-medium ${
+                                event.spots_available > 10 
+                                  ? 'text-green-600' 
+                                  : event.spots_available > 0 
+                                    ? 'text-orange-600' 
+                                    : 'text-red-600'
+                              }`}>
+                                {event.spots_available > 0 
+                                  ? `${event.spots_available} cupos` 
+                                  : 'Agotado'
+                                }
+                              </span>
+                            )}
+                          </div>
+
+                          {/* CTA Button */}
+                          <div className="w-full bg-foreground text-background px-6 py-3 text-xs font-semibold tracking-wider uppercase transition-all duration-300 hover:bg-foreground/90 text-center group-hover:gap-2 flex items-center justify-center">
+                            {event.buttonText}
+                            <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
+                          </div>
+                        </div>
                       </div>
                     </Link>
                 </motion.div>
@@ -275,16 +320,6 @@ export const Events = () => {
                 />
             ))}
             </div>
-
-            {/* Floating Register Button - Mobile Only */}
-            {events.length > 0 && events[activeIndex] && (
-              <Link
-                href={`/eventos/${events[activeIndex].slug}`}
-                className="fixed bottom-0 left-0 right-0 md:hidden z-50 bg-black text-white px-6 py-4 text-center text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-black/90 border-t border-white/10"
-              >
-                {events[activeIndex].buttonText}
-              </Link>
-            )}
         </div>
         )}
       </div>
