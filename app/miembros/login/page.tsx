@@ -119,6 +119,13 @@ function LoginContent() {
         if (eventTitle) callbackParams.set('event_title', eventTitle);
         redirectUrl += `?${callbackParams.toString()}`;
       }
+      
+      console.log('🔍 Signup Debug:', {
+        eventSlug,
+        eventTitle,
+        redirectUrl,
+        currentUrl: window.location.href
+      });
 
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
