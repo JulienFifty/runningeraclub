@@ -108,7 +108,7 @@ export default async function EventPage({ params }: PageProps) {
       </section>
 
       {/* Main Content */}
-      <section className="section-padding bg-background">
+      <section className="section-padding bg-background pb-24 md:pb-16">
         <div className="container-premium">
           <div className="grid lg:grid-cols-3 gap-12">
             {/* Main Content */}
@@ -254,7 +254,7 @@ export default async function EventPage({ params }: PageProps) {
                     </div>
                   )}
 
-                  <div className="space-y-3">
+                  <div className="space-y-3 hidden md:block">
                     <EventRegistrationButton eventId={event.id} eventSlug={event.slug} buttonText={event.buttonText} eventTitle={event.title} eventPrice={event.price} />
                   </div>
 
@@ -345,6 +345,17 @@ export default async function EventPage({ params }: PageProps) {
 
       <Footer />
       <WhatsAppButton />
+      
+      {/* Botón de registro fijo en mobile */}
+      <div className="fixed bottom-0 left-0 right-0 md:hidden z-50 bg-background border-t border-border p-4 shadow-lg">
+        <EventRegistrationButton 
+          eventId={event.id} 
+          eventSlug={event.slug} 
+          buttonText={event.buttonText} 
+          eventTitle={event.title} 
+          eventPrice={event.price} 
+        />
+      </div>
     </main>
   );
 }
