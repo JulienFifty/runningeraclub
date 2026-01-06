@@ -170,7 +170,7 @@ export const Experiences = () => {
                       <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
                       <div className="absolute bottom-0 left-0 right-0 p-6">
                         <exp.icon className="w-8 h-8 md:w-10 md:h-10 text-white mb-3" />
-                        <h3 className="font-display text-xl md:text-2xl text-white font-medium uppercase tracking-wide">
+                        <h3 className="font-display text-xl md:text-2xl text-white font-bold uppercase tracking-wide">
                           {exp.title}
                         </h3>
                       </div>

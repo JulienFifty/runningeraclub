@@ -16,13 +16,13 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useRouter } from 'next/navigation';
 
 const navLinks = [
-  { name: 'Inicio', href: '#inicio' },
-  { name: 'Comunidad', href: '#comunidad' },
-  { name: 'Eventos', href: '#eventos' },
+  { name: 'Inicio', href: '/' },
+  { name: 'Comunidad', href: '/comunidad' },
+  { name: 'Eventos', href: '/eventos' },
   { name: 'Leaderboard', href: '/leaderboard' },
-  { name: 'Experiencias', href: '#experiencias' },
-  { name: 'Galería', href: '#galeria' },
-  { name: 'Contacto', href: '#contacto' },
+  { name: 'Experiencias', href: '/experiencias' },
+  { name: 'Galería', href: '/galeria' },
+  { name: 'Contacto', href: '/contacto' },
 ];
 
 export const Header = () => {
@@ -39,11 +39,28 @@ export const Header = () => {
   const supabase = createClient();
 
   useEffect(() => {
+    let lastScrollY = window.scrollY;
+
     const handleScroll = () => {
-      setIsVisible(window.scrollY > 100);
+      const currentScrollY = window.scrollY;
+      
+      // Si está en la parte superior, ocultar
+      if (currentScrollY === 0) {
+        setIsVisible(false);
+      } 
+      // Si se hace scroll hacia arriba, mostrar
+      else if (currentScrollY < lastScrollY) {
+        setIsVisible(true);
+      } 
+      // Si se hace scroll hacia abajo, ocultar
+      else if (currentScrollY > lastScrollY) {
+        setIsVisible(false);
+      }
+      
+      lastScrollY = currentScrollY;
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -127,9 +144,9 @@ export const Header = () => {
           <div className="bg-card border-b border-border/30">
             <div className="container-premium py-2 flex items-center justify-between text-xs tracking-wider text-foreground">
               <div className="hidden md:flex items-center gap-6">
-                <a href="tel:+522221234567" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <a href="tel:+522215815902" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                   <Phone className="w-3 h-3" />
-                  <span>+52 222 123 4567</span>
+                  <span>+52 221 581 5902</span>
                 </a>
                 <span className="flex items-center gap-2">
                   <MapPin className="w-3 h-3" />
@@ -154,7 +171,7 @@ export const Header = () => {
           <div className="bg-background/95 backdrop-blur-md border-b border-border/30">
             <div className="container-premium py-4 flex items-center justify-between">
               {/* Logo */}
-              <a href="#inicio" className="flex items-center gap-2">
+              <a href="/" className="flex items-center gap-2">
                 <span className="font-display text-2xl md:text-3xl font-semibold tracking-tight">
                   RUNNING <span className="font-light italic">ERA</span>
                 </span>

@@ -12,13 +12,13 @@ const heroVideoWebM = 'https://res.cloudinary.com/dhqq37qlu/video/upload/f_webm,
 const logoRunningEra = '/assets/logo-running-era.png';
 
 const categoryItems = [
-  { icon: Dumbbell, label: 'Entrenamientos', href: '#experiencias' },
-  { icon: Calendar, label: 'Eventos', href: '#eventos' },
-  { icon: Gift, label: 'Beneficios', href: '#experiencias' },
-  { icon: Handshake, label: 'Marcas &', sublabel: 'Patrocinios', href: '#experiencias' },
-  { icon: ShoppingBag, label: 'Tienda', href: '#experiencias' },
-  { icon: Users, label: 'Comunidad', href: '#comunidad' },
-  { icon: ImageIcon, label: 'Galería', href: '#galeria' },
+  { icon: Dumbbell, label: 'Entrenamientos', href: '/entrenamientos' },
+  { icon: Calendar, label: 'Eventos', href: '/eventos' },
+  { icon: Gift, label: 'Beneficios', href: '/beneficios' },
+  { icon: Handshake, label: 'Marcas &', sublabel: 'Patrocinios', href: '/marcas' },
+  { icon: ShoppingBag, label: 'Tienda', href: '/tienda' },
+  { icon: Users, label: 'Comunidad', href: '/comunidad' },
+  { icon: ImageIcon, label: 'Galería', href: '/galeria' },
 ];
 
 export const Hero = () => {

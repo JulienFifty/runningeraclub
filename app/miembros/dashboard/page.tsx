@@ -4,10 +4,9 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { Calendar, User, LogOut, Clock, MapPin, CheckCircle, XCircle, ArrowRight } from 'lucide-react';
+import { Calendar, User, LogOut, Clock, MapPin, CheckCircle, XCircle, ArrowRight, Trophy, Activity, TrendingUp, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { StravaConnectButton } from '@/components/strava/StravaConnectButton';
-import { StravaStats } from '@/components/strava/StravaStats';
 
 // Forzar renderizado dinámico
 export const dynamic = 'force-dynamic';
@@ -300,47 +299,94 @@ function DashboardContent() {
             </div>
           </div>
 
-          {/* Strava Connection Card */}
-          {!stravaConnection ? (
-            <div className="bg-card border border-border p-6 rounded-lg mb-8">
-              <h2 className="font-display text-xl text-foreground font-light mb-4">
-                Conecta tu Strava
-              </h2>
-              <p className="text-sm text-muted-foreground mb-6">
-                Conecta tu cuenta de Strava para sincronizar tus actividades y competir en el leaderboard del club.
-              </p>
-              <StravaConnectButton
-                isConnected={!!stravaConnection}
-                athleteData={stravaConnection ? (stravaConnection as any).athlete_data : undefined}
-                onConnectionChange={() => {
-                  if (member) {
-                    loadStravaConnection(member.id);
-                  }
-                }}
-              />
+          {/* Strava Connection Card - Próximamente */}
+          <div className="bg-card border border-border p-6 rounded-lg mb-8 relative overflow-hidden">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 opacity-5">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-[#FC4C02] rounded-full blur-3xl"></div>
             </div>
-          ) : (
-            <div className="space-y-6 mb-8">
-              {/* Strava Connection Status */}
-              <div className="bg-card border border-border p-6 rounded-lg">
-                <h2 className="font-display text-xl text-foreground font-light mb-4">
-                  Conexión Strava
-                </h2>
-                <StravaConnectButton
-                  isConnected={!!stravaConnection}
-                  athleteData={stravaConnection?.athlete_data || undefined}
-                  onConnectionChange={() => {
-                    if (member) {
-                      loadStravaConnection(member.id);
-                    }
-                  }}
-                />
+            
+            <div className="relative">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="w-12 h-12 rounded-lg bg-[#FC4C02]/10 border border-[#FC4C02]/20 flex items-center justify-center flex-shrink-0">
+                  <svg
+                    className="w-6 h-6 text-[#FC4C02]"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h2 className="font-display text-xl text-foreground font-light mb-2">
+                    Integración con Strava
+                  </h2>
+                  <span className="inline-block text-xs px-3 py-1 bg-muted text-muted-foreground rounded-full mb-4">
+                    Próximamente
+                  </span>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Muy pronto podrás conectar tu cuenta de Strava y disfrutar de estas funcionalidades:
+                  </p>
+                </div>
               </div>
 
-              {/* Strava Stats */}
-              <StravaStats />
+              {/* Features Tease */}
+              <div className="grid md:grid-cols-2 gap-4 mb-6">
+                <div className="flex items-start gap-3 p-4 bg-muted/30 rounded-lg">
+                  <div className="w-8 h-8 rounded-full bg-[#FC4C02]/10 flex items-center justify-center flex-shrink-0">
+                    <Trophy className="w-4 h-4 text-[#FC4C02]" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Leaderboard Automático</h3>
+                    <p className="text-xs text-muted-foreground">
+                      Tus actividades se sincronizarán automáticamente y competirás en tiempo real
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-4 bg-muted/30 rounded-lg">
+                  <div className="w-8 h-8 rounded-full bg-[#FC4C02]/10 flex items-center justify-center flex-shrink-0">
+                    <Activity className="w-4 h-4 text-[#FC4C02]" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Estadísticas Detalladas</h3>
+                    <p className="text-xs text-muted-foreground">
+                      Visualiza tus kilómetros, ritmos y progreso de entrenamiento
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-4 bg-muted/30 rounded-lg">
+                  <div className="w-8 h-8 rounded-full bg-[#FC4C02]/10 flex items-center justify-center flex-shrink-0">
+                    <Users className="w-4 h-4 text-[#FC4C02]" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Competencia Social</h3>
+                    <p className="text-xs text-muted-foreground">
+                      Compara tu rendimiento con otros miembros del club
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-4 bg-muted/30 rounded-lg">
+                  <div className="w-8 h-8 rounded-full bg-[#FC4C02]/10 flex items-center justify-center flex-shrink-0">
+                    <TrendingUp className="w-4 h-4 text-[#FC4C02]" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Seguimiento de Progreso</h3>
+                    <p className="text-xs text-muted-foreground">
+                      Analiza tu evolución y alcanza tus objetivos de running
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <StravaConnectButton
+                isConnected={false}
+                onConnectionChange={() => {}}
+              />
             </div>
-          )}
+          </div>
         </div>
 
         {/* My Events */}

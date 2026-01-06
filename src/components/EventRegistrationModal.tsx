@@ -250,7 +250,7 @@ export function EventRegistrationModal({
                     <User className="w-6 h-6 text-foreground" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-medium text-foreground mb-1">
+                    <h3 className="text-lg font-display font-bold text-foreground mb-1 uppercase tracking-wider">
                       Registro Rápido
                     </h3>
                     <p className="text-sm text-muted-foreground">
@@ -270,7 +270,7 @@ export function EventRegistrationModal({
                     <Mail className="w-6 h-6 text-foreground" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-medium text-foreground mb-1">
+                    <h3 className="text-lg font-display font-bold text-foreground mb-1 uppercase tracking-wider">
                       Crear Cuenta / Iniciar Sesión
                     </h3>
                     <p className="text-sm text-muted-foreground">
@@ -332,7 +332,7 @@ export function EventRegistrationModal({
                     value={guestForm.phone}
                     onChange={(e) => setGuestForm({ ...guestForm, phone: e.target.value })}
                     className="pl-10"
-                    placeholder="+52 222 123 4567"
+                    placeholder="+52 221 581 5902"
                   />
                 </div>
               </div>

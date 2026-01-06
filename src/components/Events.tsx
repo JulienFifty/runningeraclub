@@ -121,16 +121,16 @@ export const Events = () => {
       {(!events.length || loading) && (
         <div className="absolute inset-0 z-0 bg-black" />
       )}
-
+      
       <div className="container-premium relative z-10">
         {/* Section Header - Siempre visible */}
         <div className="text-center mb-16 relative z-20">
           <motion.h2 
-            initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 40 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+          transition={{ duration: 0.8 }}
             className="font-title text-4xl md:text-5xl lg:text-6xl text-white font-bold mb-6 uppercase"
-          >
+        >
             Eventos Mensuales
           </motion.h2>
           
@@ -156,31 +156,31 @@ export const Events = () => {
         </div>
 
         {/* Carousel Container */}
-        {loading ? (
-          <div className="text-center text-white/80 py-12">
-            Cargando eventos...
-          </div>
-        ) : events.length === 0 ? (
-          <div className="text-center text-white/80 py-12">
-            No hay eventos disponibles
-          </div>
-        ) : (
+          {loading ? (
+            <div className="text-center text-white/80 py-12">
+              Cargando eventos...
+            </div>
+          ) : events.length === 0 ? (
+            <div className="text-center text-white/80 py-12">
+              No hay eventos disponibles
+            </div>
+          ) : (
           <div className="relative">
             {/* Navigation Buttons */}
             <button
               onClick={prevSlide}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 p-3 transition-all duration-300 hidden lg:block"
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 p-2 md:p-3 transition-all duration-300"
               aria-label="Anterior"
             >
-              <ChevronLeft className="w-6 h-6 text-white" />
+              <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </button>
             
             <button
               onClick={nextSlide}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 p-3 transition-all duration-300 hidden lg:block"
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 p-2 md:p-3 transition-all duration-300"
               aria-label="Siguiente"
             >
-              <ChevronRight className="w-6 h-6 text-white" />
+              <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </button>
 
             {/* Cards Carousel */}
@@ -193,7 +193,7 @@ export const Events = () => {
                 if (!isVisible) return null;
 
                 return (
-                  <motion.div
+                <motion.div
                     key={event.id}
                     initial={false}
                     animate={{
@@ -211,51 +211,51 @@ export const Events = () => {
                   >
                     <Link href={`/eventos/${event.slug}`}>
                       <div className="group bg-black/40 border border-white/10 overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-500">
-                        {/* Background Image */}
+                  {/* Background Image */}
                         <div className="relative h-60 md:h-64 overflow-hidden">
-                          <img
-                            src={event.image}
-                            alt={event.title}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                            loading="lazy"
-                          />
+                    <img
+                      src={event.image}
+                      alt={event.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      loading="lazy"
+                    />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-black/30" />
-                          
-                          {/* Date Badge */}
+
+                    {/* Date Badge */}
                           <div className="absolute top-6 left-6">
-                            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white px-4 py-2">
-                              <Calendar className="w-4 h-4" />
-                              <span className="text-xs font-medium tracking-wider uppercase">
-                                {event.date}
-                              </span>
-                            </div>
-                          </div>
+                      <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white px-4 py-2">
+                        <Calendar className="w-4 h-4" />
+                        <span className="text-xs font-medium tracking-wider uppercase">
+                          {event.date}
+                        </span>
+                      </div>
+                    </div>
 
                           {/* Title on Image */}
                           <div className="absolute bottom-0 left-0 right-0 p-6">
                             <h3 className="font-title text-3xl md:text-4xl text-white font-bold mb-2 leading-tight uppercase tracking-wide">
-                              {event.title}
-                            </h3>
+                      {event.title}
+                    </h3>
                           </div>
                         </div>
 
                         {/* Content */}
                         <div className="p-6 md:p-8 bg-white">
                           <p className="text-muted-foreground font-light leading-relaxed mb-4 text-sm md:text-base">
-                            {event.shortDescription}
-                          </p>
+                      {event.shortDescription}
+                    </p>
 
                           <p className="text-muted-foreground/60 text-xs tracking-widest uppercase mb-6">
-                            {event.location}
-                          </p>
+                      {event.location}
+                    </p>
 
                           <div className="w-full bg-black text-white px-8 py-4 text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-black/80 text-center">
-                            {event.buttonText}
-                          </div>
-                        </div>
+                      {event.buttonText}
+                    </div>
+                  </div>
                       </div>
                     </Link>
-                  </motion.div>
+                </motion.div>
                 );
               })}
             </div>
@@ -273,9 +273,19 @@ export const Events = () => {
                   }`}
                   aria-label={`Ir a evento ${index + 1}`}
                 />
-              ))}
+            ))}
             </div>
-          </div>
+
+            {/* Floating Register Button - Mobile Only */}
+            {events.length > 0 && events[activeIndex] && (
+              <Link
+                href={`/eventos/${events[activeIndex].slug}`}
+                className="fixed bottom-0 left-0 right-0 md:hidden z-50 bg-black text-white px-6 py-4 text-center text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-black/90 border-t border-white/10"
+              >
+                {events[activeIndex].buttonText}
+              </Link>
+            )}
+        </div>
         )}
       </div>
     </section>

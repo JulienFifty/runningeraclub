@@ -19,7 +19,7 @@ export const WellnessCommunity = () => {
 
   return (
     <section ref={sectionRef} className="bg-background py-16 md:py-24 overflow-hidden">
-      <div className="container-premium">
+      <div className="container-premium px-4 md:px-20">
         <motion.div 
           className="relative h-[40vh] md:h-[45vh] flex items-center overflow-hidden border border-black/20"
           style={{ opacity, y, scale }}
@@ -38,7 +38,7 @@ export const WellnessCommunity = () => {
               }}
               loading="lazy"
             />
-            <motion.div className="absolute inset-0 bg-black/70 border border-gray-300/20" />
+            <motion.div className="absolute inset-0 bg-black/50 border border-gray-300/20" />
           </div>
 
           {/* Content */}
