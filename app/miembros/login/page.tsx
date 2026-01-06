@@ -121,8 +121,7 @@ function LoginContent() {
       if (authError) {
         // Detectar si el usuario ya existe pero el email no está confirmado
         if (authError.message.includes('already registered') || 
-            authError.message.includes('User already registered') ||
-            authData?.user?.identities?.length === 0) {
+            authError.message.includes('User already registered')) {
           toast.error('Esta cuenta ya existe', {
             description: 'Si no confirmaste tu email, revisa tu correo o solicita uno nuevo',
             duration: 6000,
