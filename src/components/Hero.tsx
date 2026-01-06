@@ -13,7 +13,7 @@ const logoRunningEra = '/assets/logo-running-era.png';
 
 const categoryItems = [
   { icon: Dumbbell, label: 'Entrenamientos', href: '/entrenamientos' },
-  { icon: Calendar, label: 'Eventos', href: '/eventos' },
+  { icon: Calendar, label: 'Eventos', href: '#eventos' },
   { icon: Gift, label: 'Beneficios', href: '/beneficios' },
   { icon: Handshake, label: 'Marcas &', sublabel: 'Patrocinios', href: '/marcas' },
   { icon: ShoppingBag, label: 'Tienda', href: '/tienda' },
