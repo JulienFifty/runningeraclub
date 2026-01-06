@@ -34,33 +34,55 @@ function CuentaConfirmadaContent() {
   const supabase = createClient();
 
   useEffect(() => {
+    let isMounted = true;
+    
     const loadEventData = async () => {
-      // Buscar event_slug en los parámetros (puede venir como 'event' o 'event_slug')
-      const slug = searchParams?.get('event_slug') || searchParams?.get('event');
-      
-      if (slug) {
-        setEventSlug(slug);
-        setLoadingEvent(true);
+      try {
+        // Buscar event_slug en los parámetros (puede venir como 'event' o 'event_slug')
+        const slug = searchParams?.get('event_slug') || searchParams?.get('event');
         
-        // Cargar información completa del evento
-        const { data: eventData, error } = await supabase
-          .from('events')
-          .select('*')
-          .eq('slug', slug)
-          .single();
+        if (slug && isMounted) {
+          setEventSlug(slug);
+          setLoadingEvent(true);
+          
+          // Cargar información completa del evento
+          const { data: eventData, error } = await supabase
+            .from('events')
+            .select('*')
+            .eq('slug', slug)
+            .single();
 
-        if (!error && eventData) {
-          setEvent(eventData);
+          if (!error && eventData && isMounted) {
+            setEvent(eventData);
+          }
+          
+          if (isMounted) {
+            setLoadingEvent(false);
+          }
         }
-        
-        setLoadingEvent(false);
-      }
 
-      setTimeout(() => setLoading(false), 1500);
+        // Esperar antes de ocultar el loading
+        setTimeout(() => {
+          if (isMounted) {
+            setLoading(false);
+          }
+        }, 1500);
+      } catch (error) {
+        console.error('Error loading event data:', error);
+        if (isMounted) {
+          setLoading(false);
+          setLoadingEvent(false);
+        }
+      }
     };
 
     loadEventData();
-  }, [searchParams]);
+    
+    // Cleanup function
+    return () => {
+      isMounted = false;
+    };
+  }, [searchParams, supabase]);
 
   const handleContinueToEvent = () => {
     if (eventSlug) {
