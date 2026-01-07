@@ -151,20 +151,23 @@ export async function POST(request: NextRequest) {
               console.error('❌ Member not found:', { member_id, error: memberError });
             } else {
               // Crear el registro
-              const { data: newRegistration, error: createError } = await supabase
-                .from('event_registrations')
-                .insert({
-                  member_id: member_id,
-                  event_id: event_id,
-                  status: 'confirmed',
-                  payment_status: 'paid',
-                  stripe_session_id: session.id,
-                  stripe_payment_intent_id: session.payment_intent as string,
-                  amount_paid: session.amount_total ? session.amount_total / 100 : 0,
-                  currency: session.currency || 'mxn',
-                  payment_method: session.payment_method_types?.[0] || 'card',
-                })
-                .select();
+                const { data: newRegistration, error: createError } = await supabase
+                  .from('event_registrations')
+                  .upsert(
+                    {
+                      member_id: member_id,
+                      event_id: event_id,
+                      status: 'confirmed',
+                      payment_status: 'paid',
+                      stripe_session_id: session.id,
+                      stripe_payment_intent_id: session.payment_intent as string,
+                      amount_paid: session.amount_total ? session.amount_total / 100 : 0,
+                      currency: session.currency || 'mxn',
+                      payment_method: session.payment_method_types?.[0] || 'card',
+                    },
+                    { onConflict: 'member_id,event_id', ignoreDuplicates: false }
+                  )
+                  .select();
 
               if (createError) {
                 console.error('❌ Error creating event registration:', createError);

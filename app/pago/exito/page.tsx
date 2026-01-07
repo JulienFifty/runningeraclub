@@ -109,17 +109,20 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
             console.log('⚠️ Registro no encontrado, creando nuevo...');
             const { data: newReg, error: createError } = await supabase
               .from('event_registrations')
-              .insert({
-                member_id: memberId,
-                event_id: eventId,
-                status: 'confirmed',
-                payment_status: 'paid',
-                stripe_session_id: sessionId,
-                stripe_payment_intent_id: session.payment_intent as string,
-                amount_paid: amount,
-                currency: currency.toLowerCase(),
-                payment_method: session.payment_method_types?.[0] || 'card',
-              })
+              .upsert(
+                {
+                  member_id: memberId,
+                  event_id: eventId,
+                  status: 'confirmed',
+                  payment_status: 'paid',
+                  stripe_session_id: sessionId,
+                  stripe_payment_intent_id: session.payment_intent as string,
+                  amount_paid: amount,
+                  currency: currency.toLowerCase(),
+                  payment_method: session.payment_method_types?.[0] || 'card',
+                },
+                { onConflict: 'member_id,event_id', ignoreDuplicates: false }
+              )
               .select();
 
             if (createError) {
