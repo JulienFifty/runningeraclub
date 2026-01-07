@@ -71,6 +71,20 @@ function DashboardContent() {
       window.history.replaceState({}, '', '/miembros/dashboard');
     }
 
+    // Verificar si viene de un pago exitoso
+    const paymentSuccess = searchParams?.get('payment_success');
+    if (paymentSuccess === 'true') {
+      toast.success('¡Pago completado exitosamente!', {
+        description: 'Tu registro ha sido confirmado',
+      });
+      // Refrescar los registros después de un breve delay para asegurar que el webhook se ejecutó
+      setTimeout(async () => {
+        await reloadRegistrations();
+      }, 2000);
+      // Limpiar URL
+      window.history.replaceState({}, '', '/miembros/dashboard');
+    }
+
     // Verificar parámetros de Strava en la URL
     const stravaConnected = searchParams?.get('strava_connected');
     const stravaError = searchParams?.get('strava_error');
@@ -110,6 +124,74 @@ function DashboardContent() {
     } catch (error) {
       console.error('Error loading Strava connection:', error);
       setStravaConnection(null);
+    }
+  };
+
+  const reloadRegistrations = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        return;
+      }
+
+      // Cargar registros de eventos
+      const { data: registrationsData, error: registrationsError } = await supabase
+        .from('event_registrations')
+        .select(`
+          id,
+          event_id,
+          registration_date,
+          status,
+          payment_status,
+          stripe_session_id,
+          event:events (
+            id,
+            slug,
+            title,
+            date,
+            location,
+            image,
+            category,
+            price
+          )
+        `)
+        .eq('member_id', user.id)
+        .order('registration_date', { ascending: false });
+
+      if (registrationsError) {
+        console.error('Error reloading registrations:', registrationsError);
+      } else if (registrationsData) {
+        // Transformar los datos y filtrar
+        const transformedRegistrations = registrationsData
+          .map((reg: any) => ({
+            id: reg.id,
+            event_id: reg.event_id,
+            registration_date: reg.registration_date,
+            status: reg.status,
+            payment_status: reg.payment_status,
+            stripe_session_id: reg.stripe_session_id,
+            event: Array.isArray(reg.event) ? reg.event[0] : reg.event,
+          }))
+          .filter((reg: any) => {
+            if (!reg.event) return false;
+            
+            // Verificar si el evento es gratuito
+            const price = reg.event.price?.toString().toLowerCase();
+            const isFreeEvent = !price || price === 'gratis' || price === '0' || price === 'free';
+            
+            // Mostrar si:
+            // 1. Está pagado
+            // 2. Es evento gratuito
+            // 3. Tiene stripe_session_id (pago iniciado, puede estar pendiente de webhook)
+            return reg.payment_status === 'paid' || isFreeEvent || !!reg.stripe_session_id;
+          });
+        
+        console.log('🔄 Registros recargados:', transformedRegistrations.length);
+        setRegistrations(transformedRegistrations);
+      }
+    } catch (error) {
+      console.error('Error reloading registrations:', error);
     }
   };
 
@@ -178,6 +260,7 @@ function DashboardContent() {
           registration_date,
           status,
           payment_status,
+          stripe_session_id,
           event:events (
             id,
             slug,
@@ -193,9 +276,10 @@ function DashboardContent() {
         .order('registration_date', { ascending: false });
 
       if (registrationsError) {
+        console.error('Error loading registrations:', registrationsError);
         // Error al cargar registros, pero no bloqueamos la vista
       } else if (registrationsData) {
-        // Transformar los datos y filtrar solo registros con pago completado o eventos gratuitos
+        // Transformar los datos y filtrar
         const transformedRegistrations = registrationsData
           .map((reg: any) => ({
             id: reg.id,
@@ -203,6 +287,7 @@ function DashboardContent() {
             registration_date: reg.registration_date,
             status: reg.status,
             payment_status: reg.payment_status,
+            stripe_session_id: reg.stripe_session_id,
             event: Array.isArray(reg.event) ? reg.event[0] : reg.event,
           }))
           .filter((reg: any) => {
@@ -212,10 +297,14 @@ function DashboardContent() {
             const price = reg.event.price?.toString().toLowerCase();
             const isFreeEvent = !price || price === 'gratis' || price === '0' || price === 'free';
             
-            // Solo mostrar si está pagado o es gratuito
-            return reg.payment_status === 'paid' || isFreeEvent;
+            // Mostrar si:
+            // 1. Está pagado
+            // 2. Es evento gratuito
+            // 3. Tiene stripe_session_id (pago iniciado, puede estar pendiente de webhook)
+            return reg.payment_status === 'paid' || isFreeEvent || !!reg.stripe_session_id;
           });
         
+        console.log('📋 Registros cargados:', transformedRegistrations.length);
         setRegistrations(transformedRegistrations);
       }
     } catch (error) {

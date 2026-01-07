@@ -29,6 +29,8 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
   let amount = 0;
   let currency = 'mxn';
   let status = 'succeeded';
+  let eventId: string | null = null;
+  let memberId: string | null = null;
 
   const { data: dbTransaction } = await supabase
     .from('payment_transactions')
@@ -52,6 +54,8 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
         amount = session.amount_total ? session.amount_total / 100 : 0;
         currency = session.currency?.toUpperCase() || 'MXN';
         status = 'succeeded';
+        eventId = session.metadata?.event_id || null;
+        memberId = session.metadata?.member_id || null;
 
         // Intentar obtener información del evento desde metadata
         if (session.metadata?.event_id) {
@@ -64,6 +68,32 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
           if (event) {
             eventTitle = event.title;
             eventSlug = event.slug;
+          }
+        }
+
+        // ✅ ACTUALIZAR REGISTRO INMEDIATAMENTE si el pago está completo
+        // Esto asegura que el registro esté actualizado antes de que el webhook se ejecute
+        if (memberId && eventId) {
+          console.log('🔄 Actualizando registro inmediatamente después del pago...');
+          
+          const { error: updateError } = await supabase
+            .from('event_registrations')
+            .update({
+              payment_status: 'paid',
+              status: 'confirmed',
+              stripe_session_id: sessionId,
+              stripe_payment_intent_id: session.payment_intent as string,
+              amount_paid: amount,
+              currency: currency.toLowerCase(),
+              payment_method: session.payment_method_types?.[0] || 'card',
+            })
+            .eq('member_id', memberId)
+            .eq('event_id', eventId);
+
+          if (updateError) {
+            console.error('⚠️ Error actualizando registro (no crítico, webhook lo hará):', updateError);
+          } else {
+            console.log('✅ Registro actualizado inmediatamente');
           }
         }
       } else {
@@ -138,7 +168,7 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
                 </Link>
               )}
               <Link
-                href="/miembros/dashboard"
+                href="/miembros/dashboard?payment_success=true"
                 className="inline-flex items-center justify-center px-6 py-3 bg-foreground text-background hover:bg-foreground/90 transition-all duration-300 text-sm font-medium tracking-wider uppercase"
               >
                 Ir al Dashboard
