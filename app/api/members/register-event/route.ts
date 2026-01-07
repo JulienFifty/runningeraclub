@@ -107,6 +107,10 @@ export async function POST(request: Request) {
 
     console.log('✅ Registration check:', { existingRegistration });
 
+    // Variable para rastrear si debemos reutilizar un registro existente
+    let reuseExistingRegistration = false;
+    let existingRegistrationId: string | null = null;
+
     if (existingRegistration) {
       // Si el pago está completado, rechazar
       if (existingRegistration.payment_status === 'paid') {
@@ -116,73 +120,49 @@ export async function POST(request: Request) {
         );
       }
 
-      // Si el pago está pendiente, verificar si es antiguo (>2 horas)
+      // Si el pago está pendiente
       if (existingRegistration.payment_status === 'pending') {
-        const registrationDate = new Date(existingRegistration.registration_date);
-        const hoursSinceRegistration = (Date.now() - registrationDate.getTime()) / (1000 * 60 * 60);
-        
-        // Si el registro pendiente tiene más de 2 horas, eliminarlo y permitir nuevo intento
-        if (hoursSinceRegistration > 2) {
-          console.log('⚠️ Registro pendiente antiguo encontrado, eliminando...', {
-            hours: hoursSinceRegistration.toFixed(2),
-            registration_id: existingRegistration.id
-          });
-          
-          await supabase
-            .from('event_registrations')
-            .delete()
-            .eq('id', existingRegistration.id);
-          
-          console.log('✅ Registro pendiente antiguo eliminado, permitiendo nuevo intento');
-        } else {
-          // Si el registro es reciente, verificar si tiene stripe_session_id
-          if (existingRegistration.stripe_session_id) {
-            // Intentar obtener la sesión de Stripe para ver si aún es válida
-            try {
-              const session = await stripe.checkout.sessions.retrieve(existingRegistration.stripe_session_id);
-              
-              // Si la sesión está completa, actualizar el registro
-              if (session.payment_status === 'paid') {
-                await supabase
-                  .from('event_registrations')
-                  .update({
-                    payment_status: 'paid',
-                    status: 'confirmed',
-                  })
-                  .eq('id', existingRegistration.id);
-                
-                return NextResponse.json(
-                  { error: 'Ya estás registrado en este evento (pago completado)' },
-                  { status: 400 }
-                );
-              }
-              
-              // Si la sesión está abierta, devolver la URL
-              if (session.status === 'open' && session.url) {
-                return NextResponse.json({
-                  success: true,
-                  requires_payment: true,
-                  checkout_url: session.url,
-                  message: 'Tienes un pago pendiente, continuando con la sesión existente',
-                });
-              }
-            } catch (error) {
-              console.error('Error verificando sesión de Stripe:', error);
-              // Si hay error, eliminar el registro y permitir nuevo intento
+        // Verificar si tiene stripe_session_id activo
+        if (existingRegistration.stripe_session_id) {
+          try {
+            const session = await stripe.checkout.sessions.retrieve(existingRegistration.stripe_session_id);
+            
+            // Si la sesión está completa, actualizar el registro
+            if (session.payment_status === 'paid') {
               await supabase
                 .from('event_registrations')
-                .delete()
+                .update({
+                  payment_status: 'paid',
+                  status: 'confirmed',
+                })
                 .eq('id', existingRegistration.id);
+              
+              return NextResponse.json(
+                { error: 'Ya estás registrado en este evento (pago completado)' },
+                { status: 400 }
+              );
             }
-          } else {
-            // Si no tiene stripe_session_id, eliminar y permitir nuevo intento
-            console.log('⚠️ Registro pendiente sin stripe_session_id, eliminando...');
-            await supabase
-              .from('event_registrations')
-              .delete()
-              .eq('id', existingRegistration.id);
+            
+            // Si la sesión está abierta, devolver la URL
+            if (session.status === 'open' && session.url) {
+              return NextResponse.json({
+                success: true,
+                requires_payment: true,
+                checkout_url: session.url,
+                message: 'Tienes un pago pendiente, continuando con la sesión existente',
+              });
+            }
+          } catch (error) {
+            console.error('Error verificando sesión de Stripe:', error);
+            // Si hay error con la sesión, reutilizar el registro existente
           }
         }
+        
+        // Si llegamos aquí, el registro pendiente no tiene sesión válida
+        // Reutilizaremos este registro en lugar de crear uno nuevo
+        console.log('⚠️ Registro pendiente encontrado sin sesión válida, reutilizando...');
+        reuseExistingRegistration = true;
+        existingRegistrationId = existingRegistration.id;
       }
     }
 
@@ -241,22 +221,43 @@ export async function POST(request: Request) {
         );
       }
 
-      // Crear registro pendiente de pago
-      const { error: registrationError } = await supabase
-        .from('event_registrations')
-        .insert({
-          member_id: user.id,
-          event_id: event_id,
-          status: 'pending',
-          payment_status: 'pending',
-        });
+      // Crear o actualizar registro pendiente de pago
+      if (reuseExistingRegistration && existingRegistrationId) {
+        // Actualizar registro existente con el nuevo stripe_session_id
+        const { error: updateError } = await supabase
+          .from('event_registrations')
+          .update({
+            stripe_session_id: checkoutData.sessionId,
+            registration_date: new Date().toISOString(),
+          })
+          .eq('id', existingRegistrationId);
 
-      console.log('📋 Registration created:', { registrationError });
+        console.log('📋 Registration updated:', { updateError });
 
-      if (registrationError) {
-        console.error('❌ Error creando registro:', registrationError);
-        // No fallar aquí, el pago ya se inició
-        // Solo loguear el error
+        if (updateError) {
+          console.error('❌ Error actualizando registro:', updateError);
+        } else {
+          console.log('✅ Registro existente actualizado con nueva sesión de Stripe');
+        }
+      } else {
+        // Crear nuevo registro
+        const { error: registrationError } = await supabase
+          .from('event_registrations')
+          .insert({
+            member_id: user.id,
+            event_id: event_id,
+            status: 'pending',
+            payment_status: 'pending',
+            stripe_session_id: checkoutData.sessionId,
+          });
+
+        console.log('📋 Registration created:', { registrationError });
+
+        if (registrationError) {
+          console.error('❌ Error creando registro:', registrationError);
+          // No fallar aquí, el pago ya se inició
+          // Solo loguear el error
+        }
       }
 
       console.log('✅ Retornando checkout_url:', checkoutData.url);
