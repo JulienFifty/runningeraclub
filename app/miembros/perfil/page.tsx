@@ -296,30 +296,32 @@ export default function MemberProfile() {
   }
 
   return (
-    <main className="min-h-screen bg-background p-8">
-      <div className="container-premium max-w-4xl">
-        <Link
-          href="/miembros/dashboard"
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Volver al dashboard
-        </Link>
+    <main className="min-h-screen bg-background px-0 md:p-8">
+      <div className="max-w-4xl mx-auto md:container-premium">
+        <div className="px-4 md:px-0">
+          <Link
+            href="/miembros/dashboard"
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4 md:mb-6 transition-colors text-sm md:text-base"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Volver al dashboard
+          </Link>
 
-        <div className="mb-8">
-          <h1 className="font-display text-4xl md:text-5xl text-foreground font-light mb-4">
-            Mi Perfil
-          </h1>
-          <p className="text-muted-foreground">
-            Gestiona tu información personal
-          </p>
+          <div className="mb-6 md:mb-8">
+            <h1 className="font-display text-3xl md:text-5xl text-foreground font-light mb-2 md:mb-4">
+              Mi Perfil
+            </h1>
+            <p className="text-sm md:text-base text-muted-foreground">
+              Gestiona tu información personal
+            </p>
+          </div>
         </div>
 
-        <div className="bg-card border border-border p-6 rounded-lg space-y-6">
+        <div className="bg-card border-t border-b md:border md:border-border p-4 md:p-6 md:rounded-lg space-y-4 md:space-y-6">
           {/* Información de Membresía */}
-          <div className="pb-6 border-b border-border">
-            <h2 className="font-display text-xl text-foreground mb-4">Información de Membresía</h2>
-            <div className="grid md:grid-cols-2 gap-4">
+          <div className="pb-4 md:pb-6 border-b border-border">
+            <h2 className="font-display text-lg md:text-xl text-foreground mb-3 md:mb-4">Información de Membresía</h2>
+            <div className="grid md:grid-cols-2 gap-3 md:gap-4">
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Email</p>
                 <p className="text-foreground">{member.email}</p>
@@ -338,20 +340,20 @@ export default function MemberProfile() {
           </div>
 
           {/* Foto de Perfil */}
-          <div className="pb-6 border-b border-border">
-            <h2 className="font-display text-xl text-foreground mb-4">Foto de Perfil</h2>
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+          <div className="pb-4 md:pb-6 border-b border-border">
+            <h2 className="font-display text-lg md:text-xl text-foreground mb-3 md:mb-4">Foto de Perfil</h2>
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6">
               {/* Avatar Preview */}
               <div className="relative">
                 {profileImagePreview || member.profile_image ? (
                   <img
                     src={profileImagePreview || member.profile_image}
                     alt={member.full_name}
-                    className="w-32 h-32 rounded-full object-cover border-4 border-border"
+                    className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-border"
                   />
                 ) : (
-                  <div className="w-32 h-32 rounded-full border-4 border-border bg-foreground/10 flex items-center justify-center">
-                    <span className="text-4xl font-display font-bold text-foreground">
+                  <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-border bg-foreground/10 flex items-center justify-center">
+                    <span className="text-2xl md:text-4xl font-display font-bold text-foreground">
                       {getInitials(member.full_name)}
                     </span>
                   </div>
@@ -389,8 +391,8 @@ export default function MemberProfile() {
 
           {/* Información Personal */}
           <div>
-            <h2 className="font-display text-xl text-foreground mb-4">Información Personal</h2>
-            <div className="space-y-4">
+            <h2 className="font-display text-lg md:text-xl text-foreground mb-3 md:mb-4">Información Personal</h2>
+            <div className="space-y-3 md:space-y-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
                   Nombre Completo *
@@ -505,11 +507,11 @@ export default function MemberProfile() {
             </div>
           </div>
 
-          <div className="pt-6 border-t border-border">
+          <div className="pt-4 md:pt-6 border-t border-border">
             <button
               onClick={handleSave}
               disabled={saving}
-              className="inline-flex items-center gap-2 bg-foreground text-background px-6 py-3 rounded-lg hover:bg-foreground/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 bg-foreground text-background px-4 md:px-6 py-2 md:py-3 rounded-lg hover:bg-foreground/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
             >
               <Save className="w-4 h-4" />
               {saving ? 'Guardando...' : 'Guardar Cambios'}
@@ -517,22 +519,22 @@ export default function MemberProfile() {
           </div>
 
           {/* Zona Peligrosa - Eliminar Cuenta */}
-          <div className="pt-8 border-t border-red-200">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-              <div className="flex items-start gap-3 mb-4">
-                <AlertTriangle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h3 className="text-lg font-semibold text-red-900 mb-2">
+          <div className="pt-6 md:pt-8 border-t border-red-200">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 md:p-6">
+              <div className="flex items-start gap-2 md:gap-3 mb-3 md:mb-4">
+                <AlertTriangle className="w-5 h-5 md:w-6 md:h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <h3 className="text-base md:text-lg font-semibold text-red-900 mb-2">
                     Zona Peligrosa
                   </h3>
-                  <p className="text-sm text-red-700 mb-4">
+                  <p className="text-xs md:text-sm text-red-700 mb-3 md:mb-4">
                     Una vez que elimines tu cuenta, no hay vuelta atrás. Toda tu información será eliminada permanentemente.
                   </p>
                   <button
                     onClick={() => setShowDeleteModal(true)}
-                    className="inline-flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                    className="inline-flex items-center gap-2 bg-red-600 text-white px-3 md:px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-xs md:text-sm font-medium"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
                     Eliminar Cuenta
                   </button>
                 </div>
