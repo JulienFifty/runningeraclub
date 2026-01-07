@@ -367,12 +367,12 @@ function DashboardContent() {
   };
 
   return (
-    <main className="min-h-screen bg-background p-3 md:p-8">
-      <div className="container-premium max-w-7xl mx-auto">
+    <main className="min-h-screen bg-background px-0 md:p-8">
+      <div className="max-w-7xl mx-auto md:container-premium">
         {/* Header con Perfil */}
-        <div className="mb-6 md:mb-8">
+        <div className="mb-4 md:mb-8">
           {/* Profile Header Card */}
-          <div className="bg-card border border-border rounded-lg overflow-hidden mb-4 md:mb-6">
+          <div className="bg-card border-b border-border md:border md:border-border md:rounded-lg overflow-hidden mb-3 md:mb-6">
             {/* Background Pattern */}
             <div className="h-24 md:h-32 bg-gradient-to-r from-foreground/10 via-foreground/5 to-foreground/10 relative">
               <div className="absolute inset-0 opacity-20">
@@ -446,9 +446,9 @@ function DashboardContent() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-px md:gap-4 mb-4 md:mb-8 bg-border">
             {/* Eventos Registrados */}
-            <div className="bg-card border border-border p-3 md:p-4 rounded-lg hover:border-foreground/30 transition-all">
+            <div className="bg-card p-3 md:p-4 md:border md:border-border md:rounded-lg hover:border-foreground/30 transition-all">
               <div className="flex items-center gap-2 md:gap-3">
                 <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
                   <Calendar className="w-4 h-4 md:w-5 md:h-5 text-blue-500" />
@@ -463,7 +463,7 @@ function DashboardContent() {
             </div>
 
             {/* Eventos Completados */}
-            <div className="bg-card border border-border p-3 md:p-4 rounded-lg hover:border-foreground/30 transition-all">
+            <div className="bg-card p-3 md:p-4 md:border md:border-border md:rounded-lg hover:border-foreground/30 transition-all">
               <div className="flex items-center gap-2 md:gap-3">
                 <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-green-500/10 flex items-center justify-center flex-shrink-0">
                   <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-green-500" />
@@ -478,7 +478,7 @@ function DashboardContent() {
             </div>
 
             {/* Kilómetros */}
-            <div className="bg-card border border-border p-3 md:p-4 rounded-lg hover:border-foreground/30 transition-all">
+            <div className="bg-card p-3 md:p-4 md:border md:border-border md:rounded-lg hover:border-foreground/30 transition-all">
               <div className="flex items-center gap-2 md:gap-3">
                 <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0">
                   <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-orange-500" />
@@ -493,7 +493,7 @@ function DashboardContent() {
             </div>
 
             {/* Posición */}
-            <div className="bg-card border border-border p-3 md:p-4 rounded-lg hover:border-foreground/30 transition-all">
+            <div className="bg-card p-3 md:p-4 md:border md:border-border md:rounded-lg hover:border-foreground/30 transition-all">
               <div className="flex items-center gap-2 md:gap-3">
                 <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center flex-shrink-0">
                   <Trophy className="w-4 h-4 md:w-5 md:h-5 text-yellow-500" />
@@ -509,7 +509,7 @@ function DashboardContent() {
           </div>
 
           {/* Strava Connection Card - Próximamente */}
-          <div className="bg-card border border-border p-4 md:p-6 rounded-lg mb-6 md:mb-8 relative overflow-hidden">
+          <div className="bg-card border-t border-b md:border md:border-border p-4 md:p-6 md:rounded-lg mb-4 md:mb-8 relative overflow-hidden">
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-5">
               <div className="absolute top-0 right-0 w-64 h-64 bg-[#FC4C02] rounded-full blur-3xl"></div>
@@ -599,7 +599,7 @@ function DashboardContent() {
         </div>
 
         {/* My Events */}
-        <div>
+        <div className="px-4 md:px-0">
           <div className="flex items-center justify-between mb-4 md:mb-6">
             <h2 className="font-display text-xl md:text-2xl text-foreground">Mis Eventos</h2>
             <Link
@@ -613,7 +613,7 @@ function DashboardContent() {
           </div>
 
           {registrations.length === 0 ? (
-            <div className="bg-card border border-border p-8 md:p-12 rounded-lg text-center">
+            <div className="bg-card border-t border-b md:border md:border-border p-8 md:p-12 md:rounded-lg text-center">
               <Calendar className="w-10 h-10 md:w-12 md:h-12 text-muted-foreground mx-auto mb-3 md:mb-4" />
               <p className="text-sm md:text-base text-muted-foreground mb-3 md:mb-4">No tienes eventos registrados</p>
               <Link
@@ -630,7 +630,7 @@ function DashboardContent() {
                 <Link
                   key={registration.id}
                   href={`/eventos/${registration.event.slug}`}
-                  className="bg-card border border-border rounded-lg overflow-hidden hover:border-foreground/50 transition-all group"
+                  className="bg-card border-t border-b md:border md:border-border md:rounded-lg overflow-hidden hover:border-foreground/50 transition-all group"
                 >
                   <div className="relative w-full h-40 md:h-48 overflow-hidden">
                     <img
