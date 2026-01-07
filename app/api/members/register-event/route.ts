@@ -139,11 +139,31 @@ export async function POST(request: Request) {
 
       const checkoutData = await checkoutResponse.json();
       
-      console.log('💳 Checkout response:', { ok: checkoutResponse.ok, data: checkoutData });
+      console.log('💳 Checkout response:', { 
+        ok: checkoutResponse.ok, 
+        status: checkoutResponse.status,
+        data: checkoutData 
+      });
 
       if (!checkoutResponse.ok) {
+        console.error('❌ Error en checkout:', checkoutData);
         return NextResponse.json(
-          { error: 'Error al crear sesión de pago', details: checkoutData.error },
+          { 
+            error: 'Error al crear sesión de pago', 
+            details: checkoutData.details || checkoutData.error || 'Error desconocido al crear sesión de pago'
+          },
+          { status: checkoutResponse.status || 500 }
+        );
+      }
+
+      // Validar que tenemos la URL
+      if (!checkoutData.url) {
+        console.error('❌ Checkout exitoso pero sin URL:', checkoutData);
+        return NextResponse.json(
+          { 
+            error: 'Error al crear sesión de pago', 
+            details: 'No se recibió la URL de pago de Stripe'
+          },
           { status: 500 }
         );
       }
@@ -161,11 +181,12 @@ export async function POST(request: Request) {
       console.log('📋 Registration created:', { registrationError });
 
       if (registrationError) {
-        return NextResponse.json(
-          { error: 'Error al crear registro', details: registrationError.message },
-          { status: 500 }
-        );
+        console.error('❌ Error creando registro:', registrationError);
+        // No fallar aquí, el pago ya se inició
+        // Solo loguear el error
       }
+
+      console.log('✅ Retornando checkout_url:', checkoutData.url);
 
       return NextResponse.json({
         success: true,

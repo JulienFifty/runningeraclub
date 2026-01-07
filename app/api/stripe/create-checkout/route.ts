@@ -321,6 +321,24 @@ export async function POST(request: NextRequest) {
 
     const session = await stripe.checkout.sessions.create(sessionConfig);
 
+    console.log('✅ Stripe session creada:', { 
+      sessionId: session.id, 
+      url: session.url,
+      hasUrl: !!session.url 
+    });
+
+    // Validar que la sesión tenga URL
+    if (!session.url) {
+      console.error('❌ Stripe session creada pero sin URL');
+      return NextResponse.json(
+        { 
+          error: 'Error al crear sesión de pago', 
+          details: 'La sesión de Stripe no tiene URL. Por favor intenta de nuevo.'
+        },
+        { status: 500 }
+      );
+    }
+
     // Crear transacción pendiente
     const { error: transactionError } = await supabase
       .from('payment_transactions')
@@ -342,29 +360,37 @@ export async function POST(request: NextRequest) {
       });
 
     if (transactionError) {
-      console.error('Error creating transaction:', transactionError);
+      console.error('⚠️ Error creating transaction (no crítico):', transactionError);
+      // No fallar si la transacción no se crea, es solo para tracking
     }
 
     // Registrar uso del cupón si se aplicó
     if (couponData && discountAmount > 0) {
-      await supabase
-        .from('coupon_usage')
-        .insert({
-          coupon_id: couponData.id,
-          member_id: member_id || null,
-          attendee_id: attendee_id || null,
-          event_id: event_id,
-          discount_amount: discountAmount / 100,
-          original_amount: parseInt(priceMatch[0]),
-          final_amount: amount / 100,
-        });
+      try {
+        await supabase
+          .from('coupon_usage')
+          .insert({
+            coupon_id: couponData.id,
+            member_id: member_id || null,
+            attendee_id: attendee_id || null,
+            event_id: event_id,
+            discount_amount: discountAmount / 100,
+            original_amount: parseInt(priceMatch[0]),
+            final_amount: amount / 100,
+          });
 
-      // Incrementar contador de uso del cupón
-      await supabase
-        .from('coupons')
-        .update({ used_count: supabase.rpc('increment', { row_id: couponData.id }) })
-        .eq('id', couponData.id);
+        // Incrementar contador de uso del cupón
+        await supabase
+          .from('coupons')
+          .update({ used_count: supabase.rpc('increment', { row_id: couponData.id }) })
+          .eq('id', couponData.id);
+      } catch (couponError) {
+        console.error('⚠️ Error registrando uso de cupón (no crítico):', couponError);
+        // No fallar si el cupón no se registra
+      }
     }
+
+    console.log('✅ Retornando respuesta exitosa con URL:', session.url);
 
     return NextResponse.json({
       sessionId: session.id,

@@ -84,6 +84,8 @@ export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventT
     setRegistering(true);
 
     try {
+      console.log('🔄 Iniciando registro de evento:', { eventId });
+      
       const response = await fetch('/api/members/register-event', {
         method: 'POST',
         headers: {
@@ -93,19 +95,37 @@ export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventT
       });
 
       const data = await response.json();
+      
+      console.log('📥 Respuesta del servidor:', { 
+        ok: response.ok, 
+        status: response.status,
+        data 
+      });
 
       if (!response.ok) {
+        console.error('❌ Error en registro:', data);
         toast.error('Error al registrarse', {
-          description: data.error || 'No se pudo completar el registro',
+          description: data.details || data.error || 'No se pudo completar el registro',
         });
+        setRegistering(false);
         return;
       }
 
-      if (data.requires_payment && data.checkout_url) {
-        // Redirigir a Stripe Checkout
-        window.location.href = data.checkout_url;
+      if (data.requires_payment) {
+        if (data.checkout_url) {
+          console.log('💳 Redirigiendo a Stripe Checkout:', data.checkout_url);
+          // Redirigir a Stripe Checkout
+          window.location.href = data.checkout_url;
+        } else {
+          console.error('❌ No se recibió checkout_url pero requires_payment es true');
+          toast.error('Error al crear sesión de pago', {
+            description: 'No se pudo obtener la URL de pago. Por favor intenta de nuevo.',
+          });
+          setRegistering(false);
+        }
       } else {
         // Registro exitoso (evento gratuito)
+        console.log('✅ Registro exitoso (evento gratuito)');
         toast.success('¡Registro exitoso!', {
           description: 'Te has registrado correctamente al evento',
         });
@@ -114,10 +134,10 @@ export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventT
         router.push('/miembros/dashboard');
       }
     } catch (error: any) {
+      console.error('💥 Error inesperado en handleRegister:', error);
       toast.error('Error inesperado', {
         description: error.message || 'Ocurrió un error al registrarse',
       });
-    } finally {
       setRegistering(false);
     }
   };
