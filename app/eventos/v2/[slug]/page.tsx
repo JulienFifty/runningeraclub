@@ -6,7 +6,7 @@ import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { getEventBySlug, getAllEventSlugs } from '@/data/events-supabase';
 import { Calendar, MapPin, Clock, Route, TrendingUp, Users, DollarSign, CheckCircle, ArrowLeft, MessageCircle, Mail, Phone } from 'lucide-react';
 import Link from 'next/link';
-import { EventRegistrationButton } from '@/components/EventRegistrationButton';
+import { EventRegistrationButtonWrapper } from '@/components/EventRegistrationButtonWrapper';
 
 interface PageProps {
   params: Promise<{
@@ -241,7 +241,7 @@ export default async function EventPageV2({ params }: PageProps) {
                   )}
 
                   <div className="space-y-3">
-                    <EventRegistrationButton eventId={event.id} buttonText={event.buttonText} />
+                    <EventRegistrationButtonWrapper eventId={event.id} buttonText={event.buttonText} eventTitle={event.title} eventPrice={event.price} />
                   </div>
 
                   {/* Contact Info */}
