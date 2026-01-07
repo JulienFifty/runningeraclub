@@ -8,6 +8,7 @@ import { Calendar, MapPin, Clock, Route, TrendingUp, Users, DollarSign, CheckCir
 import Link from 'next/link';
 import { EventRegistrationButtonWrapper } from '@/components/EventRegistrationButtonWrapper';
 import { RefreshSessionOnReturn } from '@/components/RefreshSessionOnReturn';
+import { EventAttendees } from '@/components/EventAttendees';
 
 // Forzar renderizado dinámico para obtener datos actualizados
 export const dynamic = 'force-dynamic';
@@ -296,6 +297,9 @@ export default async function EventPage({ params }: PageProps) {
                     </div>
                   )}
                 </div>
+
+                {/* Event Attendees */}
+                <EventAttendees eventId={event.id} eventSlug={event.slug} />
 
                 {/* Quick Info */}
                 <div className="bg-card border border-border p-6 space-y-4">
