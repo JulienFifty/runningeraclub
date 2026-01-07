@@ -167,82 +167,71 @@ export async function POST(request: NextRequest) {
 
       console.log('👤 Member lookup:', { member_id, found: !!member, error: memberError });
 
-      // Si el miembro no existe, intentar crearlo (fallback adicional)
+      // Si el miembro no existe, usar datos del usuario para Stripe
+      // (El perfil debería haberse creado en register-event, pero si no existe,
+      // podemos crear la sesión de Stripe solo con el email)
       if (!member) {
-        console.log('⚠️ Member not found in Stripe checkout, attempting to create profile...');
+        console.log('⚠️ Member not found in Stripe checkout, usando datos del usuario...');
         
         // Usar datos del usuario pasados desde register-event
         if (!user_email) {
-          console.error('❌ No se proporcionaron datos del usuario para crear el perfil');
+          console.error('❌ No se proporcionaron datos del usuario');
           return NextResponse.json(
             { 
-              error: 'No se pudo crear el perfil de miembro', 
+              error: 'No se pudo obtener información del usuario', 
               details: 'Faltan datos del usuario. Por favor intenta de nuevo.'
             },
             { status: 400 }
           );
         }
 
-        // Crear perfil del miembro con los datos proporcionados
-        const { data: newMember, error: createError } = await supabase
-          .from('members')
-          .insert({
-            id: member_id,
-            email: user_email || '',
-            full_name: user_metadata?.full_name || user_email?.split('@')[0] || 'Miembro',
-            phone: user_metadata?.phone || null,
-            instagram: user_metadata?.instagram || null,
-            membership_type: 'regular',
-            membership_status: 'active',
-          })
-          .select('stripe_customer_id, email, full_name')
-          .single();
-
-        console.log('👥 Member created in Stripe checkout:', { newMember, createError });
-
-        if (createError || !newMember) {
-          console.error('❌ Failed to create member profile:', createError);
-          return NextResponse.json(
-            { 
-              error: 'Error al crear perfil de miembro', 
-              details: createError?.message || 'No se pudo crear el perfil'
-            },
-            { status: 500 }
-          );
-        }
-
-        member = newMember;
-      }
-
-      if (member) {
+        // Usar email y nombre del usuario directamente para Stripe
+        // No intentamos crear el perfil aquí porque RLS lo bloquea
+        // El perfil debería haberse creado en register-event
+        customerEmail = user_email;
+        customerName = user_metadata?.full_name || user_email?.split('@')[0] || 'Miembro';
+        
+        console.log('👤 Usando datos del usuario directamente para Stripe:', { 
+          email: customerEmail, 
+          name: customerName 
+        });
+      } else {
+        // Si el miembro existe, usar sus datos
         customerEmail = member.email;
         customerName = member.full_name || member.email?.split('@')[0] || 'Miembro';
+      }
 
-        if (member.stripe_customer_id) {
-          // Cliente ya existe en Stripe - reutilizar para futuros pagos
-          stripeCustomerId = member.stripe_customer_id;
-          console.log('✅ Cliente Stripe existente reutilizado:', stripeCustomerId);
-        } else {
-          // Crear nuevo cliente en Stripe y vincularlo al miembro
-          console.log('💳 Creando nuevo cliente en Stripe para:', customerEmail);
-          
-          const customer = await stripe.customers.create({
-            email: member.email,
-            name: customerName,
-            metadata: {
-              member_id: member_id,
-              source: 'runningeraclub',
-            },
-          });
+      // Crear o reutilizar cliente de Stripe (funciona tanto si member existe como si no)
+      if (member?.stripe_customer_id) {
+        // Cliente ya existe en Stripe - reutilizar para futuros pagos
+        stripeCustomerId = member.stripe_customer_id;
+        console.log('✅ Cliente Stripe existente reutilizado:', stripeCustomerId);
+      } else if (customerEmail) {
+        // Crear nuevo cliente en Stripe
+        console.log('💳 Creando nuevo cliente en Stripe para:', customerEmail);
+        
+        const customer = await stripe.customers.create({
+          email: customerEmail,
+          name: customerName,
+          metadata: {
+            member_id: member_id,
+            source: 'runningeraclub',
+          },
+        });
 
-          stripeCustomerId = customer.id;
-          console.log('✅ Nuevo cliente Stripe creado:', stripeCustomerId);
+        stripeCustomerId = customer.id;
+        console.log('✅ Nuevo cliente Stripe creado:', stripeCustomerId);
 
-          // Guardar stripe_customer_id en la BD para futuros pagos
+        // Intentar guardar stripe_customer_id en la BD si el perfil existe
+        if (member) {
           await supabase
             .from('members')
             .update({ stripe_customer_id: customer.id })
             .eq('id', member_id);
+        } else {
+          // Si el perfil no existe, el stripe_customer_id se guardará cuando
+          // el trigger o register-event cree el perfil
+          console.log('⚠️ Perfil no existe aún, stripe_customer_id se guardará cuando se cree el perfil');
         }
       }
     } else if (attendee_id) {
