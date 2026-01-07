@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 const navLinks = [
   { name: 'Inicio', href: '/' },
@@ -35,7 +35,11 @@ export const Header = () => {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
   const supabase = createClient();
+
+  // Detectar si estamos en la homepage
+  const isHomepage = pathname === '/';
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -43,30 +47,49 @@ export const Header = () => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       
-      // Si está en la parte superior (top), mostrar header fijo
-      if (currentScrollY === 0) {
-        setIsVisible(true);
-      } 
-      // Si se hace scroll hacia arriba (pero no está en el top), mostrar
-      else if (currentScrollY < lastScrollY) {
-        setIsVisible(true);
-      } 
-      // Si se hace scroll hacia abajo, ocultar
-      else if (currentScrollY > lastScrollY) {
-        setIsVisible(false);
+      // En la homepage, no mostrar header cuando está en el top (para hero full screen)
+      if (isHomepage) {
+        if (currentScrollY === 0) {
+          setIsVisible(false);
+        } 
+        // Si se hace scroll hacia arriba, mostrar
+        else if (currentScrollY < lastScrollY) {
+          setIsVisible(true);
+        } 
+        // Si se hace scroll hacia abajo, ocultar
+        else if (currentScrollY > lastScrollY) {
+          setIsVisible(false);
+        }
+      } else {
+        // En otras páginas, mostrar header cuando está en el top
+        if (currentScrollY === 0) {
+          setIsVisible(true);
+        } 
+        // Si se hace scroll hacia arriba (pero no está en el top), mostrar
+        else if (currentScrollY < lastScrollY) {
+          setIsVisible(true);
+        } 
+        // Si se hace scroll hacia abajo, ocultar
+        else if (currentScrollY > lastScrollY) {
+          setIsVisible(false);
+        }
       }
       
       lastScrollY = currentScrollY;
     };
 
     // Inicializar el estado basado en la posición actual
-    if (window.scrollY === 0) {
-      setIsVisible(true);
+    if (isHomepage) {
+      setIsVisible(false); // En homepage, oculto por defecto
+    } else {
+      if (window.scrollY === 0) {
+        setIsVisible(true);
+      }
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isHomepage]);
 
   useEffect(() => {
     checkAuth();
@@ -141,9 +164,72 @@ export const Header = () => {
     return 'Usuario';
   };
 
+  // Componente de botón de cuenta/login para homepage cuando el header está oculto
+  const AccountButton = () => (
+    <div className="fixed top-4 right-4 z-50">
+      {!loading && (
+        <>
+          {isAuthenticated ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/95 backdrop-blur-md border border-border/30 shadow-lg hover:bg-background transition-colors">
+                  <Avatar className="w-8 h-8">
+                    <AvatarFallback className="bg-foreground text-background text-xs">
+                      {getInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm font-medium hidden sm:inline">{getUserName()}</span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium">{getUserName()}</p>
+                    {memberData?.email && (
+                      <p className="text-xs text-muted-foreground">{memberData.email}</p>
+                    )}
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => router.push('/miembros/dashboard')}>
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  Dashboard
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/leaderboard')}>
+                  <Trophy className="mr-2 h-4 w-4" />
+                  Leaderboard
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/miembros/perfil')}>
+                  <User className="mr-2 h-4 w-4" />
+                  Mi Perfil
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Cerrar Sesión
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <a
+              href="/miembros/login"
+              className="inline-flex items-center px-4 py-2 rounded-lg bg-background/95 backdrop-blur-md border border-border/30 shadow-lg hover:bg-background transition-colors text-sm font-medium"
+            >
+              Iniciar Sesión
+            </a>
+          )}
+        </>
+      )}
+    </div>
+  );
+
   return (
-    <AnimatePresence>
-      {isVisible && (
+    <>
+      {/* Botón de cuenta/login fijo en homepage cuando el header está oculto */}
+      {isHomepage && !isVisible && <AccountButton />}
+      
+      <AnimatePresence>
+        {isVisible && (
         <motion.header
           initial={{ y: -100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -328,6 +414,7 @@ export const Header = () => {
           </AnimatePresence>
         </motion.header>
       )}
-    </AnimatePresence>
+      </AnimatePresence>
+    </>
   );
 };
