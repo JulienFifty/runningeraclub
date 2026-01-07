@@ -4,7 +4,15 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { event_id, member_id, attendee_id, is_guest, coupon_code } = await request.json();
+    const { 
+      event_id, 
+      member_id, 
+      attendee_id, 
+      is_guest, 
+      coupon_code,
+      user_email,
+      user_metadata
+    } = await request.json();
 
     if (!event_id) {
       return NextResponse.json(
@@ -144,25 +152,27 @@ export async function POST(request: NextRequest) {
       if (!member) {
         console.log('⚠️ Member not found in Stripe checkout, attempting to create profile...');
         
-        // Obtener datos del usuario autenticado
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        
-        if (userError || !user) {
+        // Usar datos del usuario pasados desde register-event
+        if (!user_email) {
+          console.error('❌ No se proporcionaron datos del usuario para crear el perfil');
           return NextResponse.json(
-            { error: 'No se pudo obtener información del usuario autenticado' },
-            { status: 401 }
+            { 
+              error: 'No se pudo crear el perfil de miembro', 
+              details: 'Faltan datos del usuario. Por favor intenta de nuevo.'
+            },
+            { status: 400 }
           );
         }
 
-        // Crear perfil del miembro
+        // Crear perfil del miembro con los datos proporcionados
         const { data: newMember, error: createError } = await supabase
           .from('members')
           .insert({
             id: member_id,
-            email: user.email || '',
-            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Miembro',
-            phone: user.user_metadata?.phone || null,
-            instagram: user.user_metadata?.instagram || null,
+            email: user_email || '',
+            full_name: user_metadata?.full_name || user_email?.split('@')[0] || 'Miembro',
+            phone: user_metadata?.phone || null,
+            instagram: user_metadata?.instagram || null,
             membership_type: 'regular',
             membership_status: 'active',
           })

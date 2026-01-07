@@ -117,6 +117,7 @@ export async function POST(request: Request) {
       // Si requiere pago, crear sesión de Stripe
       console.log('💳 Creating Stripe checkout session...');
       
+      // Pasar datos del usuario y miembro al endpoint de Stripe
       const checkoutResponse = await fetch(`${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/api/stripe/create-checkout`, {
         method: 'POST',
         headers: {
@@ -126,6 +127,13 @@ export async function POST(request: Request) {
           event_id,
           member_id: user.id,
           is_guest: false,
+          // Pasar datos del usuario para crear perfil si no existe
+          user_email: user.email,
+          user_metadata: {
+            full_name: user.user_metadata?.full_name,
+            phone: user.user_metadata?.phone,
+            instagram: user.user_metadata?.instagram,
+          },
         }),
       });
 
