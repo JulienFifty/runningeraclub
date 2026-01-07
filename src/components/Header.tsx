@@ -164,70 +164,8 @@ export const Header = () => {
     return 'Usuario';
   };
 
-  // Componente de botón de cuenta/login para homepage cuando el header está oculto
-  const AccountButton = () => (
-    <div className="fixed top-4 right-4 z-50">
-      {!loading && (
-        <>
-          {isAuthenticated ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-background/95 backdrop-blur-md border border-border/30 shadow-lg hover:bg-background transition-colors">
-                  <Avatar className="w-8 h-8">
-                    <AvatarFallback className="bg-foreground text-background text-xs">
-                      {getInitials()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm font-medium hidden sm:inline">{getUserName()}</span>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium">{getUserName()}</p>
-                    {memberData?.email && (
-                      <p className="text-xs text-muted-foreground">{memberData.email}</p>
-                    )}
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push('/miembros/dashboard')}>
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  Dashboard
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/leaderboard')}>
-                  <Trophy className="mr-2 h-4 w-4" />
-                  Leaderboard
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push('/miembros/perfil')}>
-                  <User className="mr-2 h-4 w-4" />
-                  Mi Perfil
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Cerrar Sesión
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <a
-              href="/miembros/login"
-              className="inline-flex items-center px-4 py-2 rounded-lg bg-background/95 backdrop-blur-md border border-border/30 shadow-lg hover:bg-background transition-colors text-sm font-medium"
-            >
-              Iniciar Sesión
-            </a>
-          )}
-        </>
-      )}
-    </div>
-  );
-
   return (
     <>
-      {/* Botón de cuenta/login fijo en homepage cuando el header está oculto */}
-      {isHomepage && !isVisible && <AccountButton />}
-      
       <AnimatePresence>
         {isVisible && (
         <motion.header

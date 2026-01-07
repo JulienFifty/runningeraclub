@@ -3,6 +3,18 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { Dumbbell, Calendar, Gift, Handshake, ShoppingBag, Users, Image as ImageIcon, ArrowRight, User } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { LayoutDashboard, Trophy, LogOut } from 'lucide-react';
 const heroImage = '/assets/hero-runners.jpg';
 // CDN Cloudinary - Video optimizado con transformaciones automáticas
 // MP4 con optimización automática
@@ -24,8 +36,85 @@ const categoryItems = [
 export const Hero = () => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [itemPositions, setItemPositions] = useState<Array<{ left: number; width: number }>>([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [memberData, setMemberData] = useState<{
+    full_name?: string;
+    email?: string;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
   const gridRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
+  const supabase = createClient();
+  const router = useRouter();
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+      if (authError || !user) {
+        setIsAuthenticated(false);
+        setLoading(false);
+        return;
+      }
+
+      setIsAuthenticated(true);
+
+      const { data: member, error: memberError } = await supabase
+        .from('members')
+        .select('full_name, email')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (!memberError && member) {
+        setMemberData(member);
+      } else {
+        setMemberData({
+          email: user.email,
+        });
+      }
+    } catch (error) {
+      setIsAuthenticated(false);
+      setMemberData(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setIsAuthenticated(false);
+    setMemberData(null);
+    router.push('/');
+    router.refresh();
+  };
+
+  const getInitials = () => {
+    if (memberData?.full_name) {
+      const names = memberData.full_name.split(' ');
+      if (names.length >= 2) {
+        return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
+      }
+      return memberData.full_name[0].toUpperCase();
+    }
+    if (memberData?.email) {
+      return memberData.email[0].toUpperCase();
+    }
+    return 'U';
+  };
+
+  const getUserName = () => {
+    if (memberData?.full_name) {
+      return memberData.full_name;
+    }
+    if (memberData?.email) {
+      return memberData.email.split('@')[0];
+    }
+    return 'Usuario';
+  };
   
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -123,21 +212,67 @@ export const Hero = () => {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.6 }}
-        className="absolute top-4 right-4 md:top-6 md:right-8 z-10 flex items-center gap-4"
+        className="absolute top-4 right-4 md:top-6 md:right-8 z-10 flex items-center gap-3 md:gap-4"
       >
         <a
           href="#eventos"
-          className="text-xs tracking-wider uppercase text-white/80 hover:text-white transition-colors"
+          className="text-xs tracking-wider uppercase text-white/80 hover:text-white transition-colors hidden sm:inline"
         >
           TODOS LOS EVENTOS
         </a>
-        <a
-          href="/miembros/login"
-          className="flex items-center gap-1.5 text-xs tracking-wider uppercase text-white/80 hover:text-white transition-colors"
-        >
-          <User className="w-3 h-3" />
-          SIGN IN
-        </a>
+        {!loading && (
+          <>
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all">
+                    <Avatar className="w-full h-full">
+                      <AvatarFallback className="bg-white/20 text-white text-[10px] md:text-xs border-0">
+                        {getInitials()}
+                      </AvatarFallback>
+                    </Avatar>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium">{getUserName()}</p>
+                      {memberData?.email && (
+                        <p className="text-xs text-muted-foreground">{memberData.email}</p>
+                      )}
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => router.push('/miembros/dashboard')}>
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push('/leaderboard')}>
+                    <Trophy className="mr-2 h-4 w-4" />
+                    Leaderboard
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push('/miembros/perfil')}>
+                    <User className="mr-2 h-4 w-4" />
+                    Mi Perfil
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Cerrar Sesión
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <a
+                href="/miembros/login"
+                className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all"
+                title="Iniciar Sesión"
+              >
+                <User className="w-4 h-4 text-white" />
+              </a>
+            )}
+          </>
+        )}
       </motion.div>
 
       {/* Content */}
