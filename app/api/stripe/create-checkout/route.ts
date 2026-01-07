@@ -126,6 +126,25 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // ✅ VALIDAR MÍNIMO DE STRIPE ($10.00 MXN = 1000 centavos)
+    const STRIPE_MINIMUM_AMOUNT = 1000; // $10.00 MXN en centavos
+    if (amount < STRIPE_MINIMUM_AMOUNT) {
+      console.error('❌ Monto menor al mínimo de Stripe:', {
+        amount: amount / 100,
+        minimum: STRIPE_MINIMUM_AMOUNT / 100,
+        event_price: event.price
+      });
+      
+      return NextResponse.json(
+        { 
+          error: 'Precio mínimo no alcanzado', 
+          details: `Stripe requiere un mínimo de $${STRIPE_MINIMUM_AMOUNT / 100} MXN por transacción. El precio del evento ($${amount / 100} MXN) es menor al mínimo requerido.`,
+          hint: 'Considera ajustar el precio del evento o usar un método de pago alternativo para eventos de bajo costo.'
+        },
+        { status: 400 }
+      );
+    }
+
     // Obtener o crear cliente de Stripe
     let stripeCustomerId: string | undefined;
     let customerEmail: string | undefined;
