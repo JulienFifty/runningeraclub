@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -17,8 +17,10 @@ interface EventRegistrationButtonProps {
 
 export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventTitle = 'Evento', eventPrice }: EventRegistrationButtonProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [registering, setRegistering] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -27,6 +29,35 @@ export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventT
   useEffect(() => {
     checkAuthAndRegistration();
   }, [eventId]);
+
+  useEffect(() => {
+    // Si viene de la página de éxito, refrescar después de un breve delay
+    const paymentSuccess = searchParams?.get('payment_success');
+    if (paymentSuccess === 'true') {
+      // Limpiar el parámetro de la URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete('payment_success');
+      window.history.replaceState({}, '', url.toString());
+      
+      // Refrescar después de un delay
+      setTimeout(() => {
+        checkAuthAndRegistration();
+      }, 1000);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    // Si hay un registro pendiente, refrescar periódicamente para verificar si ya se pagó
+    if (paymentStatus === 'pending' && !isRegistered) {
+      const intervalId = setInterval(() => {
+        checkAuthAndRegistration();
+      }, 5000); // Refrescar cada 5 segundos
+
+      return () => {
+        clearInterval(intervalId);
+      };
+    }
+  }, [paymentStatus, isRegistered]);
 
   const checkAuthAndRegistration = async () => {
     try {
@@ -43,30 +74,47 @@ export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventT
       // Verificar si ya está registrado (tanto en event_registrations como en attendees)
       const registrationResult = await supabase
         .from('event_registrations')
-        .select('id, status, payment_status')
+        .select('id, status, payment_status, stripe_session_id')
         .eq('member_id', user.id)
         .eq('event_id', eventId)
         .maybeSingle();
 
       const attendeeResult = await supabase
         .from('attendees')
-        .select('id, status')
+        .select('id, status, payment_status')
         .eq('event_id', eventId)
         .eq('email', user.email || '')
         .maybeSingle();
 
+      // Guardar el estado del pago para mostrar información
+      if (registrationResult.data) {
+        setPaymentStatus(registrationResult.data.payment_status);
+      }
+
       // Solo considerar registrado si:
       // 1. El pago está completado (payment_status = 'paid')
       // 2. O es un evento gratuito (eventPrice = 'gratis' o '0')
-      // 3. O está en la tabla de attendees
+      // 3. O está en la tabla de attendees con payment_status = 'paid'
       const hasValidRegistration = registrationResult.data && 
         (registrationResult.data.payment_status === 'paid' || 
          !eventPrice || 
          eventPrice.toLowerCase() === 'gratis' || 
          eventPrice === '0');
 
-      if (hasValidRegistration || attendeeResult.data) {
+      const hasValidAttendee = attendeeResult.data && 
+        (!attendeeResult.data.payment_status || 
+         attendeeResult.data.payment_status === 'paid');
+
+      if (hasValidRegistration || hasValidAttendee) {
         setIsRegistered(true);
+      } else if (registrationResult.data && registrationResult.data.payment_status === 'pending') {
+        // Si hay registro pendiente, intentar verificar si ya se pagó
+        if (registrationResult.data.stripe_session_id) {
+          // Refrescar el estado después de un delay para dar tiempo al webhook
+          setTimeout(() => {
+            checkAuthAndRegistration();
+          }, 2000);
+        }
       }
     } catch (error) {
       console.error('Error checking registration:', error);

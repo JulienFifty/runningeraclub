@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
@@ -255,7 +256,13 @@ export default async function EventPage({ params }: PageProps) {
                   )}
 
                   <div className="space-y-3 hidden md:block">
-                    <EventRegistrationButton eventId={event.id} eventSlug={event.slug} buttonText={event.buttonText} eventTitle={event.title} eventPrice={event.price} />
+                    <Suspense fallback={
+                      <div className="block w-full bg-foreground text-background px-6 py-4 text-center text-sm font-medium tracking-wider uppercase opacity-50">
+                        Cargando...
+                      </div>
+                    }>
+                      <EventRegistrationButton eventId={event.id} eventSlug={event.slug} buttonText={event.buttonText} eventTitle={event.title} eventPrice={event.price} />
+                    </Suspense>
                   </div>
 
                   {/* Contact Info */}
@@ -348,13 +355,19 @@ export default async function EventPage({ params }: PageProps) {
       
       {/* Botón de registro fijo en mobile */}
       <div className="fixed bottom-0 left-0 right-0 md:hidden z-50 bg-background border-t border-border p-4 shadow-lg">
-        <EventRegistrationButton 
-          eventId={event.id} 
-          eventSlug={event.slug} 
-          buttonText={event.buttonText} 
-          eventTitle={event.title} 
-          eventPrice={event.price} 
-        />
+        <Suspense fallback={
+          <div className="block w-full bg-foreground text-background px-6 py-4 text-center text-sm font-medium tracking-wider uppercase opacity-50">
+            Cargando...
+          </div>
+        }>
+          <EventRegistrationButton 
+            eventId={event.id} 
+            eventSlug={event.slug} 
+            buttonText={event.buttonText} 
+            eventTitle={event.title} 
+            eventPrice={event.price} 
+          />
+        </Suspense>
       </div>
     </main>
   );
