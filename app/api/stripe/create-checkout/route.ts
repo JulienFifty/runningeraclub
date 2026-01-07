@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 export async function POST(request: NextRequest) {
   try {
@@ -347,35 +348,64 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Crear transacción pendiente
-    const { error: transactionError } = await supabase
-      .from('payment_transactions')
-      .insert({
-        event_id,
-        member_id: member_id || null,
-        attendee_id: attendee_id || null,
-        stripe_session_id: session.id,
-        stripe_payment_intent_id: session.payment_intent as string || null,
-        amount: amount / 100,
-        currency: 'mxn',
-        status: 'pending',
-        metadata: {
-          stripe_customer_id: stripeCustomerId,
-          coupon_code: couponData?.code,
-          discount_amount: discountAmount / 100,
-          original_amount: parseInt(priceMatch[0]),
-        },
-      });
+    // Crear transacción pendiente usando Service Role Key para bypass RLS
+    try {
+      const supabaseAdmin = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false,
+          },
+        }
+      );
 
-    if (transactionError) {
-      console.error('⚠️ Error creating transaction (no crítico):', transactionError);
-      // No fallar si la transacción no se crea, es solo para tracking
+      const { error: transactionError } = await supabaseAdmin
+        .from('payment_transactions')
+        .insert({
+          event_id,
+          member_id: member_id || null,
+          attendee_id: attendee_id || null,
+          stripe_session_id: session.id,
+          stripe_payment_intent_id: session.payment_intent as string || null,
+          amount: amount / 100,
+          currency: 'mxn',
+          status: 'pending',
+          metadata: {
+            stripe_customer_id: stripeCustomerId,
+            coupon_code: couponData?.code,
+            discount_amount: discountAmount / 100,
+            original_amount: parseInt(priceMatch[0]),
+          },
+        });
+
+      if (transactionError) {
+        console.error('⚠️ Error creating transaction (no crítico):', transactionError);
+        // No fallar si la transacción no se crea, es solo para tracking
+      } else {
+        console.log('✅ Transaction created successfully');
+      }
+    } catch (error) {
+      console.error('⚠️ Error creating transaction (no crítico):', error);
+      // No fallar si la transacción no se crea
     }
 
-    // Registrar uso del cupón si se aplicó
+    // Registrar uso del cupón si se aplicó (usando Service Role Key)
     if (couponData && discountAmount > 0) {
       try {
-        await supabase
+        const supabaseAdmin = createSupabaseClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!,
+          {
+            auth: {
+              autoRefreshToken: false,
+              persistSession: false,
+            },
+          }
+        );
+
+        await supabaseAdmin
           .from('coupon_usage')
           .insert({
             coupon_id: couponData.id,
@@ -388,9 +418,9 @@ export async function POST(request: NextRequest) {
           });
 
         // Incrementar contador de uso del cupón
-        await supabase
+        await supabaseAdmin
           .from('coupons')
-          .update({ used_count: supabase.rpc('increment', { row_id: couponData.id }) })
+          .update({ used_count: supabaseAdmin.rpc('increment', { row_id: couponData.id }) })
           .eq('id', couponData.id);
       } catch (couponError) {
         console.error('⚠️ Error registrando uso de cupón (no crítico):', couponError);
