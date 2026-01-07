@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { stripe } from '@/lib/stripe';
 
 export async function POST(request: Request) {
   try {
@@ -99,7 +100,7 @@ export async function POST(request: Request) {
     // Verificar si ya está registrado
     const { data: existingRegistration } = await supabase
       .from('event_registrations')
-      .select('id')
+      .select('id, payment_status, registration_date, stripe_session_id')
       .eq('member_id', user.id)
       .eq('event_id', event_id)
       .maybeSingle();
@@ -107,10 +108,82 @@ export async function POST(request: Request) {
     console.log('✅ Registration check:', { existingRegistration });
 
     if (existingRegistration) {
-      return NextResponse.json(
-        { error: 'Ya estás registrado en este evento' },
-        { status: 400 }
-      );
+      // Si el pago está completado, rechazar
+      if (existingRegistration.payment_status === 'paid') {
+        return NextResponse.json(
+          { error: 'Ya estás registrado en este evento' },
+          { status: 400 }
+        );
+      }
+
+      // Si el pago está pendiente, verificar si es antiguo (>2 horas)
+      if (existingRegistration.payment_status === 'pending') {
+        const registrationDate = new Date(existingRegistration.registration_date);
+        const hoursSinceRegistration = (Date.now() - registrationDate.getTime()) / (1000 * 60 * 60);
+        
+        // Si el registro pendiente tiene más de 2 horas, eliminarlo y permitir nuevo intento
+        if (hoursSinceRegistration > 2) {
+          console.log('⚠️ Registro pendiente antiguo encontrado, eliminando...', {
+            hours: hoursSinceRegistration.toFixed(2),
+            registration_id: existingRegistration.id
+          });
+          
+          await supabase
+            .from('event_registrations')
+            .delete()
+            .eq('id', existingRegistration.id);
+          
+          console.log('✅ Registro pendiente antiguo eliminado, permitiendo nuevo intento');
+        } else {
+          // Si el registro es reciente, verificar si tiene stripe_session_id
+          if (existingRegistration.stripe_session_id) {
+            // Intentar obtener la sesión de Stripe para ver si aún es válida
+            try {
+              const session = await stripe.checkout.sessions.retrieve(existingRegistration.stripe_session_id);
+              
+              // Si la sesión está completa, actualizar el registro
+              if (session.payment_status === 'paid') {
+                await supabase
+                  .from('event_registrations')
+                  .update({
+                    payment_status: 'paid',
+                    status: 'confirmed',
+                  })
+                  .eq('id', existingRegistration.id);
+                
+                return NextResponse.json(
+                  { error: 'Ya estás registrado en este evento (pago completado)' },
+                  { status: 400 }
+                );
+              }
+              
+              // Si la sesión está abierta, devolver la URL
+              if (session.status === 'open' && session.url) {
+                return NextResponse.json({
+                  success: true,
+                  requires_payment: true,
+                  checkout_url: session.url,
+                  message: 'Tienes un pago pendiente, continuando con la sesión existente',
+                });
+              }
+            } catch (error) {
+              console.error('Error verificando sesión de Stripe:', error);
+              // Si hay error, eliminar el registro y permitir nuevo intento
+              await supabase
+                .from('event_registrations')
+                .delete()
+                .eq('id', existingRegistration.id);
+            }
+          } else {
+            // Si no tiene stripe_session_id, eliminar y permitir nuevo intento
+            console.log('⚠️ Registro pendiente sin stripe_session_id, eliminando...');
+            await supabase
+              .from('event_registrations')
+              .delete()
+              .eq('id', existingRegistration.id);
+          }
+        }
+      }
     }
 
     if (requiresPayment) {
