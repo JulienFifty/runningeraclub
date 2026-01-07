@@ -32,17 +32,19 @@ export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventT
 
   useEffect(() => {
     // Si viene de la página de éxito, refrescar después de un breve delay
-    const paymentSuccess = searchParams?.get('payment_success');
-    if (paymentSuccess === 'true') {
-      // Limpiar el parámetro de la URL
-      const url = new URL(window.location.href);
-      url.searchParams.delete('payment_success');
-      window.history.replaceState({}, '', url.toString());
-      
-      // Refrescar después de un delay
-      setTimeout(() => {
-        checkAuthAndRegistration();
-      }, 1000);
+    if (typeof window !== 'undefined' && searchParams) {
+      const paymentSuccess = searchParams.get('payment_success');
+      if (paymentSuccess === 'true') {
+        // Limpiar el parámetro de la URL
+        const url = new URL(window.location.href);
+        url.searchParams.delete('payment_success');
+        window.history.replaceState({}, '', url.toString());
+        
+        // Refrescar después de un delay
+        setTimeout(() => {
+          checkAuthAndRegistration();
+        }, 1000);
+      }
     }
   }, [searchParams]);
 
