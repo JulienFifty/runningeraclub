@@ -18,7 +18,7 @@ function ConfirmarEmailContent() {
   const supabase = createClient();
 
   useEffect(() => {
-    // Obtener el email de los parámetros de la URL
+    // Obtener el email y parámetros del evento de los parámetros de la URL
     const emailParam = searchParams?.get('email');
     if (emailParam) {
       setEmail(emailParam);
@@ -33,12 +33,20 @@ function ConfirmarEmailContent() {
 
     setResending(true);
     try {
+      // Preservar parámetros del evento al reenviar
+      const eventSlug = searchParams?.get('event_slug');
+      const eventTitle = searchParams?.get('event_title');
+      
+      const requestBody: any = { email };
+      if (eventSlug) requestBody.event_slug = eventSlug;
+      if (eventTitle) requestBody.event_title = eventTitle;
+      
       const response = await fetch('/api/auth/resend-confirmation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();

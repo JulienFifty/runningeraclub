@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
-    const { email } = await request.json();
+    const { email, event_slug, event_title } = await request.json();
 
     if (!email) {
       console.error('❌ Email no proporcionado');
@@ -16,14 +16,22 @@ export async function POST(request: Request) {
     const supabase = await createClient();
 
     // Log del intento
-    console.log('👤 Intentando reenviar para:', { email });
+    console.log('👤 Intentando reenviar para:', { email, event_slug, event_title });
 
-    // Reenviar email de confirmación con URL de callback configurada
-    const redirectUrl = `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/auth/callback`;
+    // Construir URL de callback con contexto del evento si existe
+    let redirectUrl = `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/auth/callback`;
+    if (event_slug) {
+      const callbackParams = new URLSearchParams();
+      callbackParams.set('event_slug', event_slug);
+      if (event_title) callbackParams.set('event_title', event_title);
+      redirectUrl += `?${callbackParams.toString()}`;
+    }
     
     console.log('📧 Intentando reenviar email:', { 
       email, 
       redirectUrl,
+      event_slug,
+      event_title,
       timestamp: new Date().toISOString()
     });
     

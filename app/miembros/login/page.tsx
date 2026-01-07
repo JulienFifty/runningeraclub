@@ -173,9 +173,17 @@ function LoginContent() {
             });
           }
 
-          // Redirigir a la página de confirmación
+          // Redirigir a la página de confirmación con contexto del evento
           setTimeout(() => {
-            router.push(`/miembros/confirmar-email?email=${encodeURIComponent(email)}`);
+            const confirmUrl = new URL('/miembros/confirmar-email', window.location.origin);
+            confirmUrl.searchParams.set('email', email);
+            if (eventSlug) {
+              confirmUrl.searchParams.set('event_slug', eventSlug);
+            }
+            if (eventTitle) {
+              confirmUrl.searchParams.set('event_title', eventTitle);
+            }
+            router.push(confirmUrl.toString());
           }, 2000);
           return;
         }
@@ -190,12 +198,22 @@ function LoginContent() {
         // El perfil se creará automáticamente cuando el usuario confirme su email
         // mediante un trigger en la base de datos (ver: create-member-profile-trigger.sql)
         
-        // Redirigir a la página de confirmación de email
+        // Redirigir a la página de confirmación de email con contexto del evento
         toast.success('¡Registro exitoso!', {
           description: 'Revisa tu correo para confirmar tu cuenta',
         });
         
-        router.push(`/miembros/confirmar-email?email=${encodeURIComponent(email)}`);
+        // Construir URL con parámetros del evento si existen
+        const confirmUrl = new URL('/miembros/confirmar-email', window.location.origin);
+        confirmUrl.searchParams.set('email', email);
+        if (eventSlug) {
+          confirmUrl.searchParams.set('event_slug', eventSlug);
+        }
+        if (eventTitle) {
+          confirmUrl.searchParams.set('event_title', eventTitle);
+        }
+        
+        router.push(confirmUrl.toString());
       }
     } catch (error: any) {
       toast.error('Error inesperado', {
