@@ -43,11 +43,11 @@ export const Header = () => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       
-      // Si está en la parte superior, ocultar
+      // Si está en la parte superior (top), mostrar header fijo
       if (currentScrollY === 0) {
-        setIsVisible(false);
+        setIsVisible(true);
       } 
-      // Si se hace scroll hacia arriba, mostrar
+      // Si se hace scroll hacia arriba (pero no está en el top), mostrar
       else if (currentScrollY < lastScrollY) {
         setIsVisible(true);
       } 
@@ -58,6 +58,11 @@ export const Header = () => {
       
       lastScrollY = currentScrollY;
     };
+
+    // Inicializar el estado basado en la posición actual
+    if (window.scrollY === 0) {
+      setIsVisible(true);
+    }
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
