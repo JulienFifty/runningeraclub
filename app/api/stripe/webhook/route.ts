@@ -49,10 +49,15 @@ export async function POST(request: NextRequest) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         
-        console.log('✅ Checkout session completed:', session.id);
+        console.log('✅ Checkout session completed:', {
+          session_id: session.id,
+          payment_status: session.payment_status,
+          payment_intent: session.payment_intent,
+          metadata: session.metadata,
+        });
 
         // Actualizar transacción
-        await supabase
+        const { error: transactionError } = await supabase
           .from('payment_transactions')
           .update({
             status: 'succeeded',
@@ -61,32 +66,57 @@ export async function POST(request: NextRequest) {
           })
           .eq('stripe_session_id', session.id);
 
+        if (transactionError) {
+          console.error('⚠️ Error updating transaction:', transactionError);
+        } else {
+          console.log('✅ Transaction updated successfully');
+        }
+
         const metadata = session.metadata;
-        if (metadata) {
-          const { event_id, member_id, attendee_id, is_guest } = metadata;
+        if (!metadata) {
+          console.error('❌ No metadata found in session:', session.id);
+          break;
+        }
 
-          if (is_guest === 'true' && attendee_id) {
-            // Actualizar attendee
-            const { data: updateData, error: updateError } = await supabase
-              .from('attendees')
-              .update({
-                payment_status: 'paid',
-                stripe_session_id: session.id,
-                stripe_payment_intent_id: session.payment_intent as string,
-                amount_paid: session.amount_total ? session.amount_total / 100 : 0,
-                currency: session.currency || 'mxn',
-                payment_method: session.payment_method_types?.[0] || 'card',
-              })
-              .eq('id', attendee_id)
-              .select();
+        const { event_id, member_id, attendee_id, is_guest } = metadata;
+        console.log('📋 Webhook metadata:', { event_id, member_id, attendee_id, is_guest });
 
-            if (updateError) {
-              console.error('Error updating attendee:', updateError);
-            } else {
-              console.log('✅ Attendee updated successfully:', updateData);
-            }
-          } else if (member_id) {
-            // Actualizar event_registration
+        if (is_guest === 'true' && attendee_id) {
+          // Actualizar attendee
+          const { data: updateData, error: updateError } = await supabase
+            .from('attendees')
+            .update({
+              payment_status: 'paid',
+              stripe_session_id: session.id,
+              stripe_payment_intent_id: session.payment_intent as string,
+              amount_paid: session.amount_total ? session.amount_total / 100 : 0,
+              currency: session.currency || 'mxn',
+              payment_method: session.payment_method_types?.[0] || 'card',
+            })
+            .eq('id', attendee_id)
+            .select();
+
+          if (updateError) {
+            console.error('❌ Error updating attendee:', updateError);
+          } else {
+            console.log('✅ Attendee updated successfully:', updateData);
+          }
+        } else if (member_id && event_id) {
+          // Primero intentar actualizar el registro existente
+          const { data: existingRegistration, error: findError } = await supabase
+            .from('event_registrations')
+            .select('id')
+            .eq('member_id', member_id)
+            .eq('event_id', event_id)
+            .maybeSingle();
+
+          console.log('🔍 Existing registration check:', { 
+            found: !!existingRegistration, 
+            error: findError 
+          });
+
+          if (existingRegistration) {
+            // Actualizar registro existente
             const { data: updateData, error: updateError } = await supabase
               .from('event_registrations')
               .update({
@@ -98,16 +128,53 @@ export async function POST(request: NextRequest) {
                 currency: session.currency || 'mxn',
                 payment_method: session.payment_method_types?.[0] || 'card',
               })
-              .eq('member_id', member_id)
-              .eq('event_id', event_id)
+              .eq('id', existingRegistration.id)
               .select();
 
             if (updateError) {
-              console.error('Error updating event registration:', updateError);
+              console.error('❌ Error updating event registration:', updateError);
             } else {
               console.log('✅ Event registration updated successfully:', updateData);
             }
+          } else {
+            // Si no existe, crearlo (fallback)
+            console.log('⚠️ Registration not found, creating new one...');
+            
+            // Verificar que el miembro existe
+            const { data: member, error: memberError } = await supabase
+              .from('members')
+              .select('id, email')
+              .eq('id', member_id)
+              .maybeSingle();
+
+            if (memberError || !member) {
+              console.error('❌ Member not found:', { member_id, error: memberError });
+            } else {
+              // Crear el registro
+              const { data: newRegistration, error: createError } = await supabase
+                .from('event_registrations')
+                .insert({
+                  member_id: member_id,
+                  event_id: event_id,
+                  status: 'confirmed',
+                  payment_status: 'paid',
+                  stripe_session_id: session.id,
+                  stripe_payment_intent_id: session.payment_intent as string,
+                  amount_paid: session.amount_total ? session.amount_total / 100 : 0,
+                  currency: session.currency || 'mxn',
+                  payment_method: session.payment_method_types?.[0] || 'card',
+                })
+                .select();
+
+              if (createError) {
+                console.error('❌ Error creating event registration:', createError);
+              } else {
+                console.log('✅ Event registration created successfully:', newRegistration);
+              }
+            }
           }
+        } else {
+          console.error('❌ Missing required metadata:', { member_id, event_id, attendee_id });
         }
         break;
       }

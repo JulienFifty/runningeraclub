@@ -71,29 +71,78 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
           }
         }
 
-        // ✅ ACTUALIZAR REGISTRO INMEDIATAMENTE si el pago está completo
+        // ✅ ACTUALIZAR O CREAR REGISTRO INMEDIATAMENTE si el pago está completo
         // Esto asegura que el registro esté actualizado antes de que el webhook se ejecute
         if (memberId && eventId) {
-          console.log('🔄 Actualizando registro inmediatamente después del pago...');
+          console.log('🔄 Sincronizando registro después del pago...');
           
-          const { error: updateError } = await supabase
+          // Primero verificar si existe
+          const { data: existingReg, error: findError } = await supabase
             .from('event_registrations')
-            .update({
-              payment_status: 'paid',
-              status: 'confirmed',
-              stripe_session_id: sessionId,
-              stripe_payment_intent_id: session.payment_intent as string,
-              amount_paid: amount,
-              currency: currency.toLowerCase(),
-              payment_method: session.payment_method_types?.[0] || 'card',
-            })
+            .select('id')
             .eq('member_id', memberId)
-            .eq('event_id', eventId);
+            .eq('event_id', eventId)
+            .maybeSingle();
 
-          if (updateError) {
-            console.error('⚠️ Error actualizando registro (no crítico, webhook lo hará):', updateError);
+          if (existingReg) {
+            // Actualizar registro existente
+            const { error: updateError } = await supabase
+              .from('event_registrations')
+              .update({
+                payment_status: 'paid',
+                status: 'confirmed',
+                stripe_session_id: sessionId,
+                stripe_payment_intent_id: session.payment_intent as string,
+                amount_paid: amount,
+                currency: currency.toLowerCase(),
+                payment_method: session.payment_method_types?.[0] || 'card',
+              })
+              .eq('id', existingReg.id);
+
+            if (updateError) {
+              console.error('⚠️ Error actualizando registro:', updateError);
+            } else {
+              console.log('✅ Registro actualizado inmediatamente');
+            }
           } else {
-            console.log('✅ Registro actualizado inmediatamente');
+            // Crear registro si no existe
+            console.log('⚠️ Registro no encontrado, creando nuevo...');
+            const { data: newReg, error: createError } = await supabase
+              .from('event_registrations')
+              .insert({
+                member_id: memberId,
+                event_id: eventId,
+                status: 'confirmed',
+                payment_status: 'paid',
+                stripe_session_id: sessionId,
+                stripe_payment_intent_id: session.payment_intent as string,
+                amount_paid: amount,
+                currency: currency.toLowerCase(),
+                payment_method: session.payment_method_types?.[0] || 'card',
+              })
+              .select();
+
+            if (createError) {
+              console.error('❌ Error creando registro:', createError);
+              // Intentar sincronizar desde Stripe como último recurso
+              try {
+                const syncResponse = await fetch(`${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/api/stripe/sync-payment`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ session_id: sessionId }),
+                });
+                const syncData = await syncResponse.json();
+                if (syncResponse.ok) {
+                  console.log('✅ Registro sincronizado desde Stripe:', syncData);
+                } else {
+                  console.error('❌ Error sincronizando desde Stripe:', syncData);
+                }
+              } catch (syncError) {
+                console.error('❌ Error en sincronización:', syncError);
+              }
+            } else {
+              console.log('✅ Registro creado inmediatamente:', newReg);
+            }
           }
         }
       } else {
