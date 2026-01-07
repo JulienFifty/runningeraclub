@@ -367,54 +367,55 @@ function DashboardContent() {
   };
 
   return (
-    <main className="min-h-screen bg-background p-4 md:p-8">
-      <div className="container-premium">
+    <main className="min-h-screen bg-background p-3 md:p-8">
+      <div className="container-premium max-w-7xl mx-auto">
         {/* Header con Perfil */}
-        <div className="mb-8">
+        <div className="mb-6 md:mb-8">
           {/* Profile Header Card */}
-          <div className="bg-card border border-border rounded-lg overflow-hidden mb-6">
+          <div className="bg-card border border-border rounded-lg overflow-hidden mb-4 md:mb-6">
             {/* Background Pattern */}
-            <div className="h-32 bg-gradient-to-r from-foreground/10 via-foreground/5 to-foreground/10 relative">
+            <div className="h-24 md:h-32 bg-gradient-to-r from-foreground/10 via-foreground/5 to-foreground/10 relative">
               <div className="absolute inset-0 opacity-20">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-foreground rounded-full blur-3xl"></div>
               </div>
             </div>
             
             {/* Profile Info */}
-            <div className="px-6 pb-6 -mt-16 relative">
-              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-                <div className="flex items-end gap-4">
+            <div className="px-4 md:px-6 pb-4 md:pb-6 -mt-12 md:-mt-16 relative">
+              <div className="flex flex-col gap-4">
+                <div className="flex items-end gap-3 md:gap-4">
                   {/* Avatar */}
-                  <div className="relative">
+                  <div className="relative flex-shrink-0">
                     {member.profile_image ? (
                       <img
                         src={member.profile_image}
                         alt={member.full_name}
-                        className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-background object-cover"
+                        className="w-20 h-20 md:w-32 md:h-32 rounded-full border-4 border-background object-cover"
                       />
                     ) : (
-                      <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-background bg-foreground/10 flex items-center justify-center">
-                        <span className="text-2xl md:text-4xl font-display font-bold text-foreground">
+                      <div className="w-20 h-20 md:w-32 md:h-32 rounded-full border-4 border-background bg-foreground/10 flex items-center justify-center">
+                        <span className="text-xl md:text-4xl font-display font-bold text-foreground">
                           {getInitials(member.full_name)}
                         </span>
                       </div>
                     )}
                     {/* Status Indicator */}
-                    <div className="absolute bottom-2 right-2 w-4 h-4 bg-green-500 rounded-full border-2 border-background"></div>
+                    <div className="absolute bottom-1 right-1 md:bottom-2 md:right-2 w-3 h-3 md:w-4 md:h-4 bg-green-500 rounded-full border-2 border-background"></div>
                   </div>
                   
                   {/* Name and Info */}
-                  <div className="mb-2">
-                    <h1 className="font-display text-2xl md:text-3xl text-foreground font-bold mb-1">
+                  <div className="mb-0 md:mb-2 flex-1 min-w-0">
+                    <h1 className="font-display text-xl md:text-3xl text-foreground font-bold mb-1 break-words">
                       {member.full_name}
                     </h1>
-                    <p className="text-sm text-muted-foreground mb-2">
+                    <p className="text-xs md:text-sm text-muted-foreground mb-2 truncate">
                       {member.email}
                     </p>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-foreground/10 text-foreground rounded-full">
                         <CheckCircle className="w-3 h-3" />
-                        Miembro {member.membership_status === 'active' ? 'Activo' : member.membership_status}
+                        <span className="hidden sm:inline">Miembro </span>
+                        {member.membership_status === 'active' ? 'Activo' : member.membership_status}
                       </span>
                       <span className="inline-flex items-center text-xs px-2 py-1 bg-primary/10 text-primary rounded-full capitalize">
                         {member.membership_type}
@@ -424,17 +425,17 @@ function DashboardContent() {
                 </div>
                 
                 {/* Actions */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full">
                   <Link
                     href="/miembros/perfil"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-foreground text-background rounded-lg hover:bg-foreground/90 transition-colors text-sm"
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-foreground text-background rounded-lg hover:bg-foreground/90 transition-colors text-xs md:text-sm"
                   >
                     <User className="w-4 h-4" />
-                    Editar Perfil
+                    <span className="hidden sm:inline">Editar </span>Perfil
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="inline-flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-card transition-colors text-sm"
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-3 md:px-4 py-2 border border-border rounded-lg hover:bg-card transition-colors text-xs md:text-sm"
                   >
                     <LogOut className="w-4 h-4" />
                     Salir
@@ -445,16 +446,16 @@ function DashboardContent() {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
             {/* Eventos Registrados */}
-            <div className="bg-card border border-border p-4 rounded-lg hover:border-foreground/30 transition-all">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                  <Calendar className="w-5 h-5 text-blue-500" />
+            <div className="bg-card border border-border p-3 md:p-4 rounded-lg hover:border-foreground/30 transition-all">
+              <div className="flex items-center gap-2 md:gap-3">
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+                  <Calendar className="w-4 h-4 md:w-5 md:h-5 text-blue-500" />
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Eventos</p>
-                  <p className="text-2xl font-display font-bold text-foreground">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-muted-foreground truncate">Eventos</p>
+                  <p className="text-xl md:text-2xl font-display font-bold text-foreground">
                     {registrations.length}
                   </p>
                 </div>
@@ -462,14 +463,14 @@ function DashboardContent() {
             </div>
 
             {/* Eventos Completados */}
-            <div className="bg-card border border-border p-4 rounded-lg hover:border-foreground/30 transition-all">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-                  <CheckCircle className="w-5 h-5 text-green-500" />
+            <div className="bg-card border border-border p-3 md:p-4 rounded-lg hover:border-foreground/30 transition-all">
+              <div className="flex items-center gap-2 md:gap-3">
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-green-500/10 flex items-center justify-center flex-shrink-0">
+                  <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-green-500" />
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Completados</p>
-                  <p className="text-2xl font-display font-bold text-foreground">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-muted-foreground truncate">Completados</p>
+                  <p className="text-xl md:text-2xl font-display font-bold text-foreground">
                     {registrations.filter(r => r.status === 'attended').length}
                   </p>
                 </div>
@@ -477,14 +478,14 @@ function DashboardContent() {
             </div>
 
             {/* Kilómetros */}
-            <div className="bg-card border border-border p-4 rounded-lg hover:border-foreground/30 transition-all">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-orange-500" />
+            <div className="bg-card border border-border p-3 md:p-4 rounded-lg hover:border-foreground/30 transition-all">
+              <div className="flex items-center gap-2 md:gap-3">
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0">
+                  <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-orange-500" />
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Kilómetros</p>
-                  <p className="text-2xl font-display font-bold text-foreground">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-muted-foreground truncate">Kilómetros</p>
+                  <p className="text-xl md:text-2xl font-display font-bold text-foreground">
                     0
                   </p>
                 </div>
@@ -492,14 +493,14 @@ function DashboardContent() {
             </div>
 
             {/* Posición */}
-            <div className="bg-card border border-border p-4 rounded-lg hover:border-foreground/30 transition-all">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center">
-                  <Trophy className="w-5 h-5 text-yellow-500" />
+            <div className="bg-card border border-border p-3 md:p-4 rounded-lg hover:border-foreground/30 transition-all">
+              <div className="flex items-center gap-2 md:gap-3">
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center flex-shrink-0">
+                  <Trophy className="w-4 h-4 md:w-5 md:h-5 text-yellow-500" />
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Posición</p>
-                  <p className="text-2xl font-display font-bold text-foreground">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-muted-foreground truncate">Posición</p>
+                  <p className="text-xl md:text-2xl font-display font-bold text-foreground">
                     --
                   </p>
                 </div>
@@ -508,81 +509,81 @@ function DashboardContent() {
           </div>
 
           {/* Strava Connection Card - Próximamente */}
-          <div className="bg-card border border-border p-6 rounded-lg mb-8 relative overflow-hidden">
+          <div className="bg-card border border-border p-4 md:p-6 rounded-lg mb-6 md:mb-8 relative overflow-hidden">
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-5">
               <div className="absolute top-0 right-0 w-64 h-64 bg-[#FC4C02] rounded-full blur-3xl"></div>
             </div>
             
             <div className="relative">
-              <div className="flex items-start gap-4 mb-6">
-                <div className="w-12 h-12 rounded-lg bg-[#FC4C02]/10 border border-[#FC4C02]/20 flex items-center justify-center flex-shrink-0">
+              <div className="flex items-start gap-3 md:gap-4 mb-4 md:mb-6">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-[#FC4C02]/10 border border-[#FC4C02]/20 flex items-center justify-center flex-shrink-0">
                   <svg
-                    className="w-6 h-6 text-[#FC4C02]"
+                    className="w-5 h-5 md:w-6 md:h-6 text-[#FC4C02]"
                     viewBox="0 0 24 24"
                     fill="currentColor"
                   >
                     <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
                   </svg>
                 </div>
-                <div className="flex-1">
-                  <h2 className="font-display text-xl text-foreground font-light mb-2">
+                <div className="flex-1 min-w-0">
+                  <h2 className="font-display text-lg md:text-xl text-foreground font-light mb-2">
                     Integración con Strava
                   </h2>
-                  <span className="inline-block text-xs px-3 py-1 bg-muted text-muted-foreground rounded-full mb-4">
+                  <span className="inline-block text-xs px-2 md:px-3 py-1 bg-muted text-muted-foreground rounded-full mb-3 md:mb-4">
                     Próximamente
                   </span>
-                  <p className="text-sm text-muted-foreground mb-4">
+                  <p className="text-xs md:text-sm text-muted-foreground mb-3 md:mb-4">
                     Muy pronto podrás conectar tu cuenta de Strava y disfrutar de estas funcionalidades:
                   </p>
                 </div>
               </div>
 
               {/* Features Tease */}
-              <div className="grid md:grid-cols-2 gap-4 mb-6">
-                <div className="flex items-start gap-3 p-4 bg-muted/30 rounded-lg">
-                  <div className="w-8 h-8 rounded-full bg-[#FC4C02]/10 flex items-center justify-center flex-shrink-0">
-                    <Trophy className="w-4 h-4 text-[#FC4C02]" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-4 md:mb-6">
+                <div className="flex items-start gap-2 md:gap-3 p-3 md:p-4 bg-muted/30 rounded-lg">
+                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#FC4C02]/10 flex items-center justify-center flex-shrink-0">
+                    <Trophy className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#FC4C02]" />
                   </div>
-                  <div>
-                    <h3 className="text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Leaderboard Automático</h3>
-                    <p className="text-xs text-muted-foreground">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-xs md:text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Leaderboard Automático</h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
                       Tus actividades se sincronizarán automáticamente y competirás en tiempo real
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 p-4 bg-muted/30 rounded-lg">
-                  <div className="w-8 h-8 rounded-full bg-[#FC4C02]/10 flex items-center justify-center flex-shrink-0">
-                    <Activity className="w-4 h-4 text-[#FC4C02]" />
+                <div className="flex items-start gap-2 md:gap-3 p-3 md:p-4 bg-muted/30 rounded-lg">
+                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#FC4C02]/10 flex items-center justify-center flex-shrink-0">
+                    <Activity className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#FC4C02]" />
                   </div>
-                  <div>
-                    <h3 className="text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Estadísticas Detalladas</h3>
-                    <p className="text-xs text-muted-foreground">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-xs md:text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Estadísticas Detalladas</h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
                       Visualiza tus kilómetros, ritmos y progreso de entrenamiento
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 p-4 bg-muted/30 rounded-lg">
-                  <div className="w-8 h-8 rounded-full bg-[#FC4C02]/10 flex items-center justify-center flex-shrink-0">
-                    <Users className="w-4 h-4 text-[#FC4C02]" />
+                <div className="flex items-start gap-2 md:gap-3 p-3 md:p-4 bg-muted/30 rounded-lg">
+                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#FC4C02]/10 flex items-center justify-center flex-shrink-0">
+                    <Users className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#FC4C02]" />
                   </div>
-                  <div>
-                    <h3 className="text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Competencia Social</h3>
-                    <p className="text-xs text-muted-foreground">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-xs md:text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Competencia Social</h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
                       Compara tu rendimiento con otros miembros del club
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 p-4 bg-muted/30 rounded-lg">
-                  <div className="w-8 h-8 rounded-full bg-[#FC4C02]/10 flex items-center justify-center flex-shrink-0">
-                    <TrendingUp className="w-4 h-4 text-[#FC4C02]" />
+                <div className="flex items-start gap-2 md:gap-3 p-3 md:p-4 bg-muted/30 rounded-lg">
+                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#FC4C02]/10 flex items-center justify-center flex-shrink-0">
+                    <TrendingUp className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#FC4C02]" />
                   </div>
-                  <div>
-                    <h3 className="text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Seguimiento de Progreso</h3>
-                    <p className="text-xs text-muted-foreground">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-xs md:text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Seguimiento de Progreso</h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
                       Analiza tu evolución y alcanza tus objetivos de running
                     </p>
                   </div>
@@ -599,38 +600,39 @@ function DashboardContent() {
 
         {/* My Events */}
         <div>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-display text-2xl text-foreground">Mis Eventos</h2>
+          <div className="flex items-center justify-between mb-4 md:mb-6">
+            <h2 className="font-display text-xl md:text-2xl text-foreground">Mis Eventos</h2>
             <Link
               href="/#eventos"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
+              className="text-xs md:text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
             >
-              Ver todos los eventos
-              <ArrowRight className="w-4 h-4" />
+              <span className="hidden sm:inline">Ver todos los eventos</span>
+              <span className="sm:hidden">Ver todos</span>
+              <ArrowRight className="w-3 h-3 md:w-4 md:h-4" />
             </Link>
           </div>
 
           {registrations.length === 0 ? (
-            <div className="bg-card border border-border p-12 rounded-lg text-center">
-              <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground mb-4">No tienes eventos registrados</p>
+            <div className="bg-card border border-border p-8 md:p-12 rounded-lg text-center">
+              <Calendar className="w-10 h-10 md:w-12 md:h-12 text-muted-foreground mx-auto mb-3 md:mb-4" />
+              <p className="text-sm md:text-base text-muted-foreground mb-3 md:mb-4">No tienes eventos registrados</p>
               <Link
                 href="/#eventos"
-                className="inline-flex items-center gap-2 bg-foreground text-background px-6 py-3 rounded-lg hover:bg-foreground/90 transition-colors"
+                className="inline-flex items-center gap-2 bg-foreground text-background px-4 md:px-6 py-2 md:py-3 rounded-lg hover:bg-foreground/90 transition-colors text-sm md:text-base"
               >
                 Explorar Eventos
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {registrations.map((registration) => (
                 <Link
                   key={registration.id}
                   href={`/eventos/${registration.event.slug}`}
                   className="bg-card border border-border rounded-lg overflow-hidden hover:border-foreground/50 transition-all group"
                 >
-                  <div className="relative w-full h-48 overflow-hidden">
+                  <div className="relative w-full h-40 md:h-48 overflow-hidden">
                     <img
                       src={registration.event.image}
                       alt={registration.event.title}
@@ -640,32 +642,32 @@ function DashboardContent() {
                       }}
                     />
                   </div>
-                  <div className="p-6">
-                    <div className="flex items-start justify-between gap-2 mb-3">
-                      <h3 className="font-display text-xl text-foreground group-hover:text-foreground/80 transition-colors flex-1">
+                  <div className="p-4 md:p-6">
+                    <div className="flex items-start justify-between gap-2 mb-2 md:mb-3">
+                      <h3 className="font-display text-lg md:text-xl text-foreground group-hover:text-foreground/80 transition-colors flex-1 line-clamp-2">
                         {registration.event.title}
                       </h3>
                     </div>
                     
-                    <div className="flex items-center gap-2 mb-3 flex-wrap">
+                    <div className="flex items-center gap-2 mb-2 md:mb-3 flex-wrap">
                       <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
                         {registration.event.category}
                       </span>
                       {getStatusBadge(registration.status)}
                     </div>
 
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                      <Calendar className="w-4 h-4" />
-                      <span>{registration.event.date}</span>
+                    <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground mb-2 md:mb-3">
+                      <Calendar className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                      <span className="truncate">{registration.event.date}</span>
                     </div>
 
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <MapPin className="w-4 h-4" />
-                      <span>{registration.event.location}</span>
+                    <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+                      <MapPin className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                      <span className="truncate">{registration.event.location}</span>
                     </div>
 
                     {registration.payment_status === 'pending' && (
-                      <div className="mt-4 pt-4 border-t border-border">
+                      <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-border">
                         <p className="text-xs text-muted-foreground">
                           Pago pendiente
                         </p>
