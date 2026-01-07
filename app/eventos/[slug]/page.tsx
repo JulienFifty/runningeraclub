@@ -7,6 +7,7 @@ import { getEventBySlug, getAllEventSlugs } from '@/data/events-supabase';
 import { Calendar, MapPin, Clock, Route, TrendingUp, Users, DollarSign, CheckCircle, ArrowLeft, MessageCircle, Mail, Phone } from 'lucide-react';
 import Link from 'next/link';
 import { EventRegistrationButtonWrapper } from '@/components/EventRegistrationButtonWrapper';
+import { RefreshSessionOnReturn } from '@/components/RefreshSessionOnReturn';
 
 // Forzar renderizado dinámico para obtener datos actualizados
 export const dynamic = 'force-dynamic';
@@ -58,6 +59,7 @@ export default async function EventPage({ params }: PageProps) {
 
   return (
     <main className="min-h-screen bg-background">
+      <RefreshSessionOnReturn />
       <Header />
       
       {/* Hero Section */}
