@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     console.log('💰 Payment check:', { price: event.price, requiresPayment });
 
     // Verificar si el miembro ya existe en la tabla members
-    const { data: member, error: memberError } = await supabase
+    let { data: member, error: memberError } = await supabase
       .from('members')
       .select('id, email, full_name')
       .eq('id', user.id)
