@@ -1,13 +1,28 @@
 -- ============================================
 -- Agregar nuevo administrador
 -- ============================================
--- Ejecuta este script en el SQL Editor de Supabase
+-- IMPORTANTE: Este script solo agrega el email a la tabla admins
+-- La contraseña se maneja en Supabase Auth (ver instrucciones abajo)
 -- 
--- INSTRUCCIONES:
--- 1. Ve a tu proyecto en Supabase
--- 2. Abre el SQL Editor
--- 3. Copia y pega este script
--- 4. Ejecuta el script
+-- PASOS COMPLETOS:
+-- 
+-- 1. CREAR USUARIO EN SUPABASE AUTH (con contraseña):
+--    - Ve a Authentication > Users en Supabase Dashboard
+--    - Haz clic en "Add user" o "Invite user"
+--    - Email: runningeraclub@gmail.com
+--    - Contraseña: [la que quieras]
+--    - Auto Confirm: ✅ (activado)
+--    - Guardar
+--
+-- 2. AGREGAR A TABLA ADMINS (ejecuta este script):
+--    - Ve a SQL Editor en Supabase
+--    - Copia y pega este script
+--    - Ejecuta el script
+--
+-- 3. VERIFICAR:
+--    - El usuario podrá iniciar sesión en /admin/login
+--    - Con el email: runningeraclub@gmail.com
+--    - Y la contraseña que configuraste en el paso 1
 -- ============================================
 
 -- Agregar el nuevo administrador
