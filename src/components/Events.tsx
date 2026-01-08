@@ -272,8 +272,8 @@ export const Events = () => {
                             {event.title}
                           </h3>
 
-                          {/* Description - Oculto en mobile para reducir altura */}
-                          <p className="text-muted-foreground text-xs md:text-sm leading-relaxed mb-3 md:mb-4 flex-1 hidden md:block line-clamp-2">
+                          {/* Description - Cortada y pequeña en mobile */}
+                          <p className="text-muted-foreground text-[10px] md:text-sm leading-relaxed mb-3 md:mb-4 flex-1 line-clamp-2">
                             {event.shortDescription}
                           </p>
 
