@@ -275,9 +275,9 @@ export const Hero = () => {
       </motion.div>
 
       {/* Content */}
-      <div className="relative flex-1 flex flex-col items-center justify-center pt-8 md:pt-12 pb-8">
+      <div className="relative flex-1 flex flex-col items-center justify-center pt-4 md:pt-12 pb-8">
         <div className="container-premium w-full">
-          <div className="max-w-3xl mt-8 md:mt-12 mx-auto text-center">
+          <div className="max-w-3xl mt-4 md:mt-12 mx-auto text-center">
             {/* Logo with dramatic entrance */}
             <motion.div
               initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
