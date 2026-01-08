@@ -212,37 +212,27 @@ export function AdminNotifications() {
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden">
       {/* Header */}
-      <div 
-        className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50 transition-colors"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Bell className="w-5 h-5 text-foreground" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center font-bold">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
-            )}
+      <div className="p-4">
+        <div 
+          className="flex items-center justify-between mb-4 cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Bell className="w-5 h-5 text-foreground" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center font-bold">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </div>
+            <div>
+              <h2 className="text-lg font-display font-semibold text-foreground">Notificaciones</h2>
+              <p className="text-xs text-muted-foreground">
+                {unreadCount === 0 ? 'No hay notificaciones nuevas' : `${unreadCount} nueva${unreadCount > 1 ? 's' : ''}`}
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-lg font-display font-semibold text-foreground">Notificaciones</h2>
-            <p className="text-xs text-muted-foreground">
-              {unreadCount === 0 ? 'No hay notificaciones nuevas' : `${unreadCount} nueva${unreadCount > 1 ? 's' : ''}`}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowFilters(!showFilters);
-            }}
-            className={`p-2 hover:bg-muted rounded transition-colors ${showFilters ? 'bg-muted' : ''}`}
-            title="Filtros"
-          >
-            <Filter className="w-4 h-4 text-muted-foreground" />
-          </button>
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -256,48 +246,44 @@ export function AdminNotifications() {
             <RefreshCw className={`w-4 h-4 text-muted-foreground ${refreshing ? 'animate-spin' : ''}`} />
           </button>
         </div>
-      </div>
 
-      {/* Filtros por Categoría */}
-      {isExpanded && showFilters && (
-        <div className="border-t border-border p-4 bg-muted/30">
-          <div className="flex flex-wrap gap-2">
-            {categories.map((category) => {
-              const Icon = category.icon;
-              const count = getCategoryCount(category.value);
-              const isActive = selectedCategory === category.value;
-              
-              return (
-                <button
-                  key={category.value}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedCategory(category.value);
-                  }}
-                  className={`
-                    inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
-                    border
-                    ${isActive 
-                      ? `${category.color} border-current` 
-                      : 'bg-background border-border text-muted-foreground hover:bg-muted'
-                    }
-                  `}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{category.label}</span>
-                  {count > 0 && (
-                    <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
-                      isActive ? 'bg-current/20' : 'bg-muted'
-                    }`}>
-                      {count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+        {/* Filtros por Categoría - Siempre visibles en el header */}
+        <div className="flex flex-wrap gap-2">
+          {categories.map((category) => {
+            const Icon = category.icon;
+            const count = getCategoryCount(category.value);
+            const isActive = selectedCategory === category.value;
+            
+            return (
+              <button
+                key={category.value}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedCategory(category.value);
+                }}
+                className={`
+                  inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-200
+                  border
+                  ${isActive 
+                    ? `${category.color} border-current` 
+                    : 'bg-background border-border text-muted-foreground hover:bg-muted'
+                  }
+                `}
+              >
+                <Icon className="w-3 h-3" />
+                <span>{category.label}</span>
+                {count > 0 && (
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                    isActive ? 'bg-current/20' : 'bg-muted'
+                  }`}>
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
-      )}
+      </div>
 
       {/* Notifications List */}
       {isExpanded && (
