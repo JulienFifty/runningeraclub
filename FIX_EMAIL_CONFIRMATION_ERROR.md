@@ -205,3 +205,4 @@ LIMIT 10;
 
 Si `email_confirmed_at` es NULL, el usuario no ha confirmado su email.
 
+

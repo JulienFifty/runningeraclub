@@ -92,3 +92,4 @@ COMMENT ON COLUMN coupons.event_id IS 'ID del evento (NULL = aplicable a todos)'
 
 
 
+

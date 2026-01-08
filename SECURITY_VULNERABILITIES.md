@@ -177,3 +177,4 @@ La vulnerabilidad en `xlsx` es conocida pero el riesgo es **bajo** porque:
 **Última actualización**: 2026-01-06  
 **Próxima revisión**: 2026-02-06 (mensual)
 
+

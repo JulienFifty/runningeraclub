@@ -26,3 +26,4 @@ SELECT id, title, difficulty FROM events LIMIT 5;
 
 
 
+

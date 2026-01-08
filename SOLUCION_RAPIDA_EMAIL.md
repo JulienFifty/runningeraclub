@@ -161,3 +161,4 @@ Si después de seguir todos estos pasos aún no funciona:
 3. Revisa los logs de Supabase para ver errores
 4. Contacta al administrador del sistema
 
+

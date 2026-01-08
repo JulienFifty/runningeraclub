@@ -184,3 +184,4 @@ Usar un servicio de email dedicado es mejor para producción:
 
 ¿Pudiste aumentar el límite en Supabase?
 
+

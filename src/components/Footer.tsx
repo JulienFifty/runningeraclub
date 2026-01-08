@@ -30,7 +30,7 @@ const footerLinks = {
 };
 
 const socialLinks = [
-  { icon: Instagram, href: 'https://instagram.com/runningera', label: 'Instagram' },
+  { icon: Instagram, href: 'https://www.instagram.com/runningera_club/', label: 'Instagram' },
 ];
 
 export const Footer = () => {

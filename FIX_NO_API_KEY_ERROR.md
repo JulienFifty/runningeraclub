@@ -195,3 +195,4 @@ https://vercel.com/[tu-username]/runningeraclub/settings/environment-variables
 
 **Configura las variables de entorno en Vercel ahora y el error desaparecerá.**
 
+

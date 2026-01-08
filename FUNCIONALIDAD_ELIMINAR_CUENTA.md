@@ -327,3 +327,4 @@ Los usuarios ahora pueden:
 
 Después del deploy, **agrega la Service Role Key en Vercel** y prueba la funcionalidad.
 
+

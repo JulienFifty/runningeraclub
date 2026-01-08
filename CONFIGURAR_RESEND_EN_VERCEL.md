@@ -234,3 +234,4 @@ Sender Name: RUNNING ERA Club
 
 **¿Necesitas ayuda con algún paso específico? ¿Ya agregaste el dominio en Resend y tienes los registros DNS?**
 
+

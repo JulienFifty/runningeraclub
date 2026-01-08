@@ -188,3 +188,4 @@ Si no puedes configurarlo, Supabase usa un valor por defecto de:
 
 **¿Encontraste esta opción en tu dashboard de Supabase? Si no, puede que esté en un valor por defecto de 60 segundos.**
 
+

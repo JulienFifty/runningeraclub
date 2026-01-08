@@ -197,3 +197,4 @@ Antes de lanzar en producción, verifica:
 - Cada modo tiene su propio `STRIPE_WEBHOOK_SECRET`
 - Asegúrate de configurar ambos en Vercel con diferentes variables de entorno si es necesario
 
+

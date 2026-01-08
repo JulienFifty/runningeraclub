@@ -190,7 +190,7 @@ export const Header = () => {
               </div>
               <div className="flex items-center gap-4 mx-auto md:mx-0">
                 <a 
-                  href="https://instagram.com/runningera" 
+                  href="https://www.instagram.com/runningera_club/" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="hover:opacity-80 transition-opacity"

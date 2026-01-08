@@ -271,3 +271,4 @@ notificaciones@mail.runningeraclub.com
 
 Si sí, te recomiendo usar el dominio principal directamente. Si no, podemos usar `onboarding@resend.dev` temporalmente.
 
+

@@ -260,3 +260,4 @@ const { data: event } = await supabase
 
 **El error está corregido. Espera que se complete el deployment y prueba el flujo de confirmación → registro.**
 
+

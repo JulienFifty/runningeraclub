@@ -238,3 +238,4 @@ Si después de estos pasos no funciona:
 
 ¿Qué ves en Auth Users de Supabase para tu email?
 
+

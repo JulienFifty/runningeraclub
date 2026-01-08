@@ -244,3 +244,4 @@ Ahora la página:
 
 **El error está corregido. Espera que se complete el deployment en Vercel (~2 minutos) y prueba de nuevo el flujo de confirmación.**
 
+

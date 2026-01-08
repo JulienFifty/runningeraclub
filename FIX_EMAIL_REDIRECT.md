@@ -246,3 +246,4 @@ https://www.runningeraclub.com/auth/callback
 
 ¿Ya configuraste el Site URL y Redirect URLs en Supabase?
 
+

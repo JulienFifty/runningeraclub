@@ -228,3 +228,4 @@ Después de implementar el trigger:
 
 **Ejecuta el script del trigger ahora y prueba registrarte de nuevo.**
 
+

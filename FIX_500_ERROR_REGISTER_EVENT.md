@@ -332,3 +332,4 @@ Los `console.log` agregados ayudan a diagnosticar dónde falla exactamente el fl
 
 **El error está corregido con triple protección. Espera que se complete el deployment y prueba el flujo completo de registro en evento.**
 
+

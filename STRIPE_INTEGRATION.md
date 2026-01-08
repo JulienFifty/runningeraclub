@@ -196,3 +196,4 @@ Ver `STRIPE_SETUP.md` para instrucciones detalladas de configuración.
 
 
 
+

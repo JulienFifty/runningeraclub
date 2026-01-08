@@ -137,3 +137,4 @@ cp ENV_VARIABLES_SETUP.md .env.local
 - Verifica que `STRIPE_WEBHOOK_SECRET` esté configurada
 - Verifica que la clave empiece con `whsec_`
 
+

@@ -259,3 +259,4 @@ Esto permite:
 - ✅ Reportes más precisos
 - ✅ Reembolsos más fáciles
 
+
