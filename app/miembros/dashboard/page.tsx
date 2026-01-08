@@ -520,98 +520,8 @@ function DashboardContent() {
             </div>
           </div>
 
-          {/* Strava Connection Card - Próximamente */}
-          <div className="bg-card border-t border-b md:border md:border-border p-4 md:p-6 md:rounded-lg mb-4 md:mb-8 relative overflow-hidden">
-            {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-5">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-[#FC4C02] rounded-full blur-3xl"></div>
-            </div>
-            
-            <div className="relative">
-              <div className="flex items-start gap-3 md:gap-4 mb-4 md:mb-6">
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-[#FC4C02]/10 border border-[#FC4C02]/20 flex items-center justify-center flex-shrink-0">
-                  <svg
-                    className="w-5 h-5 md:w-6 md:h-6 text-[#FC4C02]"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
-                  </svg>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h2 className="font-display text-lg md:text-xl text-foreground font-light mb-2">
-                    Integración con Strava
-                  </h2>
-                  <span className="inline-block text-xs px-2 md:px-3 py-1 bg-muted text-muted-foreground rounded-full mb-3 md:mb-4">
-                    Próximamente
-                  </span>
-                  <p className="text-xs md:text-sm text-muted-foreground mb-3 md:mb-4">
-                    Muy pronto podrás conectar tu cuenta de Strava y disfrutar de estas funcionalidades:
-                  </p>
-                </div>
-              </div>
-
-              {/* Features Tease */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-4 md:mb-6">
-                <div className="flex items-start gap-2 md:gap-3 p-3 md:p-4 bg-muted/30 rounded-lg">
-                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#FC4C02]/10 flex items-center justify-center flex-shrink-0">
-                    <Trophy className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#FC4C02]" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="text-xs md:text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Leaderboard Automático</h3>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      Tus actividades se sincronizarán automáticamente y competirás en tiempo real
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-2 md:gap-3 p-3 md:p-4 bg-muted/30 rounded-lg">
-                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#FC4C02]/10 flex items-center justify-center flex-shrink-0">
-                    <Activity className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#FC4C02]" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="text-xs md:text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Estadísticas Detalladas</h3>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      Visualiza tus kilómetros, ritmos y progreso de entrenamiento
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-2 md:gap-3 p-3 md:p-4 bg-muted/30 rounded-lg">
-                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#FC4C02]/10 flex items-center justify-center flex-shrink-0">
-                    <Users className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#FC4C02]" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="text-xs md:text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Competencia Social</h3>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      Compara tu rendimiento con otros miembros del club
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-2 md:gap-3 p-3 md:p-4 bg-muted/30 rounded-lg">
-                  <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#FC4C02]/10 flex items-center justify-center flex-shrink-0">
-                    <TrendingUp className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#FC4C02]" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="text-xs md:text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Seguimiento de Progreso</h3>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      Analiza tu evolución y alcanza tus objetivos de running
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <StravaConnectButton
-                isConnected={false}
-                onConnectionChange={() => {}}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* My Events */}
-        <div className="px-4 md:px-0">
+        {/* My Events - Movido antes de Strava */}
+        <div className="px-4 md:px-0 mb-4 md:mb-8">
           <div className="flex items-center justify-between mb-4 md:mb-6">
             <h2 className="font-display text-xl md:text-2xl text-foreground">Mis Eventos</h2>
             <Link
@@ -722,6 +632,95 @@ function DashboardContent() {
               })}
             </div>
           )}
+        </div>
+
+        {/* Strava Connection Card - Próximamente */}
+        <div className="bg-card border-t border-b md:border md:border-border p-4 md:p-6 md:rounded-lg mb-4 md:mb-8 relative overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[#FC4C02] rounded-full blur-3xl"></div>
+          </div>
+          
+          <div className="relative">
+            <div className="flex items-start gap-3 md:gap-4 mb-4 md:mb-6">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-[#FC4C02]/10 border border-[#FC4C02]/20 flex items-center justify-center flex-shrink-0">
+                <svg
+                  className="w-5 h-5 md:w-6 md:h-6 text-[#FC4C02]"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="font-display text-lg md:text-xl text-foreground font-light mb-2">
+                  Integración con Strava
+                </h2>
+                <span className="inline-block text-xs px-2 md:px-3 py-1 bg-muted text-muted-foreground rounded-full mb-3 md:mb-4">
+                  Próximamente
+                </span>
+                <p className="text-xs md:text-sm text-muted-foreground mb-3 md:mb-4">
+                  Muy pronto podrás conectar tu cuenta de Strava y disfrutar de estas funcionalidades:
+                </p>
+              </div>
+            </div>
+
+            {/* Features Tease */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-4 md:mb-6">
+              <div className="flex items-start gap-2 md:gap-3 p-3 md:p-4 bg-muted/30 rounded-lg">
+                <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#FC4C02]/10 flex items-center justify-center flex-shrink-0">
+                  <Trophy className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#FC4C02]" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-xs md:text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Leaderboard Automático</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Tus actividades se sincronizarán automáticamente y competirás en tiempo real
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2 md:gap-3 p-3 md:p-4 bg-muted/30 rounded-lg">
+                <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#FC4C02]/10 flex items-center justify-center flex-shrink-0">
+                  <Activity className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#FC4C02]" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-xs md:text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Estadísticas Detalladas</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Visualiza tus kilómetros, ritmos y progreso de entrenamiento
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2 md:gap-3 p-3 md:p-4 bg-muted/30 rounded-lg">
+                <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#FC4C02]/10 flex items-center justify-center flex-shrink-0">
+                  <Users className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#FC4C02]" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-xs md:text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Competencia Social</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Compara tu rendimiento con otros miembros del club
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2 md:gap-3 p-3 md:p-4 bg-muted/30 rounded-lg">
+                <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-[#FC4C02]/10 flex items-center justify-center flex-shrink-0">
+                  <TrendingUp className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#FC4C02]" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-xs md:text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Seguimiento de Progreso</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Analiza tu evolución y alcanza tus objetivos de running
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <StravaConnectButton
+              isConnected={false}
+              onConnectionChange={() => {}}
+            />
+          </div>
         </div>
       </div>
 
