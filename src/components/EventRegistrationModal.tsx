@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 import Link from 'next/link';
-import { X, User, Mail, Phone, ArrowRight, Tag, Check } from 'lucide-react';
+import { X, User, Mail, Phone, ArrowRight, Tag, Check, Crown, Sparkles, Gift, Trophy, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -239,53 +239,117 @@ export function EventRegistrationModal({
         {/* Content */}
         <div className="p-6">
           {mode === 'choose' && (
-            <div className="space-y-4">
-              <p className="text-muted-foreground mb-6">
-                Elige cómo deseas registrarte a <span className="font-medium text-foreground">{eventTitle}</span>
+            <div className="space-y-6">
+              <div className="text-center mb-6">
+                <p className="text-muted-foreground mb-2">
+                  Regístrate a <span className="font-medium text-foreground">{eventTitle}</span>
+                </p>
                 {requiresPayment && (
-                  <span className="block mt-2 text-sm">
-                    Precio: <span className="font-semibold text-foreground">{eventPrice}</span>
-                  </span>
+                  <p className="text-lg font-display font-semibold text-foreground">
+                    {eventPrice}
+                  </p>
                 )}
-              </p>
+              </div>
 
+              {/* Opción Principal: Crear Cuenta */}
               <button
-                onClick={() => setMode('guest')}
-                className="w-full p-6 border-2 border-border rounded-lg hover:border-foreground/50 transition-colors text-left group"
+                onClick={handleLoginClick}
+                className="w-full relative overflow-hidden border-2 border-foreground/20 rounded-xl hover:border-foreground/40 transition-all duration-300 text-left group bg-gradient-to-br from-foreground/5 to-foreground/10 hover:from-foreground/10 hover:to-foreground/15"
               >
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-background rounded-lg group-hover:bg-foreground/5 transition-colors">
-                    <User className="w-6 h-6 text-foreground" />
+                {/* Badge de Recomendado */}
+                <div className="absolute top-4 right-4 z-10">
+                  <div className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-yellow-400/20 to-orange-400/20 border border-yellow-400/30 rounded-full backdrop-blur-sm">
+                    <Sparkles className="w-3.5 h-3.5 text-yellow-400" />
+                    <span className="text-xs font-semibold text-yellow-400 uppercase tracking-wider">Recomendado</span>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-display font-bold text-foreground mb-1 uppercase tracking-wider">
-                      Registro Rápido
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Registrate sin crear una cuenta. Solo necesitas tu nombre y contacto.
-                    </p>
+                </div>
+
+                <div className="p-6">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="p-3 bg-gradient-to-br from-foreground/10 to-foreground/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                      <Crown className="w-7 h-7 text-foreground" />
+                    </div>
+                    <div className="flex-1 pt-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="text-xl font-display font-bold text-foreground uppercase tracking-tight">
+                          Crear Cuenta
+                        </h3>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+                        Únete al club y accede a beneficios exclusivos
+                      </p>
+                      
+                      {/* Lista de Beneficios */}
+                      <div className="space-y-2.5">
+                        <div className="flex items-center gap-2.5 text-sm">
+                          <div className="w-5 h-5 rounded-full bg-foreground/10 flex items-center justify-center flex-shrink-0">
+                            <Check className="w-3 h-3 text-foreground" />
+                          </div>
+                          <span className="text-foreground/90">Gestiona todos tus eventos en un solo lugar</span>
+                        </div>
+                        <div className="flex items-center gap-2.5 text-sm">
+                          <div className="w-5 h-5 rounded-full bg-foreground/10 flex items-center justify-center flex-shrink-0">
+                            <Check className="w-3 h-3 text-foreground" />
+                          </div>
+                          <span className="text-foreground/90">Acceso a eventos exclusivos para miembros</span>
+                        </div>
+                        <div className="flex items-center gap-2.5 text-sm">
+                          <div className="w-5 h-5 rounded-full bg-foreground/10 flex items-center justify-center flex-shrink-0">
+                            <Check className="w-3 h-3 text-foreground" />
+                          </div>
+                          <span className="text-foreground/90">Descuentos especiales y cupones exclusivos</span>
+                        </div>
+                        <div className="flex items-center gap-2.5 text-sm">
+                          <div className="w-5 h-5 rounded-full bg-foreground/10 flex items-center justify-center flex-shrink-0">
+                            <Check className="w-3 h-3 text-foreground" />
+                          </div>
+                          <span className="text-foreground/90">Historial completo de tus participaciones</span>
+                        </div>
+                        <div className="flex items-center gap-2.5 text-sm">
+                          <div className="w-5 h-5 rounded-full bg-foreground/10 flex items-center justify-center flex-shrink-0">
+                            <Check className="w-3 h-3 text-foreground" />
+                          </div>
+                          <span className="text-foreground/90">Comunidad activa de corredores</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  
+                  <div className="flex items-center justify-between pt-4 border-t border-foreground/10">
+                    <span className="text-xs text-muted-foreground">Gratis y sin compromiso</span>
+                    <ArrowRight className="w-5 h-5 text-foreground group-hover:translate-x-1 transition-transform" />
+                  </div>
                 </div>
               </button>
 
+              {/* Divider */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-border"></div>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">o</span>
+                </div>
+              </div>
+
+              {/* Opción Secundaria: Registro Rápido */}
               <button
-                onClick={handleLoginClick}
-                className="w-full p-6 border-2 border-border rounded-lg hover:border-foreground/50 transition-colors text-left group"
+                onClick={() => setMode('guest')}
+                className="w-full p-5 border border-border/50 rounded-lg hover:border-border transition-all duration-200 text-left group bg-background/50"
               >
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-background rounded-lg group-hover:bg-foreground/5 transition-colors">
-                    <Mail className="w-6 h-6 text-foreground" />
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-background rounded-lg group-hover:bg-foreground/5 transition-colors">
+                    <User className="w-5 h-5 text-muted-foreground" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-display font-bold text-foreground mb-1 uppercase tracking-wider">
-                      Crear Cuenta / Iniciar Sesión
+                    <h3 className="text-base font-display font-medium text-foreground/80 mb-0.5">
+                      Registro Rápido
                     </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Crea una cuenta de miembro para gestionar tus eventos y tener acceso a beneficios exclusivos.
+                    <p className="text-xs text-muted-foreground">
+                      Sin cuenta. Solo nombre y contacto.
                     </p>
                   </div>
-                  <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground/60 transition-colors" />
                 </div>
               </button>
             </div>
