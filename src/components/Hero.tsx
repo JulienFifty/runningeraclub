@@ -320,7 +320,7 @@ export const Hero = () => {
               transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
               className="inline-block text-white/80 text-xs tracking-[0.3em] uppercase mb-4"
             >
-              Social Running Club
+              Puebla Running Club
             </motion.span>
 
             {/* Main Title with powerful reveal */}
