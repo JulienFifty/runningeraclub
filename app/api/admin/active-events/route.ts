@@ -28,19 +28,17 @@ export async function GET() {
       );
     }
 
-    // Obtener fecha actual en formato YYYY-MM-DD
+    // Obtener fecha actual
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const todayString = today.toISOString().split('T')[0];
+    today.setMinutes(0, 0, 0);
+    today.setSeconds(0, 0);
 
-    // Obtener eventos activos (fecha >= hoy)
-    // Nota: La columna 'date' puede ser TEXT, así que comparamos como string
-    const { data: events, error: eventsError } = await supabase
+    // Obtener todos los eventos (porque la columna date es TEXT y puede tener diferentes formatos)
+    const { data: allEvents, error: eventsError } = await supabase
       .from('events')
       .select('id, slug, title, date, max_participants')
-      .gte('date', todayString)
-      .order('date', { ascending: true })
-      .limit(10); // Limitar a 10 eventos más próximos
+      .order('date', { ascending: true });
 
     if (eventsError) {
       console.error('Error fetching events:', eventsError);
@@ -49,6 +47,54 @@ export async function GET() {
         { status: 500 }
       );
     }
+
+    // Filtrar eventos activos (fecha >= hoy) en JavaScript
+    // Intentar parsear diferentes formatos de fecha
+    const events = (allEvents || []).filter((event) => {
+      if (!event.date) return false;
+
+      try {
+        // Intentar diferentes formatos de fecha
+        let eventDate: Date | null = null;
+
+        // Formato 1: YYYY-MM-DD
+        if (event.date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          eventDate = new Date(event.date);
+        }
+        // Formato 2: DD MMM YYYY (ej: "10 ENE 2026")
+        else if (event.date.match(/^\d{1,2}\s+\w{3}\s+\d{4}$/i)) {
+          // Parsear formato español
+          const months: { [key: string]: number } = {
+            'ene': 0, 'feb': 1, 'mar': 2, 'abr': 3, 'may': 4, 'jun': 5,
+            'jul': 6, 'ago': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dic': 11,
+            'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'may': 4, 'jun': 5,
+            'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11,
+          };
+          const parts = event.date.toLowerCase().split(/\s+/);
+          if (parts.length === 3 && months[parts[1]] !== undefined) {
+            eventDate = new Date(
+              parseInt(parts[2]),
+              months[parts[1]],
+              parseInt(parts[0])
+            );
+          }
+        }
+        // Formato 3: Intentar parseo automático
+        else {
+          eventDate = new Date(event.date);
+        }
+
+        // Validar que la fecha sea válida y sea >= hoy
+        if (eventDate && !isNaN(eventDate.getTime())) {
+          eventDate.setHours(0, 0, 0, 0);
+          return eventDate >= today;
+        }
+      } catch (error) {
+        console.warn(`Error parsing date for event ${event.id}: ${event.date}`, error);
+      }
+
+      return false;
+    }).slice(0, 10); // Limitar a 10 eventos más próximos
 
     // Para cada evento, calcular registros e ingresos
     const eventsWithStats = await Promise.all(
