@@ -87,7 +87,7 @@ export default async function EventPage({ params }: PageProps) {
         </div>
 
         <div className="relative z-10 h-full flex items-end">
-          <div className="container-premium w-full pb-8 md:pb-16 pt-4 md:pt-0">
+          <div className="container-premium w-full pb-12 md:pb-16 pt-8 md:pt-0">
             <Link
               href="/#eventos"
               className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-4 md:mb-6 transition-colors text-xs md:text-sm font-medium tracking-wider uppercase"
