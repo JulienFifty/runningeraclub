@@ -14,6 +14,7 @@ import {
   Star,
   X
 } from 'lucide-react';
+import { ThemeToggle } from '@/components/admin/ThemeToggle';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -217,6 +218,9 @@ export function UserSidebar({ onClose, isMobile = false }: UserSidebarProps) {
             </div>
           </div>
         )}
+
+        {/* Theme Toggle */}
+        <ThemeToggle />
 
         {/* External Links */}
         <Link
