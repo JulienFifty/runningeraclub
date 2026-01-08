@@ -4,9 +4,10 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { Calendar, User, LogOut, Clock, MapPin, CheckCircle, XCircle, ArrowRight, Trophy, Activity, TrendingUp, Users, Home } from 'lucide-react';
+import { Calendar, User, LogOut, Clock, MapPin, CheckCircle, XCircle, ArrowRight, Trophy, Activity, TrendingUp, Users, Home, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { StravaConnectButton } from '@/components/strava/StravaConnectButton';
+import { CancelRegistrationModal } from '@/components/CancelRegistrationModal';
 
 // Forzar renderizado dinámico
 export const dynamic = 'force-dynamic';
@@ -27,6 +28,9 @@ interface EventRegistration {
   registration_date: string;
   status: string;
   payment_status: string;
+  stripe_payment_intent_id?: string | null;
+  amount_paid?: number | null;
+  currency?: string | null;
   event: {
     id: string;
     slug: string;
@@ -261,6 +265,9 @@ function DashboardContent() {
           status,
           payment_status,
           stripe_session_id,
+          stripe_payment_intent_id,
+          amount_paid,
+          currency,
           event:events (
             id,
             slug,
@@ -288,6 +295,9 @@ function DashboardContent() {
             status: reg.status,
             payment_status: reg.payment_status,
             stripe_session_id: reg.stripe_session_id,
+            stripe_payment_intent_id: reg.stripe_payment_intent_id,
+            amount_paid: reg.amount_paid,
+            currency: reg.currency,
             event: Array.isArray(reg.event) ? reg.event[0] : reg.event,
           }))
           .filter((reg: any) => {
@@ -691,6 +701,21 @@ function DashboardContent() {
           )}
         </div>
       </div>
+
+      {/* Modal de Cancelación */}
+      {selectedRegistration && (
+        <CancelRegistrationModal
+          isOpen={cancelModalOpen}
+          onClose={() => {
+            setCancelModalOpen(false);
+            setSelectedRegistration(null);
+          }}
+          onCancelSuccess={() => {
+            reloadRegistrations();
+          }}
+          registration={selectedRegistration}
+        />
+      )}
     </main>
   );
 }
