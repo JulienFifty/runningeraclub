@@ -42,8 +42,7 @@ interface Transaction {
     slug: string;
   };
   members?: {
-    first_name: string;
-    last_name: string;
+    full_name: string;
     email: string;
   };
   attendees?: {
@@ -95,7 +94,7 @@ export function PaymentsDashboard() {
         .select(`
           *,
           events(title, slug),
-          members(first_name, last_name, email),
+          members(full_name, email),
           attendees(name, email)
         `)
         .order('created_at', { ascending: false });
@@ -312,7 +311,7 @@ export function PaymentsDashboard() {
                       <TableCell>
                         <div>
                           {transaction.members
-                            ? `${transaction.members.first_name} ${transaction.members.last_name}`
+                            ? transaction.members.full_name
                             : transaction.attendees?.name || 'N/A'}
                         </div>
                         <div className="text-sm text-muted-foreground">
