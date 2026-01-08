@@ -406,7 +406,7 @@ function DashboardContent() {
                       />
                     ) : (
                       <div className="w-20 h-20 md:w-32 md:h-32 rounded-full border-4 border-background bg-foreground/10 flex items-center justify-center">
-                        <span className="text-xl md:text-4xl font-display font-bold text-foreground">
+                        <span className="text-xl md:text-4xl font-sans font-bold text-foreground">
                           {getInitials(member.full_name)}
                         </span>
                       </div>
@@ -417,7 +417,7 @@ function DashboardContent() {
                   
                   {/* Name and Info */}
                   <div className="mb-0 md:mb-2 flex-1 min-w-0">
-                    <h1 className="font-display text-xl md:text-3xl text-foreground font-bold mb-1 break-words">
+                    <h1 className="font-sans text-xl md:text-3xl text-foreground font-bold mb-1 break-words">
                       {member.full_name}
                     </h1>
                     <p className="text-xs md:text-sm text-muted-foreground mb-2 truncate">
@@ -467,7 +467,7 @@ function DashboardContent() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs text-muted-foreground truncate">Eventos</p>
-                  <p className="text-xl md:text-2xl font-display font-bold text-foreground">
+                  <p className="text-xl md:text-2xl font-sans font-bold text-foreground">
                     {registrations.length}
                   </p>
                 </div>
@@ -523,7 +523,7 @@ function DashboardContent() {
         {/* My Events - Movido antes de Strava */}
         <div className="px-4 md:px-0 mb-4 md:mb-8">
           <div className="flex items-center justify-between mb-4 md:mb-6">
-            <h2 className="font-display text-xl md:text-2xl text-foreground">Mis Eventos</h2>
+            <h2 className="font-sans text-xl md:text-2xl text-foreground font-semibold">Mis Eventos</h2>
             <Link
               href="/#eventos"
               className="text-xs md:text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
@@ -571,7 +571,7 @@ function DashboardContent() {
                       </div>
                       <div className="p-4 md:p-6 flex-1 flex flex-col">
                         <div className="flex items-start justify-between gap-2 mb-2 md:mb-3">
-                          <h3 className="font-display text-lg md:text-xl text-foreground group-hover:text-foreground/80 transition-colors flex-1 line-clamp-2">
+                          <h3 className="font-sans text-lg md:text-xl text-foreground font-semibold group-hover:text-foreground/80 transition-colors flex-1 line-clamp-2">
                             {registration.event.title}
                           </h3>
                         </div>
@@ -653,7 +653,7 @@ function DashboardContent() {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="font-display text-lg md:text-xl text-foreground font-light mb-2">
+                <h2 className="font-sans text-lg md:text-xl text-foreground font-light mb-2">
                   Integración con Strava
                 </h2>
                 <span className="inline-block text-xs px-2 md:px-3 py-1 bg-muted text-muted-foreground rounded-full mb-3 md:mb-4">
@@ -672,7 +672,7 @@ function DashboardContent() {
                   <Trophy className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#FC4C02]" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-xs md:text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Leaderboard Automático</h3>
+                  <h3 className="text-xs md:text-sm font-sans font-bold text-foreground mb-1 uppercase tracking-wider">Leaderboard Automático</h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     Tus actividades se sincronizarán automáticamente y competirás en tiempo real
                   </p>
