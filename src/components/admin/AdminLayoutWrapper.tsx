@@ -4,6 +4,10 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { AdminSidebar } from './AdminSidebar';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Menu } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export function AdminLayoutWrapper({
   children,
@@ -68,15 +72,39 @@ export function AdminLayoutWrapper({
 
   return (
     <div className="flex min-h-screen bg-background">
-      {/* Sidebar - Solo mostrar si no es login */}
-      {!isLoginPage && <AdminSidebar />}
+      {/* Sidebar Desktop - Solo mostrar si no es login */}
+      {!isLoginPage && !isMobile && (
+        <AdminSidebar isMobile={false} />
+      )}
+
+      {/* Sidebar Mobile - Sheet Drawer */}
+      {!isLoginPage && isMobile && (
+        <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+          <SheetContent side="left" className="w-64 p-0 [&>button]:hidden">
+            <AdminSidebar isMobile={true} onClose={() => setIsMobileMenuOpen(false)} />
+          </SheetContent>
+        </Sheet>
+      )}
       
       {/* Main Content */}
       <main 
         className={`flex-1 transition-all duration-300 ${
-          !isLoginPage ? 'ml-64' : ''
+          !isLoginPage && !isMobile ? 'ml-64' : ''
         }`}
       >
+        {/* Mobile Menu Button */}
+        {!isLoginPage && isMobile && (
+          <div className="sticky top-0 z-40 bg-background border-b border-border p-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="md:hidden"
+            >
+              <Menu className="w-6 h-6" />
+            </Button>
+          </div>
+        )}
         {children}
       </main>
     </div>
