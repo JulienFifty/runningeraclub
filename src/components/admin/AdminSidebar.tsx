@@ -30,6 +30,12 @@ const menuItems = [
     description: 'Gestionar eventos',
   },
   {
+    href: '/admin/miembros',
+    icon: Users,
+    label: 'Miembros',
+    description: 'Gestionar usuarios',
+  },
+  {
     href: '/admin/check-in',
     icon: FileCheck,
     label: 'Check-in',
