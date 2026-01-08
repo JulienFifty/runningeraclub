@@ -519,6 +519,7 @@ function DashboardContent() {
               </div>
             </div>
           </div>
+        </div>
 
         {/* My Events - Movido antes de Strava */}
         <div className="px-4 md:px-0 mb-4 md:mb-8">
@@ -684,7 +685,7 @@ function DashboardContent() {
                   <Activity className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#FC4C02]" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-xs md:text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Estadísticas Detalladas</h3>
+                  <h3 className="text-xs md:text-sm font-sans font-bold text-foreground mb-1 uppercase tracking-wider">Estadísticas Detalladas</h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     Visualiza tus kilómetros, ritmos y progreso de entrenamiento
                   </p>
@@ -696,7 +697,7 @@ function DashboardContent() {
                   <Users className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#FC4C02]" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-xs md:text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Competencia Social</h3>
+                  <h3 className="text-xs md:text-sm font-sans font-bold text-foreground mb-1 uppercase tracking-wider">Competencia Social</h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     Compara tu rendimiento con otros miembros del club
                   </p>
@@ -708,7 +709,7 @@ function DashboardContent() {
                   <TrendingUp className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#FC4C02]" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-xs md:text-sm font-display font-bold text-foreground mb-1 uppercase tracking-wider">Seguimiento de Progreso</h3>
+                  <h3 className="text-xs md:text-sm font-sans font-bold text-foreground mb-1 uppercase tracking-wider">Seguimiento de Progreso</h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     Analiza tu evolución y alcanza tus objetivos de running
                   </p>
