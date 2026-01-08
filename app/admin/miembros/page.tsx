@@ -84,54 +84,28 @@ export default function AdminMembers() {
 
   const fetchMembers = async () => {
     try {
-      let query = supabase
-        .from('members')
-        .select(`
-          id,
-          email,
-          full_name,
-          phone,
-          instagram,
-          membership_type,
-          membership_status,
-          created_at
-        `)
-        .order('created_at', { ascending: false });
+      // Usar API route para obtener todos los miembros (bypass RLS)
+      const response = await fetch('/api/admin/members');
+      
+      if (!response.ok) {
+        throw new Error('Error al cargar miembros');
+      }
 
+      const result = await response.json();
+      const allMembers = result.members || [];
+
+      // Aplicar filtros locales
+      let filtered = allMembers;
+      
       if (filterStatus) {
-        query = query.eq('membership_status', filterStatus);
+        filtered = filtered.filter(m => m.membership_status === filterStatus);
       }
 
       if (filterType) {
-        query = query.eq('membership_type', filterType);
+        filtered = filtered.filter(m => m.membership_type === filterType);
       }
 
-      const { data, error } = await query;
-
-      if (error) {
-        toast.error('Error al cargar miembros');
-        console.error(error);
-        return;
-      }
-
-      // Obtener conteo de registros para cada miembro
-      const membersWithCounts = await Promise.all(
-        (data || []).map(async (member) => {
-          const { count } = await supabase
-            .from('event_registrations')
-            .select('*', { count: 'exact', head: true })
-            .eq('member_id', member.id);
-
-          return {
-            ...member,
-            _count: {
-              registrations: count || 0,
-            },
-          };
-        })
-      );
-
-      setMembers(membersWithCounts);
+      setMembers(filtered);
     } catch (error) {
       console.error('Error al cargar miembros:', error);
       toast.error('Error inesperado');
