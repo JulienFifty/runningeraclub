@@ -1,15 +1,12 @@
 import { NextResponse } from 'next/server';
-import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
 // GET - Obtener reseñas aprobadas
 export async function GET() {
   try {
-    const supabase = createSupabaseClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    const supabase = await createClient();
 
     const { data, error } = await supabase
       .from('reviews')
@@ -42,12 +39,17 @@ export async function GET() {
 // POST - Crear nueva reseña
 export async function POST(request: Request) {
   try {
-    const supabase = createSupabaseClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    const supabase = await createClient();
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError) {
+      console.error('Auth error:', authError);
+      return NextResponse.json(
+        { error: 'Error de autenticación', details: authError.message },
+        { status: 401 }
+      );
+    }
 
     if (!user) {
       return NextResponse.json(
