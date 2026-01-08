@@ -135,6 +135,21 @@ export default function UnirmeAlClub() {
               La nueva era del running en Puebla. Comunidad, entrenamientos premium
               y experiencias deportivas exclusivas.
             </p>
+            <motion.button
+              onClick={() => {
+                const formSection = document.getElementById('form-section');
+                formSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+              className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-foreground text-background text-base font-display font-medium tracking-wider uppercase rounded-lg hover:bg-foreground/90 transition-all duration-300 hover:gap-4 shadow-lg hover:shadow-xl"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+            >
+              Crear mi cuenta
+              <ArrowRight className="w-5 h-5" />
+            </motion.button>
           </motion.div>
         </div>
       </section>
@@ -186,7 +201,7 @@ export default function UnirmeAlClub() {
       </section>
 
       {/* Registration Form Section */}
-      <section className="section-padding bg-background">
+      <section id="form-section" className="section-padding bg-background">
         <div className="container-premium max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
