@@ -34,6 +34,7 @@ export function AdminNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filteredNotifications, setFilteredNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<NotificationCategory>('all');
   const [showFilters, setShowFilters] = useState(false);
@@ -46,9 +47,15 @@ export function AdminNotifications() {
     return () => clearInterval(interval);
   }, []);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = async (showToast = false) => {
     try {
-      const response = await fetch('/api/admin/notifications');
+      const response = await fetch('/api/admin/notifications', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      });
+      
       if (!response.ok) {
         throw new Error('Error al cargar notificaciones');
       }
@@ -57,11 +64,20 @@ export function AdminNotifications() {
       const notifs = data.notifications || [];
       setNotifications(notifs);
       applyFilter(notifs, selectedCategory);
+      
+      if (showToast) {
+        toast.success('Notificaciones actualizadas', {
+          description: `${notifs.length} notificación${notifs.length !== 1 ? 'es' : ''} encontrada${notifs.length !== 1 ? 's' : ''}`,
+        });
+      }
     } catch (error: any) {
       console.error('Error fetching notifications:', error);
-      toast.error('Error al cargar notificaciones');
+      toast.error('Error al cargar notificaciones', {
+        description: error.message || 'No se pudieron cargar las notificaciones',
+      });
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -230,12 +246,14 @@ export function AdminNotifications() {
           <button
             onClick={(e) => {
               e.stopPropagation();
-              fetchNotifications();
+              setRefreshing(true);
+              fetchNotifications(true);
             }}
-            className="p-2 hover:bg-muted rounded transition-colors"
+            disabled={refreshing}
+            className="p-2 hover:bg-muted rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             title="Actualizar"
           >
-            <RefreshCw className="w-4 h-4 text-muted-foreground" />
+            <RefreshCw className={`w-4 h-4 text-muted-foreground ${refreshing ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
