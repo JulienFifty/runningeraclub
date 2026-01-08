@@ -83,7 +83,7 @@ export default function AdminLogin() {
         <div className="bg-card border border-border p-8 rounded-lg">
           <div className="text-center mb-8">
             <Lock className="w-12 h-12 text-foreground mx-auto mb-4" />
-            <h1 className="font-display text-3xl text-foreground mb-2">
+            <h1 className="font-sans text-3xl text-foreground mb-2">
               Acceso de Administrador
             </h1>
             <p className="text-muted-foreground text-sm">

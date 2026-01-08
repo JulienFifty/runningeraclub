@@ -174,7 +174,7 @@ export default function AdminMembers() {
                 <ArrowLeft className="w-4 h-4" />
                 <span className="text-sm">Volver al Panel</span>
               </Link>
-              <h1 className="font-display text-4xl md:text-5xl text-foreground font-light mb-4">
+              <h1 className="font-sans text-4xl md:text-5xl text-foreground font-light mb-4">
                 Gestión de Miembros
               </h1>
               <p className="text-muted-foreground">
@@ -266,7 +266,7 @@ export default function AdminMembers() {
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-display text-xl text-foreground font-semibold">
+                      <h3 className="font-sans text-xl text-foreground font-semibold">
                         {member.full_name || 'Sin nombre'}
                       </h3>
                       {getStatusBadge(member.membership_status)}

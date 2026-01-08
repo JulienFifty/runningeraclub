@@ -235,7 +235,7 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
     <div className="space-y-6">
       {/* Header con búsqueda y contador */}
       <div>
-        <h2 className="text-2xl font-display font-semibold text-foreground mb-4">Búsqueda y Filtros</h2>
+        <h2 className="text-2xl font-sans font-semibold text-foreground mb-4">Búsqueda y Filtros</h2>
         <div className="bg-card border border-border p-4 md:p-6 rounded-lg">
         <div className="flex flex-col gap-4">
           <div className="relative">
@@ -269,7 +269,7 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
 
       {/* Lista de asistentes */}
       <div>
-        <h2 className="text-2xl font-display font-semibold text-foreground mb-4">Lista de Asistentes</h2>
+        <h2 className="text-2xl font-sans font-semibold text-foreground mb-4">Lista de Asistentes</h2>
         {filteredAttendees.length === 0 ? (
         <div className="bg-card border border-border p-12 rounded-lg text-center">
           <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -286,7 +286,7 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-start gap-2 md:gap-3 mb-1.5 md:mb-2 flex-wrap">
-                  <h3 className="font-display text-lg md:text-xl lg:text-2xl text-foreground font-semibold break-words">
+                  <h3 className="font-sans text-lg md:text-xl lg:text-2xl text-foreground font-semibold break-words">
                     {attendee.name}
                   </h3>
                   {attendee.tickets > 1 && (

@@ -215,7 +215,7 @@ export function CheckinImporter({ eventId, onImportComplete }: CheckinImporterPr
 
   return (
     <div className="bg-card border border-border p-6 rounded-lg">
-      <h3 className="font-display text-xl text-foreground mb-4">Importar Asistentes</h3>
+      <h3 className="font-sans text-xl text-foreground mb-4">Importar Asistentes</h3>
       <p className="text-sm text-muted-foreground mb-4">
         Sube un archivo Excel (.xlsx, .xls) o CSV con las columnas: <strong>Cantidad</strong>, <strong>Customer Name</strong>, <strong>Customer Email</strong>, <strong>Customer Phone</strong>
       </p>

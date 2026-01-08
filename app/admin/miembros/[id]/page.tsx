@@ -247,7 +247,7 @@ export default function AdminMemberDetail() {
           </Link>
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="font-display text-4xl md:text-5xl text-foreground font-light mb-4">
+              <h1 className="font-sans text-4xl md:text-5xl text-foreground font-light mb-4">
                 {isEditing ? 'Editar Miembro' : member.full_name || 'Miembro'}
               </h1>
               <p className="text-muted-foreground">
@@ -288,7 +288,7 @@ export default function AdminMemberDetail() {
           <div className="lg:col-span-2 space-y-6">
             {/* Información Personal */}
             <div className="bg-card border border-border rounded-lg p-6">
-              <h2 className="text-2xl font-display font-semibold text-foreground mb-6">
+              <h2 className="text-2xl font-sans font-semibold text-foreground mb-6">
                 Información Personal
               </h2>
               <div className="space-y-4">
@@ -401,7 +401,7 @@ export default function AdminMemberDetail() {
 
             {/* Eventos Registrados */}
             <div className="bg-card border border-border rounded-lg p-6">
-              <h2 className="text-2xl font-display font-semibold text-foreground mb-6">
+              <h2 className="text-2xl font-sans font-semibold text-foreground mb-6">
                 Eventos Registrados ({registrations.length})
               </h2>
               {registrations.length === 0 ? (
@@ -416,7 +416,7 @@ export default function AdminMemberDetail() {
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-display text-lg text-foreground font-semibold">
+                            <h3 className="font-sans text-lg text-foreground font-semibold">
                               {reg.event?.title || 'Evento no encontrado'}
                             </h3>
                             {getStatusBadge(reg.status)}
@@ -457,7 +457,7 @@ export default function AdminMemberDetail() {
 
             {/* Transacciones */}
             <div className="bg-card border border-border rounded-lg p-6">
-              <h2 className="text-2xl font-display font-semibold text-foreground mb-6">
+              <h2 className="text-2xl font-sans font-semibold text-foreground mb-6">
                 Historial de Pagos ({transactions.length})
               </h2>
               {transactions.length === 0 ? (
@@ -511,7 +511,7 @@ export default function AdminMemberDetail() {
           <div className="space-y-6">
             {/* Estadísticas */}
             <div className="bg-card border border-border rounded-lg p-6">
-              <h3 className="text-lg font-display font-semibold text-foreground mb-4">
+              <h3 className="text-lg font-sans font-semibold text-foreground mb-4">
                 Estadísticas
               </h3>
               <div className="space-y-4">

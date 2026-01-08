@@ -16,7 +16,7 @@ export function ThemeToggle() {
     return (
       <div className="flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground">
         <div className="w-5 h-5 flex-shrink-0" />
-        <span className="font-display font-medium text-sm">Tema</span>
+        <span className="font-sans font-medium text-sm">Tema</span>
       </div>
     );
   }
@@ -34,7 +34,7 @@ export function ThemeToggle() {
       ) : (
         <Moon className="w-5 h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-200" />
       )}
-      <span className="font-display font-medium text-sm">
+      <span className="font-sans font-medium text-sm">
         {isDark ? 'Modo Claro' : 'Modo Oscuro'}
       </span>
     </button>

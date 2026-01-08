@@ -62,7 +62,7 @@ export default async function AdminDashboard() {
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="font-display text-4xl md:text-5xl lg:text-6xl text-foreground font-light mb-4">
+            <h1 className="font-sans text-4xl md:text-5xl lg:text-6xl text-foreground font-light mb-4">
               Panel de Administración
             </h1>
             <p className="text-muted-foreground text-lg">
@@ -96,7 +96,7 @@ export default async function AdminDashboard() {
                       <Icon className="w-8 h-8 text-foreground group-hover:scale-110 transition-transform duration-300" />
                     </div>
                     <div className="space-y-2">
-                      <h3 className="font-display text-xl text-foreground font-light opacity-100 transition-all duration-300 group-hover:text-foreground/80">
+                      <h3 className="font-sans text-xl text-foreground font-light opacity-100 transition-all duration-300 group-hover:text-foreground/80">
                         {section.label}
                       </h3>
                       <p className="text-sm text-muted-foreground opacity-100 transition-all duration-300 group-hover:text-muted-foreground/80">
@@ -114,7 +114,7 @@ export default async function AdminDashboard() {
 
           {/* Acceso Rápido */}
           <div className="border-t border-border pt-12">
-            <h2 className="font-display text-2xl md:text-3xl text-foreground font-light mb-6">
+            <h2 className="font-sans text-2xl md:text-3xl text-foreground font-light mb-6">
               Accesos Rápidos
             </h2>
             <Link
@@ -125,7 +125,7 @@ export default async function AdminDashboard() {
                 <Calendar className="w-6 h-6 text-foreground" />
               </div>
               <div>
-                <h3 className="font-display text-lg text-foreground font-light group-hover:opacity-70 transition-opacity">
+                <h3 className="font-sans text-lg text-foreground font-light group-hover:opacity-70 transition-opacity">
                   Crear Nuevo Evento
                 </h3>
                 <p className="text-sm text-muted-foreground">

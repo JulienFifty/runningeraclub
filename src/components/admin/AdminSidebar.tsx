@@ -121,7 +121,7 @@ export function AdminSidebar({ onClose, isMobile = false }: AdminSidebarProps) {
             <LayoutDashboard className="w-5 h-5 text-foreground" />
           </div>
           <div>
-            <h1 className="font-display text-lg font-semibold text-foreground leading-tight">
+            <h1 className="font-sans text-lg font-semibold text-foreground leading-tight">
               RUNNING ERA
             </h1>
             <p className="text-xs text-muted-foreground">Admin Panel</p>
@@ -164,7 +164,7 @@ export function AdminSidebar({ onClose, isMobile = false }: AdminSidebarProps) {
                 }`} 
               />
               <div className="flex-1 min-w-0">
-                <div className="font-display font-medium text-sm leading-tight">
+                <div className="font-sans font-medium text-sm leading-tight">
                   {item.label}
                 </div>
                 <div className="text-xs text-muted-foreground/70 mt-0.5">
@@ -201,7 +201,7 @@ export function AdminSidebar({ onClose, isMobile = false }: AdminSidebarProps) {
           className="flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200 group"
         >
           <Home className="w-5 h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-200" />
-          <span className="font-display font-medium text-sm">Ver Sitio</span>
+          <span className="font-sans font-medium text-sm">Ver Sitio</span>
         </Link>
 
         {/* Logout */}
@@ -210,7 +210,7 @@ export function AdminSidebar({ onClose, isMobile = false }: AdminSidebarProps) {
           className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-red-500/10 hover:text-red-600 transition-all duration-200 group"
         >
           <LogOut className="w-5 h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-200" />
-          <span className="font-display font-medium text-sm">Cerrar Sesión</span>
+          <span className="font-sans font-medium text-sm">Cerrar Sesión</span>
         </button>
       </div>
     </aside>

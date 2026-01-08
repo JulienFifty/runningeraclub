@@ -225,7 +225,7 @@ export function ImportAttendeesModal({ isOpen, onClose, onImportComplete, eventI
             <div className="p-2 bg-foreground/10 rounded-lg">
               <Upload className="w-5 h-5 text-foreground" />
             </div>
-            <h2 className="font-display text-xl text-foreground">Importar Asistentes</h2>
+            <h2 className="font-sans text-xl text-foreground">Importar Asistentes</h2>
           </div>
           <button
             onClick={onClose}

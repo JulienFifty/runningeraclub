@@ -229,7 +229,7 @@ export default function CouponsManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-display font-light text-foreground">
+          <h2 className="text-3xl font-sans font-light text-foreground">
             Cupones de Descuento
           </h2>
           <p className="text-muted-foreground mt-1">
@@ -427,7 +427,7 @@ export default function CouponsManagement() {
 
       {/* Stats */}
       <div>
-        <h2 className="text-2xl font-display font-semibold text-foreground mb-4">Estadísticas</h2>
+        <h2 className="text-2xl font-sans font-semibold text-foreground mb-4">Estadísticas</h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-6">
@@ -493,7 +493,7 @@ export default function CouponsManagement() {
 
       {/* Lista de cupones */}
       <div>
-        <h2 className="text-2xl font-display font-semibold text-foreground mb-4">Cupones Registrados</h2>
+        <h2 className="text-2xl font-sans font-semibold text-foreground mb-4">Cupones Registrados</h2>
         <Card>
         <CardHeader>
           <CardTitle className="sr-only">Cupones Registrados</CardTitle>

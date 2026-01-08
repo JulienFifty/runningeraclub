@@ -197,9 +197,6 @@ export async function GET() {
       })
     );
 
-    console.log('Active events found:', eventsWithStats.length);
-    console.log('Events data:', eventsWithStats.map(e => ({ title: e.title, date: e.date })));
-
     return NextResponse.json({
       success: true,
       events: eventsWithStats,

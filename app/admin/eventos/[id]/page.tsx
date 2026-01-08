@@ -254,7 +254,7 @@ export default function EditEvent() {
               >
                 <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
               </motion.div>
-              <h3 className="font-display text-2xl text-foreground mb-2">
+              <h3 className="font-sans text-2xl text-foreground mb-2">
                 ¡Evento Actualizado!
               </h3>
               <p className="text-muted-foreground mb-4">
@@ -282,14 +282,14 @@ export default function EditEvent() {
           Volver a eventos
         </Link>
 
-        <h1 className="font-display text-4xl md:text-5xl text-foreground font-light mb-8">
+        <h1 className="font-sans text-4xl md:text-5xl text-foreground font-light mb-8">
           Editar Evento
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Información Básica */}
           <div className="bg-card border border-border p-6 rounded-lg space-y-6">
-            <h2 className="font-display text-2xl text-foreground mb-4">Información Básica</h2>
+            <h2 className="font-sans text-2xl text-foreground mb-4">Información Básica</h2>
             
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">
@@ -412,7 +412,7 @@ export default function EditEvent() {
 
           {/* Detalles Adicionales */}
           <div className="bg-card border border-border p-6 rounded-lg space-y-6">
-            <h2 className="font-display text-2xl text-foreground mb-4">Detalles Adicionales</h2>
+            <h2 className="font-sans text-2xl text-foreground mb-4">Detalles Adicionales</h2>
             
             <div className="grid md:grid-cols-2 gap-4">
               <div>
@@ -505,7 +505,7 @@ export default function EditEvent() {
 
           {/* Requisitos */}
           <div className="bg-card border border-border p-6 rounded-lg space-y-4">
-            <h2 className="font-display text-2xl text-foreground mb-4">Requisitos</h2>
+            <h2 className="font-sans text-2xl text-foreground mb-4">Requisitos</h2>
             {formData.requirements.map((req, index) => (
               <div key={index} className="flex gap-2">
                 <input
@@ -544,7 +544,7 @@ export default function EditEvent() {
 
           {/* Programa */}
           <div className="bg-card border border-border p-6 rounded-lg space-y-4">
-            <h2 className="font-display text-2xl text-foreground mb-4">Programa</h2>
+            <h2 className="font-sans text-2xl text-foreground mb-4">Programa</h2>
             {formData.schedule.map((item, index) => (
               <div key={index} className="grid md:grid-cols-3 gap-2">
                 <input
@@ -593,7 +593,7 @@ export default function EditEvent() {
 
           {/* Highlights */}
           <div className="bg-card border border-border p-6 rounded-lg space-y-4">
-            <h2 className="font-display text-2xl text-foreground mb-4">Lo que Incluye</h2>
+            <h2 className="font-sans text-2xl text-foreground mb-4">Lo que Incluye</h2>
             {formData.highlights.map((highlight, index) => (
               <div key={index} className="flex gap-2">
                 <input
@@ -632,7 +632,7 @@ export default function EditEvent() {
 
           {/* Contacto */}
           <div className="bg-card border border-border p-6 rounded-lg space-y-4">
-            <h2 className="font-display text-2xl text-foreground mb-4">Información de Contacto</h2>
+            <h2 className="font-sans text-2xl text-foreground mb-4">Información de Contacto</h2>
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">
                 Email

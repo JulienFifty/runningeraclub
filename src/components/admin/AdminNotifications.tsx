@@ -225,7 +225,7 @@ export function AdminNotifications() {
               )}
             </div>
             <div>
-              <h2 className="text-lg font-display font-semibold text-foreground">Notificaciones</h2>
+              <h2 className="text-lg font-sans font-semibold text-foreground">Notificaciones</h2>
               <p className="text-xs text-muted-foreground">
                 {unreadCount === 0 ? 'No hay notificaciones nuevas' : `${unreadCount} nueva${unreadCount > 1 ? 's' : ''}`}
               </p>
@@ -322,7 +322,7 @@ export function AdminNotifications() {
                         <Icon className="w-4 h-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-display font-medium text-sm text-foreground mb-1 tracking-tight">
+                        <h3 className="font-sans font-medium text-sm text-foreground mb-1 tracking-tight">
                           {notification.title}
                         </h3>
                         <p className="text-xs text-muted-foreground mb-2 leading-relaxed">

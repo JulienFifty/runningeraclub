@@ -180,7 +180,7 @@ export default function AdminEvents() {
                 <ArrowLeft className="w-4 h-4" />
                 <span className="text-sm">Volver al Panel</span>
               </Link>
-              <h1 className="font-display text-4xl md:text-5xl text-foreground font-light mb-4">
+              <h1 className="font-sans text-4xl md:text-5xl text-foreground font-light mb-4">
                 Gestión de Eventos
               </h1>
               <p className="text-muted-foreground">

@@ -101,7 +101,7 @@ export function EditAttendeeModal({ isOpen, onClose, onSuccess, attendee }: Edit
               <Save className="w-5 h-5 text-foreground" />
             </div>
             <div>
-              <h2 className="font-display text-xl text-foreground">Editar Asistente</h2>
+              <h2 className="font-sans text-xl text-foreground">Editar Asistente</h2>
               <p className="text-sm text-muted-foreground">{attendee.name}</p>
             </div>
           </div>

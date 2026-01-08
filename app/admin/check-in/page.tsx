@@ -112,7 +112,7 @@ export default function AdminCheckIn() {
           </Link>
 
           <div className="mb-6">
-            <h1 className="font-display text-4xl md:text-5xl text-foreground font-light mb-4">
+            <h1 className="font-sans text-4xl md:text-5xl text-foreground font-light mb-4">
               Gestión de Check-in
             </h1>
             <p className="text-muted-foreground">

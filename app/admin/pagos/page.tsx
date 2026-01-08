@@ -27,7 +27,7 @@ export default async function AdminPaymentsPage() {
     <div className="min-h-screen bg-background">
       <div className="container-premium py-8 px-4">
         <div className="mb-8">
-          <h1 className="font-display text-4xl md:text-5xl text-foreground font-light mb-4">Gestión de Pagos</h1>
+          <h1 className="font-sans text-4xl md:text-5xl text-foreground font-light mb-4">Gestión de Pagos</h1>
           <p className="text-muted-foreground">
             Administra y revisa todas las transacciones de pago
           </p>

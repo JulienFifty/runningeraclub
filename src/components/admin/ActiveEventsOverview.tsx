@@ -99,7 +99,7 @@ export function ActiveEventsOverview() {
           <div className="p-2 bg-foreground/10 rounded-lg">
             <Calendar className="w-5 h-5 text-foreground" />
           </div>
-          <h2 className="font-display text-xl font-semibold text-foreground">
+          <h2 className="font-sans text-xl font-semibold text-foreground">
             Eventos Activos
           </h2>
         </div>
@@ -120,7 +120,7 @@ export function ActiveEventsOverview() {
               <Calendar className="w-5 h-5 text-foreground" />
             </div>
             <div>
-              <h2 className="font-display text-xl font-semibold text-foreground">
+              <h2 className="font-sans text-xl font-semibold text-foreground">
                 Eventos Activos
               </h2>
               <p className="text-sm text-muted-foreground">
@@ -148,7 +148,7 @@ export function ActiveEventsOverview() {
               className="group bg-background border border-border rounded-lg p-4 hover:border-foreground/50 transition-all duration-200 hover:shadow-md"
             >
               {/* Event Title */}
-              <h3 className="font-display text-lg font-semibold text-foreground mb-3 line-clamp-2 group-hover:text-foreground/80 transition-colors">
+              <h3 className="font-sans text-lg font-semibold text-foreground mb-3 line-clamp-2 group-hover:text-foreground/80 transition-colors">
                 {event.title}
               </h3>
 

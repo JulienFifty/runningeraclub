@@ -227,7 +227,7 @@ export default function AdminReviews() {
                 <ArrowLeft className="w-4 h-4" />
                 <span className="text-sm">Volver al Panel</span>
               </Link>
-              <h1 className="font-display text-4xl md:text-5xl text-foreground font-light mb-4">
+              <h1 className="font-sans text-4xl md:text-5xl text-foreground font-light mb-4">
                 Gestión de Reseñas
               </h1>
               <p className="text-muted-foreground">
@@ -349,7 +349,7 @@ export default function AdminReviews() {
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-display text-xl text-foreground font-semibold">
+                      <h3 className="font-sans text-xl text-foreground font-semibold">
                         {review.full_name}
                       </h3>
                       {getStatusBadge(review.status)}
