@@ -13,9 +13,10 @@ interface EventRegistrationButtonProps {
   buttonText: 'REGÍSTRATE' | 'VER EVENTO';
   eventTitle?: string;
   eventPrice?: string;
+  maxParticipants?: number;
 }
 
-export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventTitle = 'Evento', eventPrice }: EventRegistrationButtonProps) {
+export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventTitle = 'Evento', eventPrice, maxParticipants }: EventRegistrationButtonProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -24,11 +25,40 @@ export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventT
   const [loading, setLoading] = useState(true);
   const [registering, setRegistering] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [isEventFull, setIsEventFull] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
     checkAuthAndRegistration();
-  }, [eventId]);
+    checkEventCapacity();
+  }, [eventId, maxParticipants]);
+
+  const checkEventCapacity = async () => {
+    if (!maxParticipants) {
+      setIsEventFull(false);
+      return;
+    }
+
+    try {
+      // Contar registros confirmados (paid o pending)
+      const { count: registrationsCount } = await supabase
+        .from('event_registrations')
+        .select('*', { count: 'exact', head: true })
+        .eq('event_id', eventId)
+        .in('payment_status', ['paid', 'pending']);
+
+      const { count: attendeesCount } = await supabase
+        .from('attendees')
+        .select('*', { count: 'exact', head: true })
+        .eq('event_id', eventId)
+        .in('payment_status', ['paid', 'pending']);
+
+      const totalRegistered = (registrationsCount || 0) + (attendeesCount || 0);
+      setIsEventFull(totalRegistered >= maxParticipants);
+    } catch (error) {
+      console.error('Error checking event capacity:', error);
+    }
+  };
 
   useEffect(() => {
     // Si viene de la página de éxito, refrescar después de un breve delay
@@ -211,12 +241,21 @@ export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventT
     );
   }
 
+  // Si el evento está lleno, mostrar botón deshabilitado
+  if (isEventFull && buttonText === 'REGÍSTRATE') {
+    return (
+      <div className="block w-full bg-muted text-muted-foreground px-6 py-4 text-center text-sm font-medium tracking-wider uppercase cursor-not-allowed opacity-60">
+        Evento Lleno
+      </div>
+    );
+  }
+
   if (isAuthenticated && buttonText === 'REGÍSTRATE') {
     return (
       <>
         <button
           onClick={handleRegister}
-          disabled={registering}
+          disabled={registering || isEventFull}
           className="block w-full bg-foreground text-background px-6 py-4 text-center text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {registering ? 'Registrando...' : buttonText}
@@ -231,9 +270,10 @@ export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventT
       <>
         <button
           onClick={() => setModalOpen(true)}
-          className="block w-full bg-foreground text-background px-6 py-4 text-center text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-foreground/90"
+          disabled={isEventFull}
+          className="block w-full bg-foreground text-background px-6 py-4 text-center text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-foreground/90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {buttonText}
+          {isEventFull ? 'Evento Lleno' : buttonText}
         </button>
         <EventRegistrationModal
           eventId={eventId}
@@ -245,6 +285,7 @@ export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventT
           onRegistrationSuccess={() => {
             setIsRegistered(true);
             checkAuthAndRegistration();
+            checkEventCapacity();
           }}
         />
       </>

@@ -9,6 +9,7 @@ interface EventRegistrationButtonWrapperProps {
   buttonText: 'REGÍSTRATE' | 'VER EVENTO';
   eventTitle?: string;
   eventPrice?: string;
+  maxParticipants?: number;
 }
 
 export function EventRegistrationButtonWrapper(props: EventRegistrationButtonWrapperProps) {

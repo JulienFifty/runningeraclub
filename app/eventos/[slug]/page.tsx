@@ -269,7 +269,14 @@ export default async function EventPage({ params }: PageProps) {
                   )}
 
                   <div className="space-y-3 hidden md:block">
-                    <EventRegistrationButtonWrapper eventId={event.id} eventSlug={event.slug} buttonText={event.buttonText} eventTitle={event.title} eventPrice={event.price} />
+                    <EventRegistrationButtonWrapper 
+                      eventId={event.id} 
+                      eventSlug={event.slug} 
+                      buttonText={event.buttonText} 
+                      eventTitle={event.title} 
+                      eventPrice={event.price}
+                      maxParticipants={event.maxParticipants}
+                    />
                   </div>
 
                   {/* Contact Info */}
