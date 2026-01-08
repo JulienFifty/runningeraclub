@@ -255,6 +255,23 @@ export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventT
     );
   }
 
+  // Componente para mostrar el contador de lugares disponibles
+  const SpotsCounter = () => {
+    if (!maxParticipants || !spotsRemaining || spotsRemaining > 10 || isEventFull) {
+      return null;
+    }
+
+    return (
+      <div className="mt-3 text-center">
+        <p className="text-xs text-muted-foreground">
+          {spotsRemaining === 1 
+            ? '⚠️ Solo queda 1 lugar disponible' 
+            : `⚠️ Solo quedan ${spotsRemaining} lugares disponibles`}
+        </p>
+      </div>
+    );
+  };
+
   if (isAuthenticated && buttonText === 'REGÍSTRATE') {
     return (
       <>
@@ -265,6 +282,7 @@ export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventT
         >
           {registering ? 'Registrando...' : buttonText}
         </button>
+        <SpotsCounter />
       </>
     );
   }
@@ -280,6 +298,7 @@ export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventT
         >
           {isEventFull ? 'Evento Lleno' : buttonText}
         </button>
+        <SpotsCounter />
         <EventRegistrationModal
           eventId={eventId}
           eventSlug={eventSlug}
