@@ -57,21 +57,51 @@ export function AdminNotifications() {
   };
 
   const formatTimeAgo = (timestamp: string) => {
-    const now = new Date();
-    const time = new Date(timestamp);
-    const diffInSeconds = Math.floor((now.getTime() - time.getTime()) / 1000);
+    try {
+      const now = new Date();
+      const time = new Date(timestamp);
+      
+      // Validar que la fecha sea válida
+      if (isNaN(time.getTime())) {
+        return 'Fecha inválida';
+      }
 
-    if (diffInSeconds < 60) {
-      return 'Hace un momento';
-    } else if (diffInSeconds < 3600) {
-      const minutes = Math.floor(diffInSeconds / 60);
-      return `Hace ${minutes} minuto${minutes > 1 ? 's' : ''}`;
-    } else if (diffInSeconds < 86400) {
-      const hours = Math.floor(diffInSeconds / 3600);
-      return `Hace ${hours} hora${hours > 1 ? 's' : ''}`;
-    } else {
-      const days = Math.floor(diffInSeconds / 86400);
-      return `Hace ${days} día${days > 1 ? 's' : ''}`;
+      const diffInSeconds = Math.floor((now.getTime() - time.getTime()) / 1000);
+
+      // Si la diferencia es negativa (futuro), mostrar "Hace un momento"
+      if (diffInSeconds < 0) {
+        return 'Hace un momento';
+      }
+
+      if (diffInSeconds < 60) {
+        return 'Hace un momento';
+      } else if (diffInSeconds < 3600) {
+        const minutes = Math.floor(diffInSeconds / 60);
+        return `Hace ${minutes} minuto${minutes !== 1 ? 's' : ''}`;
+      } else if (diffInSeconds < 86400) {
+        const hours = Math.floor(diffInSeconds / 3600);
+        return `Hace ${hours} hora${hours !== 1 ? 's' : ''}`;
+      } else {
+        const days = Math.floor(diffInSeconds / 86400);
+        if (days === 1) {
+          return 'Ayer';
+        } else if (days < 7) {
+          return `Hace ${days} día${days !== 1 ? 's' : ''}`;
+        } else {
+          const weeks = Math.floor(days / 7);
+          if (weeks === 1) {
+            return 'Hace 1 semana';
+          } else if (weeks < 4) {
+            return `Hace ${weeks} semanas`;
+          } else {
+            const months = Math.floor(days / 30);
+            return months === 1 ? 'Hace 1 mes' : `Hace ${months} meses`;
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error formatting time:', error);
+      return 'Fecha inválida';
     }
   };
 
@@ -185,25 +215,16 @@ export function AdminNotifications() {
                         <Icon className="w-4 h-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-sm text-foreground mb-1">
+                        <h3 className="font-display font-medium text-sm text-foreground mb-1 tracking-tight">
                           {notification.title}
                         </h3>
-                        <p className="text-xs text-muted-foreground mb-2">
+                        <p className="text-xs text-muted-foreground mb-2 leading-relaxed">
                           {notification.message}
                         </p>
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center">
                           <span className="text-xs text-muted-foreground">
                             {formatTimeAgo(notification.timestamp)}
                           </span>
-                          {notification.link && (
-                            <a
-                              href={notification.link}
-                              className="text-xs text-foreground hover:underline"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              Ver detalles →
-                            </a>
-                          )}
                         </div>
                       </div>
                     </div>
