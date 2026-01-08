@@ -16,6 +16,7 @@ interface Attendee {
   checked_in_at?: string;
   event_id?: string;
   payment_status?: 'pending' | 'paid' | 'failed' | 'refunded';
+  payment_method?: string;
   notes?: string;
 }
 
