@@ -426,7 +426,9 @@ export default function CouponsManagement() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div>
+        <h2 className="text-2xl font-display font-semibold text-foreground mb-4">Estadísticas</h2>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -487,11 +489,14 @@ export default function CouponsManagement() {
           </CardContent>
         </Card>
       </div>
+      </div>
 
       {/* Lista de cupones */}
-      <Card>
+      <div>
+        <h2 className="text-2xl font-display font-semibold text-foreground mb-4">Cupones Registrados</h2>
+        <Card>
         <CardHeader>
-          <CardTitle>Cupones Registrados</CardTitle>
+          <CardTitle className="sr-only">Cupones Registrados</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (

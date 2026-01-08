@@ -208,7 +208,9 @@ export function PaymentsDashboard() {
   return (
     <div className="space-y-6">
       {/* Estadísticas */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div>
+        <h2 className="text-2xl font-display font-semibold text-foreground mb-4">Estadísticas</h2>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Ingresos Totales</CardTitle>
@@ -251,9 +253,12 @@ export function PaymentsDashboard() {
           </CardContent>
         </Card>
       </div>
+      </div>
 
       {/* Filtros y tabla */}
-      <Card>
+      <div>
+        <h2 className="text-2xl font-display font-semibold text-foreground mb-4">Transacciones</h2>
+        <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Transacciones</CardTitle>
@@ -353,6 +358,7 @@ export function PaymentsDashboard() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

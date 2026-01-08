@@ -229,7 +229,9 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
   return (
     <div className="space-y-6">
       {/* Header con búsqueda y contador */}
-      <div className="bg-card border border-border p-4 md:p-6 rounded-lg">
+      <div>
+        <h2 className="text-2xl font-display font-semibold text-foreground mb-4">Búsqueda y Filtros</h2>
+        <div className="bg-card border border-border p-4 md:p-6 rounded-lg">
         <div className="flex flex-col gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-muted-foreground" />
@@ -258,9 +260,12 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
           </div>
         </div>
       </div>
+      </div>
 
       {/* Lista de asistentes */}
-      {filteredAttendees.length === 0 ? (
+      <div>
+        <h2 className="text-2xl font-display font-semibold text-foreground mb-4">Lista de Asistentes</h2>
+        {filteredAttendees.length === 0 ? (
         <div className="bg-card border border-border p-12 rounded-lg text-center">
           <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <p className="text-muted-foreground">
@@ -343,6 +348,7 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
           ))}
         </div>
       )}
+      </div>
 
       {/* Modal para agregar asistente */}
       <AddAttendeeModal
