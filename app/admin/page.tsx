@@ -1,29 +1,20 @@
-import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
-import { Calendar, Users, CreditCard, FileCheck, Tag, ExternalLink } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import { AdminNotifications } from '@/components/admin/AdminNotifications';
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
 
-  // Verificar autenticación
+  // Obtener información del admin (ya verificado en layout)
   const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/admin/login');
-  }
-
-  // Verificar que sea admin
-  const { data: admin, error } = await supabase
-    .from('admins')
-    .select('*')
-    .eq('email', user.email)
-    .single();
-
-  if (error || !admin) {
-    redirect('/admin/login');
-  }
+  const { data: admin } = user
+    ? await supabase
+        .from('admins')
+        .select('*')
+        .eq('email', user.email)
+        .single()
+    : { data: null };
 
   const adminSections = [
     {
@@ -65,16 +56,16 @@ export default async function AdminDashboard() {
   ];
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="section-padding">
-        <div className="container-premium max-w-7xl">
+    <div className="min-h-screen bg-background">
+      <div className="p-8">
+        <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl text-foreground font-light mb-4">
               Panel de Administración
             </h1>
             <p className="text-muted-foreground text-lg">
-              Bienvenido, {admin.email}
+              Bienvenido, {admin?.email || 'Administrador'}
             </p>
           </div>
 
@@ -139,6 +130,6 @@ export default async function AdminDashboard() {
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
