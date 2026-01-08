@@ -429,6 +429,18 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
         }}
         eventId={eventId}
       />
+      {/* Modal para editar asistente */}
+      <EditAttendeeModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedAttendee(null);
+        }}
+        onSuccess={() => {
+          fetchAttendees();
+        }}
+        attendee={selectedAttendee}
+      />
     </div>
   );
 }
