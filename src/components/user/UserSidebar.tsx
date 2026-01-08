@@ -11,12 +11,14 @@ import {
   Settings,
   Home,
   LogOut,
-  Star
+  Star,
+  X
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
 
 const menuItems = [
   {
@@ -51,7 +53,12 @@ const menuItems = [
   },
 ];
 
-export function UserSidebar() {
+interface UserSidebarProps {
+  onClose?: () => void;
+  isMobile?: boolean;
+}
+
+export function UserSidebar({ onClose, isMobile = false }: UserSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
@@ -109,11 +116,24 @@ export function UserSidebar() {
     return 'U';
   };
 
+  const handleLinkClick = () => {
+    if (isMobile && onClose) {
+      onClose();
+    }
+  };
+
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 bg-card border-r border-border flex flex-col z-50">
+    <aside className={cn(
+      "h-screen w-64 bg-card border-r border-border flex flex-col z-50",
+      isMobile ? "relative" : "fixed left-0 top-0"
+    )}>
       {/* Logo/Brand */}
-      <div className="p-6 border-b border-border">
-        <Link href="/miembros/dashboard" className="flex items-center gap-3 group">
+      <div className="p-6 border-b border-border flex items-center justify-between">
+        <Link 
+          href="/miembros/dashboard" 
+          className="flex items-center gap-3 group flex-1"
+          onClick={handleLinkClick}
+        >
           <div className="w-10 h-10 rounded-lg bg-foreground/10 flex items-center justify-center group-hover:bg-foreground/20 transition-colors">
             <LayoutDashboard className="w-5 h-5 text-foreground" />
           </div>
@@ -124,6 +144,15 @@ export function UserSidebar() {
             <p className="text-xs text-muted-foreground">Mi Cuenta</p>
           </div>
         </Link>
+        {isMobile && onClose && (
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-muted transition-colors"
+            aria-label="Cerrar menú"
+          >
+            <X className="w-5 h-5 text-foreground" />
+          </button>
+        )}
       </div>
 
       {/* Navigation */}
@@ -136,6 +165,7 @@ export function UserSidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={handleLinkClick}
               className={`
                 group flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
                 ${
@@ -191,6 +221,7 @@ export function UserSidebar() {
         {/* External Links */}
         <Link
           href="/"
+          onClick={handleLinkClick}
           className="flex items-center gap-3 px-4 py-3 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200 group"
         >
           <Home className="w-5 h-5 flex-shrink-0 group-hover:scale-110 transition-transform duration-200" />
