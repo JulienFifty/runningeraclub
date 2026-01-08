@@ -39,18 +39,19 @@ export async function POST(request: NextRequest) {
     }
 
     // ✅ VALIDAR CUPO DISPONIBLE
+    // Solo contar pagos exitosos (paid), NO contar pendientes hasta que se confirmen
     if (event.max_participants) {
       const { count: registrationsCount } = await supabase
         .from('event_registrations')
         .select('*', { count: 'exact', head: true })
         .eq('event_id', event_id)
-        .in('payment_status', ['paid', 'pending']);
+        .eq('payment_status', 'paid');
 
       const { count: attendeesCount } = await supabase
         .from('attendees')
         .select('*', { count: 'exact', head: true })
         .eq('event_id', event_id)
-        .in('payment_status', ['paid', 'pending']);
+        .eq('payment_status', 'paid');
 
       const totalRegistered = (registrationsCount || 0) + (attendeesCount || 0);
 
