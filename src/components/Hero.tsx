@@ -30,7 +30,6 @@ const categoryItems = [
   { icon: Handshake, label: 'Marcas &', sublabel: 'Patrocinios', href: '/marcas' },
   { icon: ShoppingBag, label: 'Tienda', href: '/tienda' },
   { icon: Users, label: 'Comunidad', href: '/comunidad' },
-  { icon: ImageIcon, label: 'Galería', href: '/galeria' },
 ];
 
 export const Hero = () => {
@@ -321,7 +320,7 @@ export const Hero = () => {
               transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
               className="inline-block text-white/80 text-xs tracking-[0.3em] uppercase mb-4"
             >
-              Social Running Club • Puebla
+              Social Running Club
             </motion.span>
 
             {/* Main Title with powerful reveal */}
@@ -419,7 +418,7 @@ export const Hero = () => {
                 
                 <div 
                   ref={gridRef}
-                  className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-6 lg:gap-8 relative justify-items-center w-full"
+                  className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-6 lg:gap-8 relative justify-items-center w-full"
                 >
                   {categoryItems.map((item, index) => (
                     <CategoryItem 
