@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { Calendar, Users, CreditCard, FileCheck, Tag, ExternalLink } from 'lucide-react';
 import { AdminNotifications } from '@/components/admin/AdminNotifications';
+import { ActiveEventsOverview } from '@/components/admin/ActiveEventsOverview';
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
@@ -72,6 +73,11 @@ export default async function AdminDashboard() {
           {/* Notificaciones */}
           <div className="mb-16">
             <AdminNotifications />
+          </div>
+
+          {/* Eventos Activos */}
+          <div className="mb-16">
+            <ActiveEventsOverview />
           </div>
 
           {/* Grid de Secciones */}
