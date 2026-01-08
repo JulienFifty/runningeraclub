@@ -26,6 +26,7 @@ export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventT
   const [registering, setRegistering] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [isEventFull, setIsEventFull] = useState(false);
+  const [spotsRemaining, setSpotsRemaining] = useState<number | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
@@ -36,6 +37,7 @@ export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventT
   const checkEventCapacity = async () => {
     if (!maxParticipants) {
       setIsEventFull(false);
+      setSpotsRemaining(null);
       return;
     }
 
@@ -54,7 +56,10 @@ export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventT
         .eq('payment_status', 'paid');
 
       const totalRegistered = (registrationsCount || 0) + (attendeesCount || 0);
+      const remaining = maxParticipants - totalRegistered;
+      
       setIsEventFull(totalRegistered >= maxParticipants);
+      setSpotsRemaining(remaining > 0 ? remaining : 0);
     } catch (error) {
       console.error('Error checking event capacity:', error);
     }
