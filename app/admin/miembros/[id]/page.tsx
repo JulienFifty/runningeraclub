@@ -36,7 +36,7 @@ interface Member {
 
 interface EventRegistration {
   id: string;
-  event_id: string;
+  event_id?: string;
   registration_date: string;
   status: string;
   payment_status: string;
@@ -47,7 +47,7 @@ interface EventRegistration {
     date: string;
     location: string;
     price?: string;
-  };
+  } | null;
 }
 
 interface PaymentTransaction {

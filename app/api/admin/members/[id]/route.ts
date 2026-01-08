@@ -47,46 +47,68 @@ export async function GET(
       .from('event_registrations')
       .select(`
         id,
+        event_id,
         registration_date,
         status,
-        payment_status,
-        events:event_id (
-          id,
-          title,
-          slug,
-          date,
-          location,
-          price
-        )
+        payment_status
       `)
       .eq('member_id', memberId)
       .order('registration_date', { ascending: false });
+
+    // Obtener IDs de eventos únicos
+    const eventIds = [...new Set((registrationsData || []).map((r: any) => r.event_id).filter(Boolean))];
+    
+    // Obtener datos de eventos
+    let eventsMap = new Map();
+    if (eventIds.length > 0) {
+      const { data: eventsData } = await supabase
+        .from('events')
+        .select('id, title, slug, date, location, price')
+        .in('id', eventIds);
+      
+      if (eventsData) {
+        eventsMap = new Map(eventsData.map((e: any) => [e.id, e]));
+      }
+    }
 
     // Obtener transacciones
     const { data: transactionsData, error: transError } = await supabase
       .from('payment_transactions')
       .select(`
         id,
+        event_id,
         amount,
         currency,
         status,
-        created_at,
-        events:event_id (
-          title
-        )
+        created_at
       `)
       .eq('member_id', memberId)
       .order('created_at', { ascending: false });
 
+    // Obtener IDs de eventos de transacciones
+    const transactionEventIds = [...new Set((transactionsData || []).map((t: any) => t.event_id).filter(Boolean))];
+    
+    // Obtener datos de eventos para transacciones
+    let transactionEventsMap = new Map();
+    if (transactionEventIds.length > 0) {
+      const { data: transactionEventsData } = await supabase
+        .from('events')
+        .select('id, title')
+        .in('id', transactionEventIds);
+      
+      if (transactionEventsData) {
+        transactionEventsMap = new Map(transactionEventsData.map((e: any) => [e.id, e]));
+      }
+    }
+
     // Transformar datos de registros
     const registrations = (registrationsData || []).map((reg: any) => ({
       id: reg.id,
+      event_id: reg.event_id,
       registration_date: reg.registration_date,
       status: reg.status,
       payment_status: reg.payment_status,
-      event: Array.isArray(reg.events) && reg.events.length > 0 
-        ? reg.events[0] 
-        : reg.events || null,
+      event: reg.event_id ? eventsMap.get(reg.event_id) || null : null,
     }));
 
     // Transformar datos de transacciones
@@ -96,9 +118,7 @@ export async function GET(
       currency: trans.currency,
       status: trans.status,
       created_at: trans.created_at,
-      event: Array.isArray(trans.events) && trans.events.length > 0
-        ? trans.events[0]
-        : trans.events || null,
+      event: trans.event_id ? transactionEventsMap.get(trans.event_id) || null : null,
     }));
 
     return NextResponse.json({
