@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { Calendar, Users, CreditCard, FileCheck, Tag, ExternalLink } from 'lucide-react';
+import { AdminNotifications } from '@/components/admin/AdminNotifications';
 
 export default async function AdminDashboard() {
   const supabase = await createClient();
@@ -68,13 +69,18 @@ export default async function AdminDashboard() {
       <div className="section-padding">
         <div className="container-premium max-w-7xl">
           {/* Header */}
-          <div className="mb-16">
+          <div className="mb-8">
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl text-foreground font-light mb-4">
               Panel de Administración
             </h1>
             <p className="text-muted-foreground text-lg">
               Bienvenido, {admin.email}
             </p>
+          </div>
+
+          {/* Notificaciones */}
+          <div className="mb-16">
+            <AdminNotifications />
           </div>
 
           {/* Grid de Secciones */}
