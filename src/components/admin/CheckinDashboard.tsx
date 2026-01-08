@@ -299,6 +299,7 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
                     // Verificar si es staff o cortesía por notes
                     const isStaff = attendee.notes?.includes('Staff');
                     const isCortesia = attendee.notes?.includes('Cortesía');
+                    const isRegular = attendee.notes?.includes('Regular');
                     
                     // Si es staff o cortesía, mostrar badge especial
                     if (isStaff || isCortesia) {
@@ -306,6 +307,24 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
                         <span className="inline-flex items-center gap-1 px-2 md:px-3 py-0.5 md:py-1 rounded-full text-xs font-medium whitespace-nowrap bg-purple-500/20 text-purple-600 dark:text-purple-400">
                           <Users className="w-3 h-3" />
                           {isStaff ? 'Staff' : 'Cortesía'}
+                        </span>
+                      );
+                    }
+                    
+                    // Si es regular con método de pago, mostrar método de pago
+                    if (isRegular && attendee.payment_status === 'paid') {
+                      const paymentMethodLabels: { [key: string]: string } = {
+                        'stripe': 'Pago en Stripe',
+                        'cash': 'Pago en Efectivo',
+                        'transfer': 'Pago por Transferencia',
+                      };
+                      const method = attendee.payment_method || (attendee.notes?.includes('Stripe') ? 'stripe' : attendee.notes?.includes('Efectivo') ? 'cash' : attendee.notes?.includes('Transferencia') ? 'transfer' : 'stripe');
+                      const methodLabel = paymentMethodLabels[method] || 'Pago Manual';
+                      
+                      return (
+                        <span className="inline-flex items-center gap-1 px-2 md:px-3 py-0.5 md:py-1 rounded-full text-xs font-medium whitespace-nowrap bg-blue-500/20 text-blue-600 dark:text-blue-400">
+                          <CreditCard className="w-3 h-3" />
+                          {methodLabel}
                         </span>
                       );
                     }
