@@ -361,6 +361,16 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => {
+                    setSelectedAttendee(attendee);
+                    setIsEditModalOpen(true);
+                  }}
+                  className="p-2 hover:bg-muted rounded-lg transition-colors"
+                  title="Editar tipo de registro"
+                >
+                  <Edit className="w-4 h-4 text-muted-foreground" />
+                </button>
+                <button
+                  onClick={() => {
                     if (attendee.status === 'checked_in') {
                       handleUndoCheckIn(attendee.id);
                     } else {
