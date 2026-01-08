@@ -147,12 +147,20 @@ export default function AdminReviews() {
   };
 
   const filteredReviews = reviews.filter(review => {
+    // Filtro de búsqueda
     const matchesSearch = 
+      !searchQuery ||
       review.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       review.comment?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       review.email?.toLowerCase().includes(searchQuery.toLowerCase());
     
-    return matchesSearch;
+    // Filtro de estado
+    const matchesStatus = !filterStatus || review.status === filterStatus;
+    
+    // Filtro de calificación
+    const matchesRating = !filterRating || review.rating === parseInt(filterRating);
+    
+    return matchesSearch && matchesStatus && matchesRating;
   });
 
   const getStatusBadge = (status: string) => {
