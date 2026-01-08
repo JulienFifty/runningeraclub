@@ -8,7 +8,7 @@ import { WhyChooseUs } from '@/components/WhyChooseUs';
 import { Events } from '@/components/Events';
 import { LeaderboardsSection } from '@/components/LeaderboardsSection';
 import { Community } from '@/components/Community';
-import { Testimonials } from '@/components/Testimonials';
+import { Reviews } from '@/components/Reviews';
 import { Gallery } from '@/components/Gallery';
 import { Contact } from '@/components/Contact';
 import { Footer } from '@/components/Footer';
@@ -25,7 +25,7 @@ export default function Home() {
       <LeaderboardsSection />
       <WhyChooseUs />
       <Gallery />
-      <Testimonials />
+      <Reviews />
       <Contact />
       <Footer />
       <WhatsAppButton />
