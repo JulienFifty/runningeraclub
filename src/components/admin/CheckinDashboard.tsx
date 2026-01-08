@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Search, CheckCircle, Clock, Users, UserPlus, Trash2 } from 'lucide-react';
+import { Search, CheckCircle, Clock, Users, UserPlus, Trash2, CreditCard, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { AddAttendeeModal } from './AddAttendeeModal';
 
@@ -14,6 +14,7 @@ interface Attendee {
   status: 'pending' | 'checked_in';
   checked_in_at?: string;
   event_id?: string;
+  payment_status?: 'pending' | 'paid' | 'failed' | 'refunded';
 }
 
 interface CheckinDashboardProps {
@@ -287,6 +288,41 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
                   {attendee.tickets > 1 && (
                     <span className="inline-flex items-center gap-1 bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 px-2 md:px-3 py-0.5 md:py-1 rounded-full text-xs font-medium whitespace-nowrap">
                       ⚠️ GRUPO DE {attendee.tickets}
+                    </span>
+                  )}
+                  {attendee.payment_status && (
+                    <span
+                      className={`inline-flex items-center gap-1 px-2 md:px-3 py-0.5 md:py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                        attendee.payment_status === 'paid'
+                          ? 'bg-green-500/20 text-green-600 dark:text-green-400'
+                          : attendee.payment_status === 'failed'
+                          ? 'bg-red-500/20 text-red-600 dark:text-red-400'
+                          : attendee.payment_status === 'refunded'
+                          ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400'
+                          : 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400'
+                      }`}
+                    >
+                      {attendee.payment_status === 'paid' ? (
+                        <>
+                          <CreditCard className="w-3 h-3" />
+                          Pago Exitoso
+                        </>
+                      ) : attendee.payment_status === 'failed' ? (
+                        <>
+                          <AlertCircle className="w-3 h-3" />
+                          Pago Fallido
+                        </>
+                      ) : attendee.payment_status === 'refunded' ? (
+                        <>
+                          <AlertCircle className="w-3 h-3" />
+                          Reembolsado
+                        </>
+                      ) : (
+                        <>
+                          <Clock className="w-3 h-3" />
+                          Pago Pendiente
+                        </>
+                      )}
                     </span>
                   )}
                 </div>
