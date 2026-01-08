@@ -85,23 +85,24 @@ export default async function AdminDashboard() {
 
           {/* Grid de Secciones */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-            {adminSections.map((section) => {
+            {adminSections.map((section, index) => {
               const Icon = section.icon;
               return (
                 <Link
                   key={section.href}
                   href={section.href}
-                  className="group relative bg-card border border-border rounded-lg p-8 hover:border-foreground/50 transition-all duration-300 hover:shadow-lg"
+                  className="group relative bg-card border border-border rounded-lg p-8 hover:border-foreground/50 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] animate-in fade-in slide-in-from-bottom-4"
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
                   <div className="flex flex-col items-center text-center space-y-4">
-                    <div className="w-16 h-16 rounded-full bg-foreground/5 flex items-center justify-center group-hover:bg-foreground/10 transition-colors duration-300">
+                    <div className="w-16 h-16 rounded-full bg-foreground/5 flex items-center justify-center group-hover:bg-foreground/10 transition-all duration-300 group-hover:scale-110">
                       <Icon className="w-8 h-8 text-foreground group-hover:scale-110 transition-transform duration-300" />
                     </div>
                     <div className="space-y-2">
-                      <h3 className="font-display text-xl text-foreground font-light opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <h3 className="font-display text-xl text-foreground font-light opacity-100 transition-all duration-300 group-hover:text-foreground/80">
                         {section.label}
                       </h3>
-                      <p className="text-sm text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <p className="text-sm text-muted-foreground opacity-100 transition-all duration-300 group-hover:text-muted-foreground/80">
                         {section.description}
                       </p>
                     </div>
