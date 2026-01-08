@@ -148,7 +148,7 @@ export const Events = () => {
             transition={{ duration: 0.8, delay: 0.1 }}
             className="text-white/70 text-base md:text-lg font-light max-w-2xl mx-auto mb-8"
           >
-            Descubre nuestros eventos exclusivos y únete a la comunidad de corredores más vibrante de Puebla.
+            Descubre nuestros eventos exclusivos y únete a la comunidad de corredores más grande de Puebla.
           </motion.p>
 
           <Link
