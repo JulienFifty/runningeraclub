@@ -574,6 +574,7 @@ export default function CouponsManagement() {
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
