@@ -21,10 +21,19 @@ export function AdminLayoutWrapper({
   const [mounted, setMounted] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     setMounted(true);
     checkAuth();
+  }, [pathname]);
+
+  // Cerrar menú mobile al cambiar de página
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      setIsMobileMenuOpen(false);
+    }
   }, [pathname]);
 
   const checkAuth = async () => {
