@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
@@ -9,6 +10,7 @@ import Link from 'next/link';
 import { EventRegistrationButtonWrapper } from '@/components/EventRegistrationButtonWrapper';
 import { RefreshSessionOnReturn } from '@/components/RefreshSessionOnReturn';
 import { EventAttendees } from '@/components/EventAttendees';
+import { optimizeCloudinaryUrl } from '@/lib/image-optimizer';
 
 // Forzar renderizado dinámico para obtener datos actualizados
 export const dynamic = 'force-dynamic';
@@ -66,11 +68,20 @@ export default async function EventPage({ params }: PageProps) {
       {/* Hero Section */}
       <section className="relative h-[60vh] md:h-[70vh] overflow-hidden">
         <div className="absolute inset-0">
-          <img
-            src={event.image}
+          <Image
+            src={optimizeCloudinaryUrl(event.image, {
+              width: 1920,
+              height: 1080,
+              quality: 90,
+              format: 'auto',
+              crop: 'fill',
+            })}
             alt={event.title}
-            className="w-full h-full object-cover"
-            loading="eager"
+            fill
+            sizes="100vw"
+            className="object-cover"
+            priority
+            quality={90}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/40" />
         </div>

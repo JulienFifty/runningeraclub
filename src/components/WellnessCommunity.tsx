@@ -3,6 +3,9 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { useRef } from 'react';
+import Image from 'next/image';
+import { optimizeCloudinaryUrl } from '@/lib/image-optimizer';
+
 const communityImage = 'https://res.cloudinary.com/dhqq37qlu/image/upload/v1767661563/_VXV9510-Enhanced-NR_qhsic0.jpg';
 
 export const WellnessCommunity = () => {
@@ -26,17 +29,24 @@ export const WellnessCommunity = () => {
         >
           {/* Background Image */}
           <div className="absolute inset-0 overflow-hidden">
-            <img
-              src={communityImage}
+            <Image
+              src={optimizeCloudinaryUrl(communityImage, {
+                width: 1200,
+                height: 800,
+                quality: 85,
+                format: 'auto',
+                crop: 'fill',
+              })}
               alt="Comunidad RUNNING ERA"
-              className="w-full h-full object-cover"
+              fill
+              sizes="100vw"
+              className="object-cover"
               style={{
                 objectPosition: 'center bottom',
                 transform: 'scale(1.4)',
-                width: '100%',
-                height: '100%',
               }}
               loading="lazy"
+              quality={85}
             />
             <motion.div className="absolute inset-0 bg-black/50 border border-gray-300/20" />
           </div>

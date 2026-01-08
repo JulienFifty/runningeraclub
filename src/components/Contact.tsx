@@ -3,7 +3,10 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef, useState } from 'react';
 import { Send } from 'lucide-react';
+import Image from 'next/image';
 import { toast } from 'sonner';
+import { optimizeCloudinaryUrl } from '@/lib/image-optimizer';
+
 const contactImage = 'https://res.cloudinary.com/dhqq37qlu/image/upload/v1767661531/_VXV9427_zpulgr.jpg';
 
 export const Contact = () => {
@@ -38,11 +41,20 @@ export const Contact = () => {
         >
           {/* Background Image */}
           <div className="absolute inset-0">
-            <img
-              src={contactImage}
+            <Image
+              src={optimizeCloudinaryUrl(contactImage, {
+                width: 1600,
+                height: 900,
+                quality: 85,
+                format: 'auto',
+                crop: 'fill',
+              })}
               alt="Contacto RUNNING ERA"
-              className="w-full h-full object-cover"
+              fill
+              sizes="100vw"
+              className="object-cover"
               loading="lazy"
+              quality={85}
             />
             <motion.div className="absolute inset-0 bg-black/60 border border-gray-300/20" />
           </div>

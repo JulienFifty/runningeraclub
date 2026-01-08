@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
+import Image from 'next/image';
 import { ArrowRight, Moon, Mountain, Coffee, Users, Handshake, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
 const urbanRun = '/assets/urban-run.jpg';
 const trailRun = '/assets/trail-run.jpg';
@@ -161,11 +162,14 @@ export const Experiences = () => {
                 >
                   <div className="group bg-white overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-500">
                     <div className="relative h-64 md:h-80 overflow-hidden">
-                      <img
+                      <Image
                         src={exp.image}
                         alt={exp.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
                         loading="lazy"
+                        quality={85}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
                       <div className="absolute bottom-0 left-0 right-0 p-6">

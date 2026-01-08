@@ -2,6 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { useRef } from 'react';
+import Image from 'next/image';
+import { optimizeCloudinaryUrl } from '@/lib/image-optimizer';
 
 const galleryImages = [
   { src: 'https://res.cloudinary.com/dhqq37qlu/image/upload/v1767661557/_VXV9636_fogsaj.jpg', alt: 'Momentos RUNNING ERA', span: 'col-span-2 row-span-2' },
@@ -60,11 +62,20 @@ export const Gallery = () => {
               transition={{ duration: 0.6, delay: index * 0.1 }}
               className={`relative overflow-hidden group ${image.span}`}
             >
-              <img
-                src={image.src}
+              <Image
+                src={optimizeCloudinaryUrl(image.src, {
+                  width: 600,
+                  height: 600,
+                  quality: 80,
+                  format: 'auto',
+                  crop: 'fill',
+                })}
                 alt={image.alt}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                fill
+                sizes="(max-width: 768px) 50vw, 25vw"
+                className="object-cover transition-transform duration-700 group-hover:scale-110"
                 loading="lazy"
+                quality={80}
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-500" />
             </motion.div>

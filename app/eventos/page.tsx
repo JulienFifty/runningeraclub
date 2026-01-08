@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
+import Image from 'next/image';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
@@ -10,6 +11,7 @@ import { Calendar, MapPin, Search, Filter, X, ArrowRight, Loader2 } from 'lucide
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { optimizeCloudinaryUrl, getResponsiveImageSizes } from '@/lib/image-optimizer';
 
 interface Event {
   id: string;
@@ -464,11 +466,24 @@ export default function EventosPage() {
                       <div className="group bg-white border border-border overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 h-full flex flex-col cursor-pointer">
                         {/* Image */}
                         <div className="relative h-48 overflow-hidden">
-                          <img
-                            src={event.image}
+                          <Image
+                            src={optimizeCloudinaryUrl(event.image, {
+                              width: 600,
+                              height: 400,
+                              quality: 85,
+                              format: 'auto',
+                              crop: 'fill',
+                            })}
                             alt={event.title}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            fill
+                            sizes={getResponsiveImageSizes({
+                              mobile: 300,
+                              tablet: 400,
+                              desktop: 500,
+                            })}
+                            className="object-cover transition-transform duration-700 group-hover:scale-105"
                             loading="lazy"
+                            quality={85}
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
                           

@@ -3,6 +3,9 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { useRef } from 'react';
+import Image from 'next/image';
+import { optimizeCloudinaryUrl } from '@/lib/image-optimizer';
+
 const heroImage = 'https://res.cloudinary.com/dhqq37qlu/image/upload/v1767661563/_VXV9510-Enhanced-NR_qhsic0.jpg';
 
 export const Community = () => {
@@ -27,11 +30,20 @@ export const Community = () => {
           style={{ scale: imageScale, opacity: imageOpacity }}
         >
           <div className="absolute inset-0">
-            <img
-              src={heroImage}
+            <Image
+              src={optimizeCloudinaryUrl(heroImage, {
+                width: 1200,
+                height: 1600,
+                quality: 85,
+                format: 'auto',
+                crop: 'fill',
+              })}
               alt="Comunidad RUNNING ERA entrenando"
-              className="w-full h-full object-cover"
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
               loading="lazy"
+              quality={85}
             />
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent lg:from-black/70 lg:via-black/50 lg:to-transparent" />
           </div>

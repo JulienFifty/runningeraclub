@@ -4,7 +4,9 @@ import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
 import { ArrowRight, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
+import { optimizeCloudinaryUrl, getResponsiveImageSizes } from '@/lib/image-optimizer';
 
 interface Event {
   id: string;
@@ -216,11 +218,24 @@ export const Events = () => {
                       <div className="group bg-white border border-border overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 h-full flex flex-col">
                         {/* Background Image */}
                         <div className="relative h-36 md:h-56 overflow-hidden">
-                          <img
-                            src={event.image}
+                          <Image
+                            src={optimizeCloudinaryUrl(event.image, {
+                              width: 800,
+                              height: 600,
+                              quality: 85,
+                              format: 'auto',
+                              crop: 'fill',
+                            })}
                             alt={event.title}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            fill
+                            sizes={getResponsiveImageSizes({
+                              mobile: 320,
+                              tablet: 400,
+                              desktop: 500,
+                            })}
+                            className="object-cover transition-transform duration-700 group-hover:scale-105"
                             loading="lazy"
+                            quality={85}
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
