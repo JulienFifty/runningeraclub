@@ -31,12 +31,17 @@ export const metadata: Metadata = {
     title: "RUNNING ERA | Club de Running Premium en Puebla",
     description: "La nueva era del running en Puebla. Únete a nuestra comunidad exclusiva de corredores.",
     type: "website",
-    images: ["https://lovable.dev/opengraph-image-p98pqg.png"],
+    url: "https://runningera.mx",
+    images: ["https://runningera.mx/assets/logo-running-era.png"],
   },
   twitter: {
     card: "summary_large_image",
     site: "@RunningEraMX",
-    images: ["https://lovable.dev/opengraph-image-p98pqg.png"],
+    images: ["https://runningera.mx/assets/logo-running-era.png"],
+  },
+  icons: {
+    icon: "/assets/logo-running-era.png",
+    apple: "/assets/logo-running-era.png",
   },
 };
 
@@ -48,6 +53,8 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${inter.variable} ${playfair.variable} ${oswald.variable}`} suppressHydrationWarning>
       <head>
+        <link rel="icon" href="/assets/logo-running-era.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/assets/logo-running-era.png" />
         <link rel="canonical" href="https://runningera.mx" />
         <script
           type="application/ld+json"

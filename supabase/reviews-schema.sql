@@ -47,3 +47,4 @@ CREATE POLICY "Admins can manage all reviews" ON reviews
 COMMENT ON TABLE reviews IS 'Tabla de reseñas y testimonios de miembros';
 COMMENT ON COLUMN reviews.status IS 'Estado de la reseña: pending, approved, rejected';
 
+

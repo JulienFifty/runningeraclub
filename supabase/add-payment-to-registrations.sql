@@ -15,3 +15,4 @@ CREATE INDEX IF NOT EXISTS idx_event_registrations_stripe_pi ON event_registrati
 
 
 
+

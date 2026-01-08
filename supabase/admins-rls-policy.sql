@@ -29,3 +29,4 @@ CREATE POLICY "Users can check if they are admin" ON admins
 
 
 
+
