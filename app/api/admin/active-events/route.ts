@@ -54,45 +54,66 @@ export async function GET() {
     const eventsWithStats = await Promise.all(
       (events || []).map(async (event) => {
         try {
-          // Contar registros con pago exitoso (paid) de event_registrations
-          const { count: registrationsCount, error: regError } = await supabase
-            .from('event_registrations')
-            .select('*', { count: 'exact', head: true })
-            .eq('event_id', event.id)
-            .eq('payment_status', 'paid');
+          let registeredCount = 0;
+          let totalRevenue = 0;
 
-          if (regError) {
-            console.error(`Error counting registrations for event ${event.id}:`, regError);
+          // Contar registros con pago exitoso (paid) de event_registrations
+          // Manejar caso donde la tabla no existe
+          try {
+            const { count: registrationsCount, error: regError } = await supabase
+              .from('event_registrations')
+              .select('*', { count: 'exact', head: true })
+              .eq('event_id', event.id)
+              .eq('payment_status', 'paid');
+
+            if (!regError) {
+              registeredCount += registrationsCount || 0;
+            } else if (regError.code !== 'PGRST116') { // PGRST116 = tabla no existe
+              console.error(`Error counting registrations for event ${event.id}:`, regError);
+            }
+          } catch (e) {
+            // Ignorar si la tabla no existe
+            console.warn('event_registrations table may not exist');
           }
 
           // Contar asistentes con pago exitoso (paid) de attendees
-          const { count: attendeesCount, error: attError } = await supabase
-            .from('attendees')
-            .select('*', { count: 'exact', head: true })
-            .eq('event_id', event.id)
-            .eq('payment_status', 'paid');
+          try {
+            const { count: attendeesCount, error: attError } = await supabase
+              .from('attendees')
+              .select('*', { count: 'exact', head: true })
+              .eq('event_id', event.id)
+              .eq('payment_status', 'paid');
 
-          if (attError) {
-            console.error(`Error counting attendees for event ${event.id}:`, attError);
+            if (!attError) {
+              registeredCount += attendeesCount || 0;
+            } else if (attError.code !== 'PGRST116') {
+              console.error(`Error counting attendees for event ${event.id}:`, attError);
+            }
+          } catch (e) {
+            // Ignorar si la tabla no existe
+            console.warn('attendees table may not exist');
           }
-
-          const registeredCount = (registrationsCount || 0) + (attendeesCount || 0);
 
           // Calcular ingresos totales de payment_transactions
-          const { data: transactions, error: transError } = await supabase
-            .from('payment_transactions')
-            .select('amount, status')
-            .eq('event_id', event.id)
-            .eq('status', 'succeeded');
+          try {
+            const { data: transactions, error: transError } = await supabase
+              .from('payment_transactions')
+              .select('amount, status')
+              .eq('event_id', event.id)
+              .eq('status', 'succeeded');
 
-          if (transError) {
-            console.error(`Error fetching transactions for event ${event.id}:`, transError);
+            if (!transError) {
+              totalRevenue = (transactions || []).reduce(
+                (sum, t) => sum + (parseFloat(t.amount?.toString() || '0') || 0),
+                0
+              );
+            } else if (transError.code !== 'PGRST116') {
+              console.error(`Error fetching transactions for event ${event.id}:`, transError);
+            }
+          } catch (e) {
+            // Ignorar si la tabla no existe
+            console.warn('payment_transactions table may not exist');
           }
-
-          const totalRevenue = (transactions || []).reduce(
-            (sum, t) => sum + (parseFloat(t.amount?.toString() || '0') || 0),
-            0
-          );
 
           const maxParticipants = event.max_participants || 0;
           const spotsRemaining = maxParticipants > 0 ? maxParticipants - registeredCount : 0;

@@ -34,6 +34,7 @@ export function ActiveEventsOverview() {
     try {
       const response = await fetch('/api/admin/active-events', {
         cache: 'no-store',
+        credentials: 'include', // Incluir cookies de sesión
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
         },
