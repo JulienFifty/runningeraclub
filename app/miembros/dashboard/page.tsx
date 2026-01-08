@@ -59,6 +59,8 @@ function DashboardContent() {
   const [registrations, setRegistrations] = useState<EventRegistration[]>([]);
   const [stravaConnection, setStravaConnection] = useState<StravaConnection | null>(null);
   const [loading, setLoading] = useState(true);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [selectedRegistration, setSelectedRegistration] = useState<EventRegistration | null>(null);
 
   const supabase = createClient();
 
