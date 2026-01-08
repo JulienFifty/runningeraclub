@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Search, CheckCircle, Clock, Users, UserPlus, Trash2, CreditCard, AlertCircle } from 'lucide-react';
+import { Search, CheckCircle, Clock, Users, UserPlus, Trash2, CreditCard, AlertCircle, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 import { AddAttendeeModal } from './AddAttendeeModal';
+import { EditAttendeeModal } from './EditAttendeeModal';
 
 interface Attendee {
   id: string;
@@ -29,6 +30,8 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
   const [loading, setLoading] = useState(true);
   const [updatingIds, setUpdatingIds] = useState<Set<string>>(new Set());
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedAttendee, setSelectedAttendee] = useState<Attendee | null>(null);
 
   useEffect(() => {
     fetchAttendees();

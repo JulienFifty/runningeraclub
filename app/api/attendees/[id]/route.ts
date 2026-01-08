@@ -1,7 +1,7 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
-export async function DELETE(
+export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
@@ -30,21 +30,30 @@ export async function DELETE(
         })
       : createSupabaseClient(supabaseUrl, supabaseAnonKey);
 
-    // Eliminar el asistente
-    const { error } = await supabase
+    const body = await request.json();
+    const { payment_status, notes } = body;
+
+    // Actualizar el asistente
+    const { data, error } = await supabase
       .from('attendees')
-      .delete()
-      .eq('id', id);
+      .update({
+        payment_status: payment_status || null,
+        notes: notes || null,
+      })
+      .eq('id', id)
+      .select()
+      .single();
 
     if (error) {
       return NextResponse.json(
-        { error: 'Error al eliminar el asistente', details: error.message },
+        { error: 'Error al actualizar el asistente', details: error.message },
         { status: 500 }
       );
     }
 
     return NextResponse.json({
       success: true,
+      attendee: data,
     });
   } catch (error: any) {
     return NextResponse.json(
@@ -53,12 +62,3 @@ export async function DELETE(
     );
   }
 }
-
-
-
-
-
-
-
-
-
