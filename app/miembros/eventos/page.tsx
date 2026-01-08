@@ -238,12 +238,22 @@ export default function MisEventosPage() {
                           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                             <Calendar className="w-4 h-4" />
                             <span>
-                              {format(new Date(reg.event.date), "d 'de' MMMM, yyyy", { locale: es })}
+                              {reg.event.date ? (() => {
+                                try {
+                                  const date = new Date(reg.event.date);
+                                  if (isNaN(date.getTime())) {
+                                    return reg.event.date;
+                                  }
+                                  return format(date, "d 'de' MMMM, yyyy", { locale: es });
+                                } catch (error) {
+                                  return reg.event.date;
+                                }
+                              })() : 'Fecha no disponible'}
                             </span>
                           </div>
                           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                             <MapPin className="w-4 h-4" />
-                            <span>{reg.event.location}</span>
+                            <span>{reg.event.location || 'Ubicación no disponible'}</span>
                           </div>
                         </div>
                       </div>
@@ -277,7 +287,17 @@ export default function MisEventosPage() {
 
                     {/* Registration Date */}
                     <p className="text-xs text-muted-foreground mt-3">
-                      Registrado el {format(new Date(reg.registration_date), "d 'de' MMMM, yyyy 'a las' HH:mm", { locale: es })}
+                      Registrado el {reg.registration_date ? (() => {
+                        try {
+                          const date = new Date(reg.registration_date);
+                          if (isNaN(date.getTime())) {
+                            return reg.registration_date;
+                          }
+                          return format(date, "d 'de' MMMM, yyyy 'a las' HH:mm", { locale: es });
+                        } catch (error) {
+                          return reg.registration_date;
+                        }
+                      })() : 'Fecha no disponible'}
                     </p>
                   </div>
                 </div>
