@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { Calendar, User, LogOut, Clock, MapPin, CheckCircle, XCircle, ArrowRight, Trophy, Activity, TrendingUp, Users, Home, X } from 'lucide-react';
+import { Calendar, User, LogOut, Clock, MapPin, CheckCircle, XCircle, ArrowRight, Trophy, Activity, TrendingUp, Users, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { StravaConnectButton } from '@/components/strava/StravaConnectButton';
 import { CancelRegistrationModal } from '@/components/CancelRegistrationModal';
@@ -381,17 +381,6 @@ function DashboardContent() {
   return (
     <main className="min-h-screen bg-background px-0 md:p-8">
       <div className="max-w-7xl mx-auto md:container-premium">
-        {/* Botón Home */}
-        <div className="px-4 md:px-0 mt-4 md:mt-6 mb-4 md:mb-6">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <Home className="w-4 h-4" />
-            Ir al inicio
-          </Link>
-        </div>
-
         {/* Header con Perfil */}
         <div className="mb-4 md:mb-8">
           {/* Profile Header Card */}
