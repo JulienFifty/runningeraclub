@@ -417,31 +417,37 @@ export default function AdminMemberDetail() {
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
                             <h3 className="font-display text-lg text-foreground font-semibold">
-                              {reg.event.title}
+                              {reg.event?.title || 'Evento no encontrado'}
                             </h3>
                             {getStatusBadge(reg.status)}
                             {getPaymentBadge(reg.payment_status)}
                           </div>
-                          <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-2">
-                              <Calendar className="w-4 h-4" />
-                              {new Date(reg.event.date).toLocaleDateString('es-ES', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                              })}
-                            </span>
-                            <span>{reg.event.location}</span>
-                            {reg.event.price && <span>{reg.event.price}</span>}
-                          </div>
+                          {reg.event ? (
+                            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                              <span className="flex items-center gap-2">
+                                <Calendar className="w-4 h-4" />
+                                {new Date(reg.event.date).toLocaleDateString('es-ES', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric'
+                                })}
+                              </span>
+                              <span>{reg.event.location}</span>
+                              {reg.event.price && <span>{reg.event.price}</span>}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-muted-foreground">Evento eliminado o no disponible</p>
+                          )}
                         </div>
-                        <Link
-                          href={`/eventos/${reg.event.slug}`}
-                          target="_blank"
-                          className="text-sm text-foreground hover:underline"
-                        >
-                          Ver evento →
-                        </Link>
+                        {reg.event?.slug && (
+                          <Link
+                            href={`/eventos/${reg.event.slug}`}
+                            target="_blank"
+                            className="text-sm text-foreground hover:underline"
+                          >
+                            Ver evento →
+                          </Link>
+                        )}
                       </div>
                     </div>
                   ))}
