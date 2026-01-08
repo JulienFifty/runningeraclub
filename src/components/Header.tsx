@@ -188,7 +188,7 @@ export const Header = () => {
                   <span>Puebla, México</span>
                 </span>
               </div>
-              <div className="flex items-center gap-4 mx-auto md:mx-0">
+              <div className="hidden md:flex items-center gap-4 mx-auto md:mx-0">
                 <a 
                   href="https://www.instagram.com/runningera_club/" 
                   target="_blank" 
