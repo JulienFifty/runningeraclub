@@ -10,7 +10,8 @@ import {
   Tag, 
   Home,
   LogOut,
-  LayoutDashboard
+  LayoutDashboard,
+  MessageSquare
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
@@ -52,6 +53,12 @@ const menuItems = [
     icon: Tag,
     label: 'Cupones',
     description: 'Descuentos',
+  },
+  {
+    href: '/admin/resenas',
+    icon: MessageSquare,
+    label: 'Reseñas',
+    description: 'Moderar reseñas',
   },
 ];
 
