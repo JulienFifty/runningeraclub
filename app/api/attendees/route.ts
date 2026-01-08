@@ -25,7 +25,7 @@ export async function POST(request: Request) {
         })
       : createSupabaseClient(supabaseUrl, supabaseAnonKey);
 
-    const { name, email, phone, tickets, event_id, registration_type } = await request.json();
+    const { name, email, phone, tickets, event_id, registration_type, payment_method } = await request.json();
 
     if (!name || !name.trim()) {
       return NextResponse.json(
@@ -36,9 +36,27 @@ export async function POST(request: Request) {
 
     // Determinar payment_status basado en registration_type
     // Si es staff o cortesía, marcar como 'paid' para que cuente en el cupo
+    // Si es regular y tiene método de pago (stripe, cash, transfer), marcar como 'paid'
     const paymentStatus = (registration_type === 'staff' || registration_type === 'cortesia') 
       ? 'paid' 
+      : (registration_type === 'regular' && payment_method)
+      ? 'paid'
       : null;
+
+    // Determinar notes basado en registration_type y método de pago
+    let notes = null;
+    if (registration_type === 'staff') {
+      notes = 'Staff - Registro manual';
+    } else if (registration_type === 'cortesia') {
+      notes = 'Cortesía - Registro manual';
+    } else if (registration_type === 'regular' && payment_method) {
+      const paymentMethodLabels: { [key: string]: string } = {
+        'stripe': 'Pago en Stripe',
+        'cash': 'Pago en Efectivo',
+        'transfer': 'Pago por Transferencia',
+      };
+      notes = `Regular - ${paymentMethodLabels[payment_method] || 'Pago manual'}`;
+    }
 
     // Crear el asistente
     const { data, error } = await supabase
@@ -51,11 +69,8 @@ export async function POST(request: Request) {
         status: 'pending',
         event_id: event_id || null,
         payment_status: paymentStatus,
-        notes: registration_type === 'staff' 
-          ? 'Staff - Registro manual' 
-          : registration_type === 'cortesia' 
-          ? 'Cortesía - Registro manual'
-          : null,
+        payment_method: payment_method || null,
+        notes: notes,
       })
       .select()
       .single();

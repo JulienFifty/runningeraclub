@@ -24,18 +24,30 @@ interface EditAttendeeModalProps {
 export function EditAttendeeModal({ isOpen, onClose, onSuccess, attendee }: EditAttendeeModalProps) {
   const [formData, setFormData] = useState({
     registrationType: 'regular' as 'regular' | 'staff' | 'cortesia',
+    paymentMethod: 'stripe' as 'stripe' | 'cash' | 'transfer',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Determinar el tipo de registro actual basado en notes
+  // Determinar el tipo de registro actual basado en notes y payment_method
   useEffect(() => {
     if (attendee) {
       if (attendee.notes?.includes('Staff')) {
-        setFormData({ registrationType: 'staff' });
+        setFormData({ registrationType: 'staff', paymentMethod: 'stripe' });
       } else if (attendee.notes?.includes('Cortesía')) {
-        setFormData({ registrationType: 'cortesia' });
+        setFormData({ registrationType: 'cortesia', paymentMethod: 'stripe' });
       } else {
-        setFormData({ registrationType: 'regular' });
+        // Si es regular, extraer método de pago de notes
+        let paymentMethod: 'stripe' | 'cash' | 'transfer' = 'stripe';
+        if (attendee.notes?.includes('Efectivo')) {
+          paymentMethod = 'cash';
+        } else if (attendee.notes?.includes('Transferencia')) {
+          paymentMethod = 'transfer';
+        } else if (attendee.notes?.includes('Stripe')) {
+          paymentMethod = 'stripe';
+        } else if ((attendee as any).payment_method) {
+          paymentMethod = (attendee as any).payment_method as 'stripe' | 'cash' | 'transfer';
+        }
+        setFormData({ registrationType: 'regular', paymentMethod });
       }
     }
   }, [attendee]);
@@ -51,14 +63,24 @@ export function EditAttendeeModal({ isOpen, onClose, onSuccess, attendee }: Edit
       // Determinar payment_status basado en registration_type
       const paymentStatus = (formData.registrationType === 'staff' || formData.registrationType === 'cortesia') 
         ? 'paid' 
+        : (formData.registrationType === 'regular' && formData.paymentMethod)
+        ? 'paid'
         : null;
 
-      // Determinar notes
-      const notes = formData.registrationType === 'staff' 
-        ? 'Staff - Registro manual' 
-        : formData.registrationType === 'cortesia' 
-        ? 'Cortesía - Registro manual'
-        : null;
+      // Determinar notes basado en registration_type y método de pago
+      let notes = null;
+      if (formData.registrationType === 'staff') {
+        notes = 'Staff - Registro manual';
+      } else if (formData.registrationType === 'cortesia') {
+        notes = 'Cortesía - Registro manual';
+      } else if (formData.registrationType === 'regular' && formData.paymentMethod) {
+        const paymentMethodLabels: { [key: string]: string } = {
+          'stripe': 'Pago en Stripe',
+          'cash': 'Pago en Efectivo',
+          'transfer': 'Pago por Transferencia',
+        };
+        notes = `Regular - ${paymentMethodLabels[formData.paymentMethod] || 'Pago manual'}`;
+      }
 
       const response = await fetch(`/api/attendees/${attendee.id}`, {
         method: 'PUT',
@@ -67,6 +89,7 @@ export function EditAttendeeModal({ isOpen, onClose, onSuccess, attendee }: Edit
         },
         body: JSON.stringify({
           payment_status: paymentStatus,
+          payment_method: formData.registrationType === 'regular' ? formData.paymentMethod : null,
           notes: notes,
         }),
       });
@@ -124,7 +147,7 @@ export function EditAttendeeModal({ isOpen, onClose, onSuccess, attendee }: Edit
               id="registrationType"
               name="registrationType"
               value={formData.registrationType}
-              onChange={(e) => setFormData({ registrationType: e.target.value as 'regular' | 'staff' | 'cortesia' })}
+              onChange={(e) => setFormData({ ...formData, registrationType: e.target.value as 'regular' | 'staff' | 'cortesia' })}
               disabled={isSubmitting}
               className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-foreground disabled:opacity-50"
             >
@@ -138,6 +161,27 @@ export function EditAttendeeModal({ isOpen, onClose, onSuccess, attendee }: Edit
                 : 'El usuario deberá completar el pago'}
             </p>
           </div>
+
+          {/* Método de Pago - Solo visible si es Regular */}
+          {formData.registrationType === 'regular' && (
+            <div>
+              <label htmlFor="paymentMethod" className="block text-sm font-medium text-foreground mb-2">
+                Método de Pago
+              </label>
+              <select
+                id="paymentMethod"
+                name="paymentMethod"
+                value={formData.paymentMethod || 'stripe'}
+                onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value as 'stripe' | 'cash' | 'transfer' })}
+                disabled={isSubmitting}
+                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-foreground disabled:opacity-50"
+              >
+                <option value="stripe">Pago en Stripe</option>
+                <option value="cash">Pago en Efectivo</option>
+                <option value="transfer">Pago por Transferencia</option>
+              </select>
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex items-center gap-3 pt-4">

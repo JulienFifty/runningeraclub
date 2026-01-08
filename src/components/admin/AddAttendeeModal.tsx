@@ -18,6 +18,7 @@ export function AddAttendeeModal({ isOpen, onClose, onSuccess, eventId }: AddAtt
     phone: '',
     tickets: '1',
     registrationType: 'regular' as 'regular' | 'staff' | 'cortesia',
+    paymentMethod: 'stripe' as 'stripe' | 'cash' | 'transfer' | null,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -46,6 +47,7 @@ export function AddAttendeeModal({ isOpen, onClose, onSuccess, eventId }: AddAtt
           tickets: parseInt(formData.tickets) || 1,
           event_id: eventId || null,
           registration_type: formData.registrationType,
+          payment_method: formData.registrationType === 'regular' ? formData.paymentMethod : null,
         }),
       });
 
@@ -65,6 +67,7 @@ export function AddAttendeeModal({ isOpen, onClose, onSuccess, eventId }: AddAtt
         phone: '',
         tickets: '1',
         registrationType: 'regular',
+        paymentMethod: 'stripe',
       });
 
       onSuccess();
@@ -196,6 +199,27 @@ export function AddAttendeeModal({ isOpen, onClose, onSuccess, eventId }: AddAtt
                 : 'El usuario deberá completar el pago'}
             </p>
           </div>
+
+          {/* Método de Pago - Solo visible si es Regular */}
+          {formData.registrationType === 'regular' && (
+            <div>
+              <label htmlFor="paymentMethod" className="block text-sm font-medium text-foreground mb-2">
+                Método de Pago
+              </label>
+              <select
+                id="paymentMethod"
+                name="paymentMethod"
+                value={formData.paymentMethod || 'stripe'}
+                onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value as 'stripe' | 'cash' | 'transfer' })}
+                disabled={isSubmitting}
+                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-foreground disabled:opacity-50"
+              >
+                <option value="stripe">Pago en Stripe</option>
+                <option value="cash">Pago en Efectivo</option>
+                <option value="transfer">Pago por Transferencia</option>
+              </select>
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex items-center gap-3 pt-4">

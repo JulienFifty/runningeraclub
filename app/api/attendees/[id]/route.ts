@@ -31,13 +31,14 @@ export async function PUT(
       : createSupabaseClient(supabaseUrl, supabaseAnonKey);
 
     const body = await request.json();
-    const { payment_status, notes } = body;
+    const { payment_status, payment_method, notes } = body;
 
     // Actualizar el asistente
     const { data, error } = await supabase
       .from('attendees')
       .update({
         payment_status: payment_status || null,
+        payment_method: payment_method || null,
         notes: notes || null,
       })
       .eq('id', id)
