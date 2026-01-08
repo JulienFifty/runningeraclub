@@ -14,6 +14,7 @@ import {
   MessageSquare,
   X
 } from 'lucide-react';
+import { ThemeToggle } from './ThemeToggle';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -189,6 +190,9 @@ export function AdminSidebar({ onClose, isMobile = false }: AdminSidebarProps) {
             </p>
           </div>
         )}
+
+        {/* Theme Toggle */}
+        <ThemeToggle />
 
         {/* External Links */}
         <Link
