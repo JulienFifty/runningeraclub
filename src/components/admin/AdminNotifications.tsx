@@ -11,7 +11,9 @@ import {
   XCircle, 
   RefreshCw,
   AlertCircle,
-  X
+  X,
+  Filter,
+  ChevronDown
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -26,10 +28,15 @@ interface Notification {
   color: string;
 }
 
+type NotificationCategory = 'all' | 'new_member' | 'new_registration' | 'payment_success' | 'payment_failed' | 'payment_pending' | 'refund';
+
 export function AdminNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [filteredNotifications, setFilteredNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [isExpanded, setIsExpanded] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<NotificationCategory>('all');
+  const [showFilters, setShowFilters] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -47,7 +54,9 @@ export function AdminNotifications() {
       }
 
       const data = await response.json();
-      setNotifications(data.notifications || []);
+      const notifs = data.notifications || [];
+      setNotifications(notifs);
+      applyFilter(notifs, selectedCategory);
     } catch (error: any) {
       console.error('Error fetching notifications:', error);
       toast.error('Error al cargar notificaciones');
@@ -55,6 +64,33 @@ export function AdminNotifications() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    applyFilter(notifications, selectedCategory);
+  }, [selectedCategory, notifications]);
+
+  const applyFilter = (notifs: Notification[], category: NotificationCategory) => {
+    if (category === 'all') {
+      setFilteredNotifications(notifs);
+    } else {
+      setFilteredNotifications(notifs.filter(n => n.type === category));
+    }
+  };
+
+  const getCategoryCount = (category: NotificationCategory) => {
+    if (category === 'all') return notifications.length;
+    return notifications.filter(n => n.type === category).length;
+  };
+
+  const categories: Array<{ value: NotificationCategory; label: string; icon: any; color: string }> = [
+    { value: 'all', label: 'Todas', icon: Bell, color: 'bg-gray-500/10 text-gray-600 border-gray-500/20' },
+    { value: 'new_member', label: 'Nuevos Miembros', icon: UserPlus, color: 'bg-blue-500/10 text-blue-600 border-blue-500/20' },
+    { value: 'new_registration', label: 'Inscripciones', icon: Calendar, color: 'bg-purple-500/10 text-purple-600 border-purple-500/20' },
+    { value: 'payment_success', label: 'Pagos Exitosos', icon: CheckCircle, color: 'bg-green-500/10 text-green-600 border-green-500/20' },
+    { value: 'payment_failed', label: 'Pagos Fallidos', icon: XCircle, color: 'bg-red-500/10 text-red-600 border-red-500/20' },
+    { value: 'payment_pending', label: 'Pagos Pendientes', icon: AlertCircle, color: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20' },
+    { value: 'refund', label: 'Reembolsos', icon: RefreshCw, color: 'bg-orange-500/10 text-orange-600 border-orange-500/20' },
+  ];
 
   const formatTimeAgo = (timestamp: string) => {
     try {
@@ -144,6 +180,7 @@ export function AdminNotifications() {
   };
 
   const unreadCount = notifications.length;
+  const filteredCount = filteredNotifications.length;
 
   if (loading) {
     return (
@@ -179,29 +216,97 @@ export function AdminNotifications() {
             </p>
           </div>
         </div>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            fetchNotifications();
-          }}
-          className="p-2 hover:bg-muted rounded transition-colors"
-          title="Actualizar"
-        >
-          <RefreshCw className="w-4 h-4 text-muted-foreground" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowFilters(!showFilters);
+            }}
+            className={`p-2 hover:bg-muted rounded transition-colors ${showFilters ? 'bg-muted' : ''}`}
+            title="Filtros"
+          >
+            <Filter className="w-4 h-4 text-muted-foreground" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              fetchNotifications();
+            }}
+            className="p-2 hover:bg-muted rounded transition-colors"
+            title="Actualizar"
+          >
+            <RefreshCw className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
       </div>
+
+      {/* Filtros por Categoría */}
+      {isExpanded && showFilters && (
+        <div className="border-t border-border p-4 bg-muted/30">
+          <div className="flex flex-wrap gap-2">
+            {categories.map((category) => {
+              const Icon = category.icon;
+              const count = getCategoryCount(category.value);
+              const isActive = selectedCategory === category.value;
+              
+              return (
+                <button
+                  key={category.value}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedCategory(category.value);
+                  }}
+                  className={`
+                    inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200
+                    border
+                    ${isActive 
+                      ? `${category.color} border-current` 
+                      : 'bg-background border-border text-muted-foreground hover:bg-muted'
+                    }
+                  `}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span>{category.label}</span>
+                  {count > 0 && (
+                    <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                      isActive ? 'bg-current/20' : 'bg-muted'
+                    }`}>
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Notifications List */}
       {isExpanded && (
         <div className="border-t border-border max-h-[500px] overflow-y-auto">
-          {notifications.length === 0 ? (
+          {filteredNotifications.length === 0 ? (
             <div className="p-8 text-center">
               <Bell className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-              <p className="text-sm text-muted-foreground">No hay notificaciones recientes</p>
+              <p className="text-sm text-muted-foreground">
+                {notifications.length === 0 
+                  ? 'No hay notificaciones recientes'
+                  : selectedCategory !== 'all'
+                  ? `No hay notificaciones de tipo "${categories.find(c => c.value === selectedCategory)?.label}"`
+                  : 'No hay notificaciones que coincidan con los filtros'
+                }
+              </p>
+              {selectedCategory !== 'all' && notifications.length > 0 && (
+                <button
+                  onClick={() => setSelectedCategory('all')}
+                  className="mt-4 text-xs text-foreground hover:underline"
+                >
+                  Ver todas las notificaciones
+                </button>
+              )}
             </div>
           ) : (
             <div className="divide-y divide-border">
-              {notifications.map((notification) => {
+              {filteredNotifications.map((notification) => {
                 const Icon = getNotificationIcon(notification.type);
                 const colorClass = getNotificationColor(notification.type);
                 
