@@ -118,68 +118,30 @@ export default function AdminMemberDetail() {
 
   const fetchMemberData = async () => {
     try {
-      // Obtener miembro
-      const { data: memberData, error: memberError } = await supabase
-        .from('members')
-        .select('*')
-        .eq('id', memberId)
-        .single();
-
-      if (memberError || !memberData) {
-        toast.error('Miembro no encontrado');
-        router.push('/admin/miembros');
-        return;
+      // Usar API route para obtener datos del miembro (bypass RLS)
+      const response = await fetch(`/api/admin/members/${memberId}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 404) {
+          toast.error('Miembro no encontrado');
+          router.push('/admin/miembros');
+          return;
+        }
+        throw new Error(errorData.error || 'Error al cargar datos del miembro');
       }
 
-      setMember(memberData);
-      setEditData(memberData);
-
-      // Obtener registros de eventos
-      const { data: registrationsData, error: regError } = await supabase
-        .from('event_registrations')
-        .select(`
-          id,
-          registration_date,
-          status,
-          payment_status,
-          event:events (
-            id,
-            title,
-            slug,
-            date,
-            location,
-            price
-          )
-        `)
-        .eq('member_id', memberId)
-        .order('registration_date', { ascending: false });
-
-      if (!regError && registrationsData) {
-        setRegistrations(registrationsData as EventRegistration[]);
-      }
-
-      // Obtener transacciones
-      const { data: transactionsData, error: transError } = await supabase
-        .from('payment_transactions')
-        .select(`
-          id,
-          amount,
-          currency,
-          status,
-          created_at,
-          event:events (
-            title
-          )
-        `)
-        .eq('member_id', memberId)
-        .order('created_at', { ascending: false });
-
-      if (!transError && transactionsData) {
-        setTransactions(transactionsData as PaymentTransaction[]);
-      }
-    } catch (error) {
+      const result = await response.json();
+      
+      setMember(result.member);
+      setEditData(result.member);
+      setRegistrations(result.registrations || []);
+      setTransactions(result.transactions || []);
+    } catch (error: any) {
       console.error('Error fetching member data:', error);
-      toast.error('Error al cargar datos del miembro');
+      toast.error('Error al cargar datos del miembro', {
+        description: error.message,
+      });
     } finally {
       setLoading(false);
     }
