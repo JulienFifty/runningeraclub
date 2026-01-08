@@ -190,7 +190,7 @@ export const Events = () => {
             </button>
 
             {/* Cards Carousel */}
-            <div className="relative h-[650px] md:h-[700px] flex items-center justify-center overflow-visible">
+            <div className="relative h-[480px] md:h-[700px] flex items-center justify-center overflow-visible">
               {events.map((event, index) => {
                 const offset = index - activeIndex;
                 const isActive = index === activeIndex;
@@ -218,7 +218,7 @@ export const Events = () => {
                     <Link href={`/eventos/${event.slug}`}>
                       <div className="group bg-white border border-border overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 h-full flex flex-col">
                         {/* Background Image */}
-                        <div className="relative h-48 md:h-56 overflow-hidden">
+                        <div className="relative h-36 md:h-56 overflow-hidden">
                           <img
                             src={event.image}
                             alt={event.title}
@@ -228,18 +228,18 @@ export const Events = () => {
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
 
                           {/* Badges Top */}
-                          <div className="absolute top-4 left-4 right-4 flex items-start justify-between gap-2">
+                          <div className="absolute top-3 left-3 right-3 flex items-start justify-between gap-2">
                             {/* Date Badge */}
-                            <div className="inline-flex items-center gap-1.5 bg-white backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm">
-                              <Calendar className="w-3.5 h-3.5 text-black" />
-                              <span className="text-xs font-semibold text-black">
+                            <div className="inline-flex items-center gap-1 bg-white/95 backdrop-blur-sm px-2 py-1 rounded-full shadow-sm">
+                              <Calendar className="w-3 h-3 text-black" />
+                              <span className="text-[10px] md:text-xs font-semibold text-black">
                                 {event.date}
                               </span>
                             </div>
                             
                             {/* Spots Available Badge */}
                             {event.spots_available !== null && event.spots_available !== undefined && (
-                              <div className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold shadow-sm ${
+                              <div className={`inline-flex items-center px-2 py-1 rounded-full text-[10px] md:text-xs font-bold shadow-sm ${
                                 event.spots_available > 10 
                                   ? 'bg-green-500 text-white'
                                   : event.spots_available > 0 
@@ -253,12 +253,10 @@ export const Events = () => {
 
                           {/* Category Badge Bottom Left */}
                           {event.category && (
-                            <div className="absolute bottom-4 left-4">
-                              <span className="inline-block bg-white backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-semibold text-black uppercase tracking-wider shadow-sm">
+                            <div className="absolute bottom-3 left-3">
+                              <span className="inline-block bg-white/95 backdrop-blur-sm px-2 py-1 rounded-full text-[10px] md:text-xs font-semibold text-black uppercase tracking-wider shadow-sm">
                                 {(() => {
-                                  // Limpiar la categoría: eliminar precio si está incluido
                                   let cleanCategory = event.category;
-                                  // Eliminar cualquier texto que incluya " - $" o "- $" o precio
                                   cleanCategory = cleanCategory.split(' - $')[0].split('- $')[0].split(' $')[0];
                                   return cleanCategory.trim();
                                 })()}
@@ -268,25 +266,25 @@ export const Events = () => {
                         </div>
 
                         {/* Content */}
-                        <div className="p-6 flex-1 flex flex-col">
+                        <div className="p-4 md:p-6 flex-1 flex flex-col">
                           {/* Title */}
-                          <h3 className="font-display text-xl md:text-2xl text-black font-bold mb-3 leading-tight group-hover:text-black/80 transition-colors">
+                          <h3 className="font-display text-lg md:text-2xl text-black font-bold mb-2 md:mb-3 leading-tight group-hover:text-black/80 transition-colors line-clamp-2">
                             {event.title}
                           </h3>
 
-                          {/* Description */}
-                          <p className="text-muted-foreground text-sm leading-relaxed mb-4 flex-1">
+                          {/* Description - Oculto en mobile para reducir altura */}
+                          <p className="text-muted-foreground text-xs md:text-sm leading-relaxed mb-3 md:mb-4 flex-1 hidden md:block line-clamp-2">
                             {event.shortDescription}
                           </p>
 
-                          {/* Location & Price/Spots */}
-                          <div className="space-y-2 mb-4 pb-4 border-b border-border">
-                            <div className="flex items-center justify-between">
-                              <p className="text-muted-foreground/70 text-xs tracking-wider uppercase">
+                          {/* Location & Price - Compacto en mobile */}
+                          <div className="space-y-1.5 md:space-y-2 mb-3 md:mb-4 pb-3 md:pb-4 border-b border-border">
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="text-muted-foreground/70 text-[10px] md:text-xs tracking-wider uppercase truncate flex-1">
                                 {event.location}
                               </p>
                               {event.price && (
-                                <span className="text-lg font-bold text-black">
+                                <span className="text-base md:text-lg font-bold text-black whitespace-nowrap">
                                   {(() => {
                                     const priceStr = event.price.toString().toLowerCase();
                                     if (priceStr === 'gratis') {
@@ -300,28 +298,12 @@ export const Events = () => {
                                 </span>
                               )}
                             </div>
-                            {event.spots_available !== undefined && event.spots_available !== null && (
-                              <div className="flex items-center justify-end">
-                                <span className={`text-xs font-medium ${
-                                  event.spots_available > 10 
-                                    ? 'text-green-600' 
-                                    : event.spots_available > 0 
-                                      ? 'text-orange-600' 
-                                      : 'text-red-600'
-                                }`}>
-                                  {event.spots_available > 0 
-                                    ? `${event.spots_available} cupos disponibles` 
-                                    : 'Agotado'
-                                  }
-                                </span>
-                              </div>
-                            )}
                           </div>
 
-                          {/* CTA Button */}
-                          <div className="w-full bg-foreground text-background px-6 py-3 text-xs font-semibold tracking-wider uppercase transition-all duration-300 hover:bg-foreground/90 text-center group-hover:gap-2 flex items-center justify-center">
+                          {/* CTA Button - Más compacto en mobile */}
+                          <div className="w-full bg-foreground text-background px-4 md:px-6 py-2.5 md:py-3 text-[10px] md:text-xs font-semibold tracking-wider uppercase transition-all duration-300 hover:bg-foreground/90 text-center group-hover:gap-2 flex items-center justify-center">
                             {event.buttonText}
-                            <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
+                            <ArrowRight className="w-3 h-3 md:w-3.5 md:h-3.5 ml-1 group-hover:translate-x-1 transition-transform" />
                           </div>
                         </div>
                       </div>
