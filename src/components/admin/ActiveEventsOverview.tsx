@@ -40,7 +40,13 @@ export function ActiveEventsOverview() {
       });
 
       if (!response.ok) {
-        throw new Error('Error al cargar eventos activos');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Error response:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData,
+        });
+        throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -48,6 +54,7 @@ export function ActiveEventsOverview() {
     } catch (error: any) {
       console.error('Error fetching active events:', error);
       setEvents([]);
+      // No mostrar toast aquí para evitar spam, solo log en consola
     } finally {
       setLoading(false);
     }
