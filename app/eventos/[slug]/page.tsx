@@ -66,7 +66,7 @@ export default async function EventPage({ params }: PageProps) {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative h-[60vh] md:h-[70vh] overflow-hidden">
+      <section className="relative h-[60vh] md:h-[70vh] overflow-hidden pt-16 md:pt-0">
         <div className="absolute inset-0">
           <Image
             src={optimizeCloudinaryUrl(event.image, {
@@ -87,34 +87,34 @@ export default async function EventPage({ params }: PageProps) {
         </div>
 
         <div className="relative z-10 h-full flex items-end">
-          <div className="container-premium w-full pb-12 md:pb-16">
+          <div className="container-premium w-full pb-8 md:pb-16 pt-4 md:pt-0">
             <Link
               href="/#eventos"
-              className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors text-sm font-medium tracking-wider uppercase"
+              className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-4 md:mb-6 transition-colors text-xs md:text-sm font-medium tracking-wider uppercase"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-3 h-3 md:w-4 md:h-4" />
               Volver a Eventos
             </Link>
             
-            <div className="flex flex-wrap items-center gap-4 mb-4">
-              <span className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white px-4 py-2 text-xs font-medium tracking-wider uppercase">
-                <Calendar className="w-4 h-4" />
+            <div className="flex flex-wrap items-center gap-2 md:gap-4 mb-3 md:mb-4">
+              <span className="inline-flex items-center gap-1.5 md:gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white px-2.5 md:px-4 py-1.5 md:py-2 text-[10px] md:text-xs font-medium tracking-wider uppercase">
+                <Calendar className="w-3 h-3 md:w-4 md:h-4" />
                 {event.date}
               </span>
-              <span className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white px-4 py-2 text-xs font-medium tracking-wider uppercase">
-                <MapPin className="w-4 h-4" />
+              <span className="inline-flex items-center gap-1.5 md:gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white px-2.5 md:px-4 py-1.5 md:py-2 text-[10px] md:text-xs font-medium tracking-wider uppercase">
+                <MapPin className="w-3 h-3 md:w-4 md:h-4" />
                 {event.location}
               </span>
-              <span className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white px-4 py-2 text-xs font-medium tracking-wider uppercase">
+              <span className="inline-flex items-center gap-1.5 md:gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white px-2.5 md:px-4 py-1.5 md:py-2 text-[10px] md:text-xs font-medium tracking-wider uppercase">
                 {event.category}
               </span>
             </div>
 
-            <h1 className="font-display text-4xl md:text-6xl lg:text-7xl text-white font-light mb-4 leading-tight">
+            <h1 className="font-display text-3xl md:text-6xl lg:text-7xl text-white font-light mb-3 md:mb-4 leading-tight">
               {event.title}
             </h1>
             
-            <p className="text-white/90 text-lg md:text-xl font-light max-w-3xl leading-relaxed">
+            <p className="text-white/90 text-sm md:text-lg lg:text-xl font-light max-w-3xl leading-relaxed">
               {event.shortDescription || event.description}
             </p>
           </div>
