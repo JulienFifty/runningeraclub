@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
-import { Calendar } from 'lucide-react';
+import { Calendar, Users, CreditCard, FileCheck, Tag, ExternalLink } from 'lucide-react';
 import { AdminNotifications } from '@/components/admin/AdminNotifications';
 
 export default async function AdminDashboard() {
