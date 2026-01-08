@@ -81,27 +81,40 @@ export async function GET() {
     // 3. Transacciones de pago (últimas 24 horas)
     const { data: transactions } = await supabase
       .from('payment_transactions')
-      .select(`
-        id,
-        status,
-        amount,
-        created_at,
-        member_id,
-        event_id,
-        members!payment_transactions_member_id_fkey(first_name, last_name, email),
-        events!payment_transactions_event_id_fkey(title, slug)
-      `)
+      .select('id, status, amount, created_at, member_id, event_id')
       .gte('created_at', last24Hours.toISOString())
       .order('created_at', { ascending: false })
       .limit(20);
 
     if (transactions) {
+      // Obtener información de miembros y eventos por separado
+      const memberIds = [...new Set(transactions.map((t: any) => t.member_id).filter(Boolean))];
+      const eventIds = [...new Set(transactions.map((t: any) => t.event_id).filter(Boolean))];
+
+      const { data: membersData } = memberIds.length > 0
+        ? await supabase
+            .from('members')
+            .select('id, full_name, email')
+            .in('id', memberIds)
+        : { data: [] };
+
+      const { data: eventsData } = eventIds.length > 0
+        ? await supabase
+            .from('events')
+            .select('id, title, slug')
+            .in('id', eventIds)
+        : { data: [] };
+
+      const membersMap = new Map((membersData || []).map((m: any) => [m.id, m]));
+      const eventsMap = new Map((eventsData || []).map((e: any) => [e.id, e]));
+
       transactions.forEach((transaction: any) => {
-        const memberName = transaction.members
-          ? `${transaction.members.first_name} ${transaction.members.last_name}`.trim() || transaction.members.email
-          : 'Usuario';
-        const eventTitle = transaction.events?.title || 'Evento';
-        const amount = transaction.amount ? `$${transaction.amount.toFixed(2)}` : '';
+        const member = transaction.member_id ? membersMap.get(transaction.member_id) : null;
+        const event = transaction.event_id ? eventsMap.get(transaction.event_id) : null;
+        
+        const memberName = member?.full_name || member?.email || 'Usuario';
+        const eventTitle = event?.title || 'Evento';
+        const amount = transaction.amount ? `$${Number(transaction.amount).toFixed(2)}` : '';
 
         let type: Notification['type'] = 'payment_pending';
         let title = 'Intento de pago';
@@ -127,7 +140,7 @@ export async function GET() {
           title,
           message,
           timestamp: transaction.created_at,
-          link: transaction.events?.slug ? `/eventos/${transaction.events.slug}` : undefined,
+          link: event?.slug ? `/eventos/${event.slug}` : undefined,
         });
       });
     }
