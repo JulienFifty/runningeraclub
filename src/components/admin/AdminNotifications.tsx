@@ -12,7 +12,6 @@ import {
   RefreshCw,
   AlertCircle,
   X,
-  Filter,
   ChevronDown
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -37,7 +36,6 @@ export function AdminNotifications() {
   const [refreshing, setRefreshing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<NotificationCategory>('all');
-  const [showFilters, setShowFilters] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
