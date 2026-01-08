@@ -357,7 +357,7 @@ export const Hero = () => {
               className="flex flex-col sm:flex-row gap-3 mb-8 md:mb-12 justify-center items-center"
             >
               <motion.a
-                href="#contacto"
+                href="/unirme-al-club"
                 className="inline-flex items-center justify-center gap-3 px-6 py-3 bg-white text-black text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-white/90 hover:gap-4"
                 whileHover={{ scale: 1.05, boxShadow: "0 10px 30px rgba(255,255,255,0.3)" }}
                 whileTap={{ scale: 0.95 }}
