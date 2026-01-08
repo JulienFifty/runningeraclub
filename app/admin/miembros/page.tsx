@@ -95,14 +95,14 @@ export default function AdminMembers() {
       const allMembers = result.members || [];
 
       // Aplicar filtros locales
-      let filtered = allMembers;
+      let filtered: Member[] = allMembers;
       
       if (filterStatus) {
-        filtered = filtered.filter(m => m.membership_status === filterStatus);
+        filtered = filtered.filter((m: Member) => m.membership_status === filterStatus);
       }
 
       if (filterType) {
-        filtered = filtered.filter(m => m.membership_type === filterType);
+        filtered = filtered.filter((m: Member) => m.membership_type === filterType);
       }
 
       setMembers(filtered);
