@@ -647,56 +647,88 @@ function DashboardContent() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-              {registrations.map((registration) => (
-                <Link
-                  key={registration.id}
-                  href={`/eventos/${registration.event.slug}`}
-                  className="bg-card border-t border-b md:border md:border-border md:rounded-lg overflow-hidden hover:border-foreground/50 transition-all group"
-                >
-                  <div className="relative w-full h-40 md:h-48 overflow-hidden">
-                    <img
-                      src={registration.event.image}
-                      alt={registration.event.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/assets/hero-runners.jpg';
-                      }}
-                    />
-                  </div>
-                  <div className="p-4 md:p-6">
-                    <div className="flex items-start justify-between gap-2 mb-2 md:mb-3">
-                      <h3 className="font-display text-lg md:text-xl text-foreground group-hover:text-foreground/80 transition-colors flex-1 line-clamp-2">
-                        {registration.event.title}
-                      </h3>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 mb-2 md:mb-3 flex-wrap">
-                      <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
-                        {registration.event.category}
-                      </span>
-                      {getStatusBadge(registration.status)}
-                    </div>
+              {registrations.map((registration) => {
+                const canCancel = registration.status !== 'cancelled' && 
+                                  registration.status !== 'attended' &&
+                                  (registration.payment_status === 'paid' || registration.payment_status === 'pending');
+                
+                return (
+                  <div
+                    key={registration.id}
+                    className="bg-card border-t border-b md:border md:border-border md:rounded-lg overflow-hidden hover:border-foreground/50 transition-all group flex flex-col"
+                  >
+                    <Link href={`/eventos/${registration.event.slug}`} className="flex-1 flex flex-col">
+                      <div className="relative w-full h-40 md:h-48 overflow-hidden">
+                        <img
+                          src={registration.event.image}
+                          alt={registration.event.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/assets/hero-runners.jpg';
+                          }}
+                        />
+                      </div>
+                      <div className="p-4 md:p-6 flex-1 flex flex-col">
+                        <div className="flex items-start justify-between gap-2 mb-2 md:mb-3">
+                          <h3 className="font-display text-lg md:text-xl text-foreground group-hover:text-foreground/80 transition-colors flex-1 line-clamp-2">
+                            {registration.event.title}
+                          </h3>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 mb-2 md:mb-3 flex-wrap">
+                          <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                            {registration.event.category}
+                          </span>
+                          {getStatusBadge(registration.status)}
+                        </div>
 
-                    <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground mb-2 md:mb-3">
-                      <Calendar className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
-                      <span className="truncate">{registration.event.date}</span>
-                    </div>
+                        <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground mb-2 md:mb-3">
+                          <Calendar className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                          <span className="truncate">{registration.event.date}</span>
+                        </div>
 
-                    <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
-                      <MapPin className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
-                      <span className="truncate">{registration.event.location}</span>
-                    </div>
+                        <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground mb-2 md:mb-3">
+                          <MapPin className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />
+                          <span className="truncate">{registration.event.location}</span>
+                        </div>
 
-                    {registration.payment_status === 'pending' && (
-                      <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-border">
-                        <p className="text-xs text-muted-foreground">
-                          Pago pendiente
+                        {registration.payment_status === 'pending' && (
+                          <div className="mt-auto pt-3 md:pt-4 border-t border-border">
+                            <p className="text-xs text-muted-foreground">
+                              Pago pendiente
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </Link>
+
+                    {/* Botón de cancelar */}
+                    {canCancel && (
+                      <div className="px-4 md:px-6 pb-4 md:pb-6 pt-2 border-t border-border">
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setSelectedRegistration(registration);
+                            setCancelModalOpen(true);
+                          }}
+                          className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 text-xs md:text-sm border border-red-500/20 text-red-500 rounded-lg hover:bg-red-500/10 transition-colors"
+                        >
+                          <X className="w-3 h-3 md:w-4 md:h-4" />
+                          Cancelar Registro
+                        </button>
+                      </div>
+                    )}
+
+                    {registration.status === 'cancelled' && (
+                      <div className="px-4 md:px-6 pb-4 md:pb-6 pt-2 border-t border-border">
+                        <p className="text-xs text-muted-foreground text-center">
+                          Registro cancelado
                         </p>
                       </div>
                     )}
                   </div>
-                </Link>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
