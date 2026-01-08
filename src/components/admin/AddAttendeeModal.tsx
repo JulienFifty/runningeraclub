@@ -17,6 +17,7 @@ export function AddAttendeeModal({ isOpen, onClose, onSuccess, eventId }: AddAtt
     email: '',
     phone: '',
     tickets: '1',
+    registrationType: 'regular' as 'regular' | 'staff' | 'cortesia',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -44,6 +45,7 @@ export function AddAttendeeModal({ isOpen, onClose, onSuccess, eventId }: AddAtt
           phone: formData.phone.trim() || null,
           tickets: parseInt(formData.tickets) || 1,
           event_id: eventId || null,
+          registration_type: formData.registrationType,
         }),
       });
 
@@ -62,6 +64,7 @@ export function AddAttendeeModal({ isOpen, onClose, onSuccess, eventId }: AddAtt
         email: '',
         phone: '',
         tickets: '1',
+        registrationType: 'regular',
       });
 
       onSuccess();
@@ -169,6 +172,29 @@ export function AddAttendeeModal({ isOpen, onClose, onSuccess, eventId }: AddAtt
               disabled={isSubmitting}
               className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-foreground disabled:opacity-50"
             />
+          </div>
+
+          <div>
+            <label htmlFor="registrationType" className="block text-sm font-medium text-foreground mb-2">
+              Tipo de Registro
+            </label>
+            <select
+              id="registrationType"
+              name="registrationType"
+              value={formData.registrationType}
+              onChange={(e) => setFormData({ ...formData, registrationType: e.target.value as 'regular' | 'staff' | 'cortesia' })}
+              disabled={isSubmitting}
+              className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-foreground disabled:opacity-50"
+            >
+              <option value="regular">Regular (Requiere pago)</option>
+              <option value="staff">Staff (Sin pago)</option>
+              <option value="cortesia">Cortesía (Sin pago)</option>
+            </select>
+            <p className="text-xs text-muted-foreground mt-1">
+              {formData.registrationType === 'staff' || formData.registrationType === 'cortesia' 
+                ? 'Este registro contará en el cupo del evento' 
+                : 'El usuario deberá completar el pago'}
+            </p>
           </div>
 
           {/* Actions */}

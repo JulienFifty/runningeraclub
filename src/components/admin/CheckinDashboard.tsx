@@ -15,6 +15,7 @@ interface Attendee {
   checked_in_at?: string;
   event_id?: string;
   payment_status?: 'pending' | 'paid' | 'failed' | 'refunded';
+  notes?: string;
 }
 
 interface CheckinDashboardProps {
@@ -290,41 +291,61 @@ export function CheckinDashboard({ eventId }: CheckinDashboardProps) {
                       ⚠️ GRUPO DE {attendee.tickets}
                     </span>
                   )}
-                  {attendee.payment_status && (
-                    <span
-                      className={`inline-flex items-center gap-1 px-2 md:px-3 py-0.5 md:py-1 rounded-full text-xs font-medium whitespace-nowrap ${
-                        attendee.payment_status === 'paid'
-                          ? 'bg-green-500/20 text-green-600 dark:text-green-400'
-                          : attendee.payment_status === 'failed'
-                          ? 'bg-red-500/20 text-red-600 dark:text-red-400'
-                          : attendee.payment_status === 'refunded'
-                          ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400'
-                          : 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400'
-                      }`}
-                    >
-                      {attendee.payment_status === 'paid' ? (
-                        <>
-                          <CreditCard className="w-3 h-3" />
-                          Pago Exitoso
-                        </>
-                      ) : attendee.payment_status === 'failed' ? (
-                        <>
-                          <AlertCircle className="w-3 h-3" />
-                          Pago Fallido
-                        </>
-                      ) : attendee.payment_status === 'refunded' ? (
-                        <>
-                          <AlertCircle className="w-3 h-3" />
-                          Reembolsado
-                        </>
-                      ) : (
-                        <>
-                          <Clock className="w-3 h-3" />
-                          Pago Pendiente
-                        </>
-                      )}
-                    </span>
-                  )}
+                  {(() => {
+                    // Verificar si es staff o cortesía por notes
+                    const isStaff = attendee.notes?.includes('Staff');
+                    const isCortesia = attendee.notes?.includes('Cortesía');
+                    
+                    // Si es staff o cortesía, mostrar badge especial
+                    if (isStaff || isCortesia) {
+                      return (
+                        <span className="inline-flex items-center gap-1 px-2 md:px-3 py-0.5 md:py-1 rounded-full text-xs font-medium whitespace-nowrap bg-purple-500/20 text-purple-600 dark:text-purple-400">
+                          <Users className="w-3 h-3" />
+                          {isStaff ? 'Staff' : 'Cortesía'}
+                        </span>
+                      );
+                    }
+                    
+                    // Si no, mostrar badge de payment_status
+                    if (attendee.payment_status) {
+                      return (
+                        <span
+                          className={`inline-flex items-center gap-1 px-2 md:px-3 py-0.5 md:py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                            attendee.payment_status === 'paid'
+                              ? 'bg-green-500/20 text-green-600 dark:text-green-400'
+                              : attendee.payment_status === 'failed'
+                              ? 'bg-red-500/20 text-red-600 dark:text-red-400'
+                              : attendee.payment_status === 'refunded'
+                              ? 'bg-orange-500/20 text-orange-600 dark:text-orange-400'
+                              : 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400'
+                          }`}
+                        >
+                          {attendee.payment_status === 'paid' ? (
+                            <>
+                              <CreditCard className="w-3 h-3" />
+                              Pago Exitoso
+                            </>
+                          ) : attendee.payment_status === 'failed' ? (
+                            <>
+                              <AlertCircle className="w-3 h-3" />
+                              Pago Fallido
+                            </>
+                          ) : attendee.payment_status === 'refunded' ? (
+                            <>
+                              <AlertCircle className="w-3 h-3" />
+                              Reembolsado
+                            </>
+                          ) : (
+                            <>
+                              <Clock className="w-3 h-3" />
+                              Pago Pendiente
+                            </>
+                          )}
+                        </span>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
                 {attendee.email && (
                   <p className="text-xs md:text-sm text-muted-foreground mb-0.5 md:mb-1 break-all">{attendee.email}</p>

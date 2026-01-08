@@ -25,7 +25,7 @@ export async function POST(request: Request) {
         })
       : createSupabaseClient(supabaseUrl, supabaseAnonKey);
 
-    const { name, email, phone, tickets, event_id } = await request.json();
+    const { name, email, phone, tickets, event_id, registration_type } = await request.json();
 
     if (!name || !name.trim()) {
       return NextResponse.json(
@@ -33,6 +33,12 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    // Determinar payment_status basado en registration_type
+    // Si es staff o cortesía, marcar como 'paid' para que cuente en el cupo
+    const paymentStatus = (registration_type === 'staff' || registration_type === 'cortesia') 
+      ? 'paid' 
+      : null;
 
     // Crear el asistente
     const { data, error } = await supabase
@@ -44,6 +50,12 @@ export async function POST(request: Request) {
         tickets: tickets || 1,
         status: 'pending',
         event_id: event_id || null,
+        payment_status: paymentStatus,
+        notes: registration_type === 'staff' 
+          ? 'Staff - Registro manual' 
+          : registration_type === 'cortesia' 
+          ? 'Cortesía - Registro manual'
+          : null,
       })
       .select()
       .single();
