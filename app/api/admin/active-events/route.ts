@@ -63,12 +63,13 @@ export async function GET() {
         }
         // Formato 2: DD MMM YYYY (ej: "10 ENE 2026")
         else if (event.date.match(/^\d{1,2}\s+\w{3}\s+\d{4}$/i)) {
-          // Parsear formato español
+          // Parsear formato español e inglés
           const months: { [key: string]: number } = {
+            // Español
             'ene': 0, 'feb': 1, 'mar': 2, 'abr': 3, 'may': 4, 'jun': 5,
             'jul': 6, 'ago': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dic': 11,
-            'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'may': 4, 'jun': 5,
-            'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11,
+            // Inglés (solo los diferentes)
+            'jan': 0, 'apr': 3, 'aug': 7, 'dec': 11,
           };
           const parts = event.date.toLowerCase().split(/\s+/);
           if (parts.length === 3 && months[parts[1]] !== undefined) {
