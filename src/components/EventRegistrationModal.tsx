@@ -79,7 +79,15 @@ export function EventRegistrationModal({
       const data = await response.json();
 
       if (!response.ok) {
-        setCouponError(data.error || 'Cupón no válido');
+        const errorMessage = data.error || 'Cupón no válido';
+        setCouponError(errorMessage);
+        
+        // Mostrar toast de error para mensajes importantes
+        if (errorMessage.includes('límite') || errorMessage.includes('expirado') || errorMessage.includes('no está disponible')) {
+          toast.error('Cupón no disponible', {
+            description: errorMessage,
+          });
+        }
         return;
       }
 
