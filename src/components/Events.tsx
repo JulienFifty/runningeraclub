@@ -149,16 +149,13 @@ export const Events = () => {
             Descubre nuestros eventos exclusivos y únete a la comunidad de corredores más vibrante de Puebla.
           </motion.p>
 
-          <motion.a
-            href="#contacto"
-            initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : { opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+          <Link
+            href="/eventos"
             className="inline-flex items-center gap-2 text-white/80 text-sm font-medium tracking-wider uppercase hover:text-white hover:gap-3 transition-all duration-300"
           >
             VER TODOS LOS EVENTOS
             <ArrowRight className="w-4 h-4" />
-          </motion.a>
+          </Link>
         </div>
 
         {/* Carousel Container */}
