@@ -89,7 +89,19 @@ export default function MisEventosPage() {
         throw error;
       }
 
-      setRegistrations((data || []) as EventRegistration[]);
+      // Transformar los datos para que event sea un objeto único en lugar de array
+      const transformedData: EventRegistration[] = (data || []).map((reg: any) => ({
+        id: reg.id,
+        event_id: reg.event_id,
+        registration_date: reg.registration_date,
+        status: reg.status,
+        payment_status: reg.payment_status,
+        event: Array.isArray(reg.event) && reg.event.length > 0 
+          ? reg.event[0] 
+          : (reg.event || null),
+      })).filter((reg: EventRegistration) => reg.event !== null);
+
+      setRegistrations(transformedData);
     } catch (error: any) {
       console.error('Error loading registrations:', error);
       toast.error('Error al cargar eventos', {
