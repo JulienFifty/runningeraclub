@@ -56,22 +56,55 @@ export async function POST(request: Request) {
     }
 
     // Obtener suscripciones
-    let query = supabase.from('push_subscriptions').select('*');
-
+    // Usar service role key para bypass RLS cuando se envía a todos los usuarios
+    // ya que las políticas RLS pueden bloquear el acceso para administradores
+    let subscriptions;
+    let subsError;
+    
     if (all_users) {
-      // Enviar a todos los usuarios
-      // No filtrar por user_id
+      // Enviar a todos los usuarios - usar service role para bypass RLS
+      const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      
+      if (supabaseServiceKey && supabaseUrl) {
+        const { createClient: createSupabaseClient } = await import('@supabase/supabase-js');
+        const supabaseAdmin = createSupabaseClient(supabaseUrl, supabaseServiceKey, {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false,
+          },
+        });
+        
+        const result = await supabaseAdmin
+          .from('push_subscriptions')
+          .select('*');
+        
+        subscriptions = result.data;
+        subsError = result.error;
+      } else {
+        // Si no hay service role key, usar cliente normal (puede fallar si las políticas RLS están mal configuradas)
+        const result = await supabase
+          .from('push_subscriptions')
+          .select('*');
+        
+        subscriptions = result.data;
+        subsError = result.error;
+      }
     } else if (user_id) {
       // Enviar a un usuario específico
-      query = query.eq('user_id', user_id);
+      const result = await supabase
+        .from('push_subscriptions')
+        .select('*')
+        .eq('user_id', user_id);
+      
+      subscriptions = result.data;
+      subsError = result.error;
     } else {
       return NextResponse.json(
         { error: 'Debes especificar user_id o all_users' },
         { status: 400 }
       );
     }
-
-    const { data: subscriptions, error: subsError } = await query;
 
     if (subsError) {
       throw subsError;
