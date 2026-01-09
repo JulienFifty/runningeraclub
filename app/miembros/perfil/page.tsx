@@ -4,8 +4,10 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { User, Mail, Phone, Calendar, ArrowLeft, Save, Instagram, Camera, Upload, Trash2, AlertTriangle } from 'lucide-react';
+import { User, Mail, Phone, Calendar, ArrowLeft, Save, Instagram, Camera, Upload, Trash2, AlertTriangle, Bell } from 'lucide-react';
 import { toast } from 'sonner';
+import { NotificationPermissionButton } from '@/components/NotificationPermissionButton';
+import { autoSubscribeToPushNotifications } from '@/lib/auto-subscribe-push';
 
 // Forzar renderizado dinámico
 export const dynamic = 'force-dynamic';
@@ -95,6 +97,11 @@ export default function MemberProfile() {
         toast.success('Perfil creado', {
           description: 'Tu perfil ha sido creado automáticamente',
         });
+        
+        // Intentar suscribirse automáticamente a notificaciones push después de crear el perfil
+        setTimeout(async () => {
+          await autoSubscribeToPushNotifications(user.id);
+        }, 1500); // Esperar 1.5 segundos para que la página termine de cargar
       } else if (memberError) {
         toast.error('Error al cargar tu perfil', {
           description: memberError.message || 'Por favor, intenta recargar la página',
@@ -320,7 +327,13 @@ export default function MemberProfile() {
         <div className="bg-card border-t border-b md:border md:border-border p-4 md:p-6 md:rounded-lg space-y-4 md:space-y-6">
           {/* Información de Membresía */}
           <div className="pb-4 md:pb-6 border-b border-border">
-            <h2 className="font-display text-lg md:text-xl text-foreground mb-3 md:mb-4">Información de Membresía</h2>
+            <div className="flex items-center justify-between mb-3 md:mb-4">
+              <h2 className="font-display text-lg md:text-xl text-foreground">Información de Membresía</h2>
+              <NotificationPermissionButton
+                variant="outline"
+                size="default"
+              />
+            </div>
             <div className="grid md:grid-cols-2 gap-3 md:gap-4">
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Email</p>

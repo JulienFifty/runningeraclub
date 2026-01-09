@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { StravaConnectButton } from '@/components/strava/StravaConnectButton';
 import { CancelRegistrationModal } from '@/components/CancelRegistrationModal';
 import { NotificationPermissionButton } from '@/components/NotificationPermissionButton';
+import { autoSubscribeToPushNotifications } from '@/lib/auto-subscribe-push';
 
 // Forzar renderizado dinámico
 export const dynamic = 'force-dynamic';
@@ -74,6 +75,15 @@ function DashboardContent() {
       toast.success('¡Email confirmado exitosamente!', {
         description: 'Bienvenido a RUNNING ERA Club',
       });
+      
+      // Intentar suscribirse automáticamente a notificaciones push
+      setTimeout(async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await autoSubscribeToPushNotifications(user.id);
+        }
+      }, 1000); // Esperar 1 segundo para que la página termine de cargar
+      
       // Limpiar URL
       window.history.replaceState({}, '', '/miembros/dashboard');
     }
@@ -245,6 +255,11 @@ function DashboardContent() {
         toast.success('Perfil creado', {
           description: 'Tu perfil ha sido creado automáticamente',
         });
+        
+        // Intentar suscribirse automáticamente a notificaciones push después de crear el perfil
+        setTimeout(async () => {
+          await autoSubscribeToPushNotifications(user.id);
+        }, 1500); // Esperar 1.5 segundos para que la página termine de cargar
       } else if (memberError) {
         toast.error('Error al cargar tu perfil', {
           description: memberError.message || 'Por favor, intenta recargar la página',
@@ -446,10 +461,10 @@ function DashboardContent() {
                     <User className="w-4 h-4" />
                     <span className="hidden sm:inline">Editar </span>Perfil
                   </Link>
-                  <div className="flex-1 min-w-[140px]">
+                  <div className="flex-1 min-w-[160px]">
                     <NotificationPermissionButton
                       variant="outline"
-                      size="sm"
+                      size="default"
                       className="w-full"
                     />
                   </div>
