@@ -34,29 +34,66 @@ export function usePushNotifications() {
 
       // Verificar si ya hay una suscripción
       try {
-        const registration = await navigator.serviceWorker.ready;
-        const subscription = await registration.pushManager.getSubscription();
-        
-        if (subscription) {
-          // Verificar si la suscripción existe en el servidor
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user) {
-            const { data: existingSubscription } = await supabase
-              .from('push_subscriptions')
-              .select('id')
-              .eq('user_id', user.id)
-              .eq('endpoint', subscription.endpoint)
-              .single();
-
-            setState(prev => ({
-              ...prev,
-              isSubscribed: !!existingSubscription,
-              isLoading: false,
-            }));
-          } else {
-            setState(prev => ({ ...prev, isLoading: false }));
+        // Intentar obtener el service worker, pero no esperar indefinidamente
+        let registration: ServiceWorkerRegistration | undefined;
+        try {
+          // Primero verificar si ya hay un service worker registrado
+          registration = await navigator.serviceWorker.getRegistration();
+          
+          // Si no hay registro, intentar registrar uno nuevo
+          if (!registration) {
+            registration = await navigator.serviceWorker.register('/sw.js');
           }
-        } else {
+          
+          // Esperar a que esté listo, pero con timeout
+          const readyRegistration = await Promise.race([
+            navigator.serviceWorker.ready,
+            new Promise<ServiceWorkerRegistration>((_, reject) => 
+              setTimeout(() => reject(new Error('Service worker timeout')), 5000)
+            )
+          ]).catch(() => registration) as ServiceWorkerRegistration | undefined; // Si falla, usar el registration que tenemos
+          
+          if (!readyRegistration) {
+            setState(prev => ({ ...prev, isSubscribed: false, isLoading: false }));
+            return;
+          }
+          
+          const subscription = await readyRegistration.pushManager.getSubscription();
+          
+          if (subscription) {
+            // Verificar si la suscripción existe en el servidor
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+              try {
+                const { data: existingSubscription } = await supabase
+                  .from('push_subscriptions')
+                  .select('id')
+                  .eq('user_id', user.id)
+                  .eq('endpoint', subscription.endpoint)
+                  .maybeSingle(); // Usar maybeSingle en lugar de single para evitar errores
+
+                setState(prev => ({
+                  ...prev,
+                  isSubscribed: !!existingSubscription,
+                  isLoading: false,
+                }));
+              } catch (dbError) {
+                console.error('Error checking subscription in DB:', dbError);
+                setState(prev => ({
+                  ...prev,
+                  isSubscribed: false,
+                  isLoading: false,
+                }));
+              }
+            } else {
+              setState(prev => ({ ...prev, isLoading: false }));
+            }
+          } else {
+            setState(prev => ({ ...prev, isSubscribed: false, isLoading: false }));
+          }
+        } catch (swError) {
+          console.error('Error with service worker:', swError);
+          // Si hay error con el service worker, aún permitir que el usuario intente suscribirse
           setState(prev => ({ ...prev, isSubscribed: false, isLoading: false }));
         }
       } catch (error) {

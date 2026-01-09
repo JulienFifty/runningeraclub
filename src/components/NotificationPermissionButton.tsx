@@ -25,6 +25,10 @@ export function NotificationPermissionButton({
   }
 
   const handleToggle = async () => {
+    if (isLoading || isToggling) {
+      return; // No hacer nada si está cargando o procesando
+    }
+    
     setIsToggling(true);
     try {
       if (isSubscribed) {
@@ -32,6 +36,8 @@ export function NotificationPermissionButton({
       } else {
         await subscribe();
       }
+    } catch (error) {
+      console.error('Error toggling notifications:', error);
     } finally {
       setIsToggling(false);
     }
@@ -40,10 +46,11 @@ export function NotificationPermissionButton({
   return (
     <Button
       onClick={handleToggle}
-      disabled={isLoading || isToggling}
+      disabled={isToggling}
       variant={variant}
       size={size}
       className={cn('gap-2', className)}
+      type="button"
     >
       {isToggling ? (
         <>
