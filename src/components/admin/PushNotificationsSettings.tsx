@@ -42,15 +42,40 @@ export function PushNotificationsSettings({ className }: PushNotificationsSettin
       });
 
       if (!response.ok) {
-        throw new Error('Error al cargar configuración');
+        // Intentar obtener el mensaje de error del servidor
+        let errorMessage = 'Error al cargar configuración';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorData.details || errorMessage;
+          // Si hay una advertencia (warning), mostrarla también
+          if (errorData.warning) {
+            console.warn('[Push Settings]', errorData.warning);
+            toast.warning('Configuración no encontrada', {
+              description: errorData.warning,
+            });
+          }
+        } catch (e) {
+          // Si no se puede parsear el error, usar el mensaje por defecto
+          console.error('Error parsing error response:', e);
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
+      
+      // Si hay una advertencia, mostrarla pero continuar
+      if (data.warning) {
+        console.warn('[Push Settings]', data.warning);
+        toast.warning('Tabla no encontrada', {
+          description: data.warning,
+        });
+      }
+      
       setSettings(data.settings || []);
     } catch (error: any) {
       console.error('Error fetching settings:', error);
       toast.error('Error al cargar configuración', {
-        description: error.message || 'Ocurrió un error inesperado.',
+        description: error.message || 'Ocurrió un error inesperado. Verifica que la tabla push_notification_settings exista en Supabase.',
       });
     } finally {
       setLoading(false);

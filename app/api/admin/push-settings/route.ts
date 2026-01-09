@@ -36,15 +36,15 @@ export async function GET() {
       .order('setting_key', { ascending: true });
 
     if (settingsError) {
-      // Si la tabla no existe, devolver configuración por defecto
-      if (settingsError.code === '42P01' || settingsError.message?.includes('does not exist')) {
+      // Si la tabla no existe, devolver configuración por defecto con código 200 pero con warning
+      if (settingsError.code === '42P01' || settingsError.message?.includes('does not exist') || settingsError.message?.includes('schema cache')) {
         console.warn('[Push Settings] Tabla push_notification_settings no existe. Usando configuración por defecto.');
         return NextResponse.json({
           settings: [
-            { id: 'default', setting_key: 'new_event', enabled: true, description: 'Notificar cuando se crea un nuevo evento' },
-            { id: 'default', setting_key: 'payment_success', enabled: true, description: 'Notificar cuando se confirma un pago exitoso' },
-            { id: 'default', setting_key: 'event_nearly_full', enabled: true, description: 'Notificar cuando quedan pocos lugares disponibles (10 o menos)' },
-            { id: 'default', setting_key: 'free_event_registration', enabled: true, description: 'Notificar cuando se registra a un evento gratuito' },
+            { id: 'default-1', setting_key: 'new_event', enabled: true, description: 'Notificar cuando se crea un nuevo evento' },
+            { id: 'default-2', setting_key: 'payment_success', enabled: true, description: 'Notificar cuando se confirma un pago exitoso' },
+            { id: 'default-3', setting_key: 'event_nearly_full', enabled: true, description: 'Notificar cuando quedan pocos lugares disponibles (10 o menos)' },
+            { id: 'default-4', setting_key: 'free_event_registration', enabled: true, description: 'Notificar cuando se registra a un evento gratuito' },
           ],
           settingsMap: {
             new_event: true,
@@ -52,10 +52,19 @@ export async function GET() {
             event_nearly_full: true,
             free_event_registration: true,
           },
-          warning: 'La tabla push_notification_settings no existe. Por favor, ejecuta el script SQL en Supabase.',
-        });
+          warning: 'La tabla push_notification_settings no existe. Por favor, ejecuta el script SQL en Supabase (supabase/quick-setup-push-notifications.sql).',
+        }, { status: 200 }); // Retornar 200 con warning en lugar de error
       }
-      throw settingsError;
+      // Para otros errores, retornar error 500
+      console.error('[Push Settings] Error obteniendo configuración:', settingsError);
+      return NextResponse.json(
+        { 
+          error: 'Error al obtener configuración', 
+          details: settingsError.message || 'Error desconocido',
+          code: settingsError.code,
+        },
+        { status: 500 }
+      );
     }
 
     // Convertir a formato de objeto para fácil acceso
@@ -124,6 +133,17 @@ export async function PUT(request: Request) {
       .single();
 
     if (error) {
+      // Si la tabla no existe, retornar error informativo
+      if (error.code === '42P01' || error.message?.includes('does not exist') || error.message?.includes('schema cache')) {
+        return NextResponse.json(
+          { 
+            error: 'La tabla push_notification_settings no existe',
+            details: 'Por favor, ejecuta el script SQL en Supabase (supabase/quick-setup-push-notifications.sql) para crear la tabla.',
+            code: error.code,
+          },
+          { status: 400 }
+        );
+      }
       throw error;
     }
 
