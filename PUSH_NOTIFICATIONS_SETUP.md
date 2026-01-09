@@ -152,6 +152,29 @@ Las suscripciones pueden volverse inválidas si:
 
 El sistema elimina automáticamente las suscripciones inválidas.
 
+## Gestión desde el Panel Admin
+
+### Configurar Notificaciones Automáticas
+
+1. Ve a `/admin/notificaciones` en el panel de administración
+2. En la sección "Notificaciones Automáticas", verás toggles para cada tipo de notificación:
+   - **Nuevos Eventos**: Notificar cuando se crea un nuevo evento
+   - **Pagos Confirmados**: Notificar cuando se confirma un pago exitoso
+   - **Eventos Casi Llenos**: Notificar cuando quedan pocos lugares disponibles (10 o menos)
+   - **Registros Gratuitos**: Notificar cuando se registra a un evento gratuito
+3. Activa/desactiva cada tipo de notificación según tus preferencias
+
+### Enviar Notificaciones Manuales
+
+1. Ve a `/admin/notificaciones` en el panel de administración
+2. En la sección "Enviar Notificación Manual", completa el formulario:
+   - **Título**: El título de la notificación (requerido)
+   - **Mensaje**: El cuerpo del mensaje (requerido)
+   - **URL de destino**: La URL a la que se dirigirá el usuario al hacer clic (opcional, por defecto: `/miembros/dashboard`)
+   - **Enviar a**: Elige entre "Todos los usuarios suscritos" o "Usuario específico"
+   - Si eliges "Usuario específico", busca el usuario por su email
+3. Haz clic en "Enviar Notificación"
+
 ## Ejemplos de Uso
 
 ### Enviar notificación cuando se crea un nuevo evento
