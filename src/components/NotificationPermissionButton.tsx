@@ -17,28 +17,18 @@ export function NotificationPermissionButton({
   variant = 'outline',
   size = 'default',
 }: NotificationPermissionButtonProps) {
-  let isSupported = false;
-  let isSubscribed = false;
-  let isLoading = true;
-  let subscribe: (() => Promise<boolean>) | null = null;
-  let unsubscribe: (() => Promise<boolean>) | null = null;
-  let isIOS = false;
-  let isStandalone = false;
-
-  try {
-    const hookResult = usePushNotifications();
-    isSupported = hookResult.isSupported ?? false;
-    isSubscribed = hookResult.isSubscribed ?? false;
-    isLoading = hookResult.isLoading ?? true;
-    subscribe = hookResult.subscribe;
-    unsubscribe = hookResult.unsubscribe;
-    isIOS = hookResult.isIOS ?? false;
-    isStandalone = hookResult.isStandalone ?? false;
-  } catch (error) {
-    console.error('[NotificationButton] Error inicializando hook:', error);
-    // Usar valores por defecto si hay error
-  }
-
+  // Hooks deben estar siempre al inicio, no dentro de try-catch
+  const hookResult = usePushNotifications();
+  const { 
+    isSupported = false, 
+    isSubscribed = false, 
+    isLoading = true, 
+    subscribe, 
+    unsubscribe, 
+    isIOS = false, 
+    isStandalone = false 
+  } = hookResult || {};
+  
   const [isToggling, setIsToggling] = useState(false);
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
 
@@ -118,8 +108,13 @@ export function NotificationPermissionButton({
   }
 
   const handleToggle = async () => {
-    if (isLoading || isToggling || !subscribe || !unsubscribe) {
-      return; // No hacer nada si está cargando, procesando o las funciones no están disponibles
+    if (isLoading || isToggling) {
+      return; // No hacer nada si está cargando o procesando
+    }
+    
+    if (!subscribe || !unsubscribe) {
+      console.error('[NotificationButton] subscribe o unsubscribe no están disponibles');
+      return;
     }
     
     setIsToggling(true);
