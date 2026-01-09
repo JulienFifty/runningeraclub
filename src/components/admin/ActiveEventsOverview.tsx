@@ -41,13 +41,29 @@ export function ActiveEventsOverview() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        let errorData: any = {};
+        const contentType = response.headers.get('content-type');
+        
+        try {
+          if (contentType && contentType.includes('application/json')) {
+            errorData = await response.json();
+          } else {
+            const text = await response.text();
+            errorData = { message: text || 'Error desconocido' };
+          }
+        } catch (parseError) {
+          console.warn('Error parsing error response:', parseError);
+          errorData = { message: 'Error al parsear respuesta del servidor' };
+        }
+        
         console.error('Error response:', {
           status: response.status,
           statusText: response.statusText,
           error: errorData,
         });
-        throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+        
+        const errorMessage = errorData.error || errorData.message || `Error ${response.status}: ${response.statusText}`;
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();

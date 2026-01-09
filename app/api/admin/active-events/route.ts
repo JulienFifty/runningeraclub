@@ -9,21 +9,21 @@ export async function GET() {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json(
-        { error: 'No autenticado' },
+        { error: 'No autenticado', success: false },
         { status: 401 }
       );
     }
 
     // Verificar que sea admin
-    const { data: admin } = await supabase
+    const { data: admin, error: adminError } = await supabase
       .from('admins')
       .select('*')
       .eq('email', user.email)
       .single();
 
-    if (!admin) {
+    if (adminError || !admin) {
       return NextResponse.json(
-        { error: 'Acceso denegado' },
+        { error: 'Acceso denegado', success: false, details: adminError?.message },
         { status: 403 }
       );
     }
@@ -205,7 +205,11 @@ export async function GET() {
   } catch (error: any) {
     console.error('Error in active-events API:', error);
     return NextResponse.json(
-      { error: 'Error del servidor', details: error.message },
+      { 
+        error: 'Error del servidor', 
+        details: error?.message || 'Error desconocido',
+        success: false 
+      },
       { status: 500 }
     );
   }
