@@ -121,27 +121,92 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const eventId = searchParams.get('event_id');
 
-    let query = supabase
+    // Obtener attendees de la tabla attendees
+    let attendeesQuery = supabase
       .from('attendees')
       .select('*')
       .order('created_at', { ascending: false });
 
     if (eventId) {
-      query = query.eq('event_id', eventId);
+      attendeesQuery = attendeesQuery.eq('event_id', eventId);
     }
 
-    const { data, error } = await query;
+    const { data: attendeesData, error: attendeesError } = await attendeesQuery;
 
-    if (error) {
-      return NextResponse.json(
-        { error: 'Error al cargar asistentes', details: error.message },
-        { status: 500 }
-      );
+    if (attendeesError) {
+      console.error('Error loading attendees:', attendeesError);
     }
+
+    // Si hay eventId, también obtener miembros registrados de event_registrations
+    // que no estén en attendees (para sincronizar datos)
+    let membersData: any[] = [];
+    if (eventId) {
+      try {
+        // Obtener registros de miembros con pago completado
+        const { data: registrationsData, error: registrationsError } = await supabase
+          .from('event_registrations')
+          .select(`
+            id,
+            member_id,
+            event_id,
+            registration_date,
+            status,
+            payment_status,
+            member:members!inner (
+              id,
+              email,
+              full_name,
+              phone
+            )
+          `)
+          .eq('event_id', eventId)
+          .eq('payment_status', 'paid')
+          .in('status', ['registered', 'confirmed']);
+
+        if (!registrationsError && registrationsData) {
+          // Obtener emails de los attendees existentes para evitar duplicados
+          const existingEmails = new Set(
+            (attendeesData || []).map((a: any) => a.email?.toLowerCase()).filter(Boolean)
+          );
+
+          // Convertir registros de miembros a formato attendees
+          membersData = registrationsData
+            .filter((reg: any) => {
+              const member = Array.isArray(reg.member) ? reg.member[0] : reg.member;
+              const email = member?.email?.toLowerCase();
+              // Solo incluir si no existe ya en attendees
+              return email && !existingEmails.has(email);
+            })
+            .map((reg: any) => {
+              const member = Array.isArray(reg.member) ? reg.member[0] : reg.member;
+              return {
+                id: `member_${reg.member_id}_${reg.event_id}`, // ID único para evitar conflictos
+                name: member?.full_name || member?.email || 'Miembro',
+                email: member?.email || null,
+                phone: member?.phone || null,
+                tickets: 1,
+                status: 'pending' as const,
+                event_id: reg.event_id,
+                payment_status: reg.payment_status || 'paid',
+                payment_method: null,
+                notes: 'Registro de miembro',
+                created_at: reg.registration_date,
+                checked_in_at: null,
+              };
+            });
+        }
+      } catch (membersError) {
+        console.error('Error loading members from event_registrations:', membersError);
+        // Continuar sin fallar si hay error
+      }
+    }
+
+    // Combinar attendees y miembros registrados
+    const allAttendees = [...(attendeesData || []), ...membersData];
 
     return NextResponse.json({
       success: true,
-      attendees: data || [],
+      attendees: allAttendees,
     });
   } catch (error: any) {
     return NextResponse.json(

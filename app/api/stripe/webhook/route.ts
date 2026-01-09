@@ -138,6 +138,74 @@ export async function POST(request: NextRequest) {
             } else {
               console.log('✅ Event registration updated successfully:', updateData);
               
+              // Crear o actualizar registro en attendees para check-in
+              try {
+                // Obtener información del miembro
+                const { data: memberData } = await supabase
+                  .from('members')
+                  .select('id, email, full_name, phone')
+                  .eq('id', member_id)
+                  .single();
+
+                if (memberData) {
+                  // Verificar si ya existe un attendee para este miembro y evento
+                  const { data: existingAttendee } = await supabase
+                    .from('attendees')
+                    .select('id')
+                    .eq('event_id', event_id)
+                    .eq('email', memberData.email)
+                    .maybeSingle();
+
+                  if (existingAttendee) {
+                    // Actualizar attendee existente
+                    const { error: attendeeUpdateError } = await supabase
+                      .from('attendees')
+                      .update({
+                        payment_status: 'paid',
+                        status: 'registered',
+                        stripe_session_id: session.id,
+                        stripe_payment_intent_id: session.payment_intent as string,
+                        amount_paid: session.amount_total ? session.amount_total / 100 : 0,
+                        currency: session.currency || 'mxn',
+                        payment_method: session.payment_method_types?.[0] || 'card',
+                      })
+                      .eq('id', existingAttendee.id);
+
+                    if (attendeeUpdateError) {
+                      console.error('❌ Error updating attendee:', attendeeUpdateError);
+                    } else {
+                      console.log('✅ Attendee updated successfully');
+                    }
+                  } else {
+                    // Crear nuevo attendee
+                    const { error: attendeeCreateError } = await supabase
+                      .from('attendees')
+                      .insert({
+                        event_id: event_id,
+                        name: memberData.full_name || memberData.email,
+                        email: memberData.email,
+                        phone: memberData.phone || null,
+                        payment_status: 'paid',
+                        status: 'registered',
+                        stripe_session_id: session.id,
+                        stripe_payment_intent_id: session.payment_intent as string,
+                        amount_paid: session.amount_total ? session.amount_total / 100 : 0,
+                        currency: session.currency || 'mxn',
+                        payment_method: session.payment_method_types?.[0] || 'card',
+                      });
+
+                    if (attendeeCreateError) {
+                      console.error('❌ Error creating attendee:', attendeeCreateError);
+                    } else {
+                      console.log('✅ Attendee created successfully for check-in');
+                    }
+                  }
+                }
+              } catch (attendeeError) {
+                // No fallar el webhook si falla la creación de attendee
+                console.error('[Webhook] Error creating/updating attendee:', attendeeError);
+              }
+              
               // Enviar notificación push al usuario cuando se confirma el pago
               try {
                 // Obtener información del evento
@@ -319,6 +387,74 @@ export async function POST(request: NextRequest) {
                   } else {
                     console.log('✅ Registration updated successfully:', existingReg.id);
                     
+                    // Crear o actualizar registro en attendees para check-in
+                    try {
+                      // Obtener información del miembro
+                      const { data: memberData } = await supabase
+                        .from('members')
+                        .select('id, email, full_name, phone')
+                        .eq('id', metadata.member_id)
+                        .single();
+
+                      if (memberData) {
+                        // Verificar si ya existe un attendee para este miembro y evento
+                        const { data: existingAttendee } = await supabase
+                          .from('attendees')
+                          .select('id')
+                          .eq('event_id', metadata.event_id)
+                          .eq('email', memberData.email)
+                          .maybeSingle();
+
+                        if (existingAttendee) {
+                          // Actualizar attendee existente
+                          const { error: attendeeUpdateError } = await supabase
+                            .from('attendees')
+                            .update({
+                              payment_status: 'paid',
+                              status: 'registered',
+                              stripe_session_id: session.id,
+                              stripe_payment_intent_id: paymentIntent.id,
+                              amount_paid: paymentIntent.amount ? paymentIntent.amount / 100 : 0,
+                              currency: paymentIntent.currency || 'mxn',
+                              payment_method: paymentIntent.payment_method_types?.[0] || 'card',
+                            })
+                            .eq('id', existingAttendee.id);
+
+                          if (attendeeUpdateError) {
+                            console.error('❌ Error updating attendee:', attendeeUpdateError);
+                          } else {
+                            console.log('✅ Attendee updated successfully');
+                          }
+                        } else {
+                          // Crear nuevo attendee
+                          const { error: attendeeCreateError } = await supabase
+                            .from('attendees')
+                            .insert({
+                              event_id: metadata.event_id,
+                              name: memberData.full_name || memberData.email,
+                              email: memberData.email,
+                              phone: memberData.phone || null,
+                              payment_status: 'paid',
+                              status: 'registered',
+                              stripe_session_id: session.id,
+                              stripe_payment_intent_id: paymentIntent.id,
+                              amount_paid: paymentIntent.amount ? paymentIntent.amount / 100 : 0,
+                              currency: paymentIntent.currency || 'mxn',
+                              payment_method: paymentIntent.payment_method_types?.[0] || 'card',
+                            });
+
+                          if (attendeeCreateError) {
+                            console.error('❌ Error creating attendee:', attendeeCreateError);
+                          } else {
+                            console.log('✅ Attendee created successfully for check-in');
+                          }
+                        }
+                      }
+                    } catch (attendeeError) {
+                      // No fallar el webhook si falla la creación de attendee
+                      console.error('[Webhook] Error creating/updating attendee:', attendeeError);
+                    }
+                    
                     // Enviar notificación push al usuario cuando se confirma el pago
                     try {
                       // Obtener información del evento
@@ -475,6 +611,74 @@ export async function POST(request: NextRequest) {
               })
               .eq('member_id', member_id)
               .eq('event_id', event_id);
+            
+            // Crear o actualizar registro en attendees para check-in
+            try {
+              // Obtener información del miembro
+              const { data: memberData } = await supabase
+                .from('members')
+                .select('id, email, full_name, phone')
+                .eq('id', member_id)
+                .single();
+
+              if (memberData) {
+                // Verificar si ya existe un attendee para este miembro y evento
+                const { data: existingAttendee } = await supabase
+                  .from('attendees')
+                  .select('id')
+                  .eq('event_id', event_id)
+                  .eq('email', memberData.email)
+                  .maybeSingle();
+
+                if (existingAttendee) {
+                  // Actualizar attendee existente
+                  const { error: attendeeUpdateError } = await supabase
+                    .from('attendees')
+                    .update({
+                      payment_status: 'paid',
+                      status: 'registered',
+                      stripe_session_id: session.id,
+                      stripe_payment_intent_id: session.payment_intent as string,
+                      amount_paid: session.amount_total ? session.amount_total / 100 : 0,
+                      currency: session.currency || 'mxn',
+                      payment_method: session.payment_method_types?.[0] || 'card',
+                    })
+                    .eq('id', existingAttendee.id);
+
+                  if (attendeeUpdateError) {
+                    console.error('❌ Error updating attendee:', attendeeUpdateError);
+                  } else {
+                    console.log('✅ Attendee updated successfully');
+                  }
+                } else {
+                  // Crear nuevo attendee
+                  const { error: attendeeCreateError } = await supabase
+                    .from('attendees')
+                    .insert({
+                      event_id: event_id,
+                      name: memberData.full_name || memberData.email,
+                      email: memberData.email,
+                      phone: memberData.phone || null,
+                      payment_status: 'paid',
+                      status: 'registered',
+                      stripe_session_id: session.id,
+                      stripe_payment_intent_id: session.payment_intent as string,
+                      amount_paid: session.amount_total ? session.amount_total / 100 : 0,
+                      currency: session.currency || 'mxn',
+                      payment_method: session.payment_method_types?.[0] || 'card',
+                    });
+
+                  if (attendeeCreateError) {
+                    console.error('❌ Error creating attendee:', attendeeCreateError);
+                  } else {
+                    console.log('✅ Attendee created successfully for check-in');
+                  }
+                }
+              }
+            } catch (attendeeError) {
+              // No fallar el webhook si falla la creación de attendee
+              console.error('[Webhook] Error creating/updating attendee:', attendeeError);
+            }
             
             // Enviar notificación push al usuario cuando se confirma el pago asíncrono
             try {
