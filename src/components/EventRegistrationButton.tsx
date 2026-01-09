@@ -227,34 +227,6 @@ export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventT
     }
   };
 
-  if (loading) {
-    return (
-      <div className="block w-full bg-foreground text-background px-6 py-4 text-center text-sm font-medium tracking-wider uppercase opacity-50">
-        Cargando...
-      </div>
-    );
-  }
-
-  if (isRegistered) {
-    return (
-      <Link
-        href="/miembros/dashboard"
-        className="block w-full bg-green-500 text-white px-6 py-4 text-center text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-green-600"
-      >
-        Ya estás registrado - Ver en Dashboard
-      </Link>
-    );
-  }
-
-  // Si el evento está lleno, mostrar botón deshabilitado
-  if (isEventFull && buttonText === 'REGÍSTRATE') {
-    return (
-      <div className="block w-full bg-muted text-muted-foreground px-6 py-4 text-center text-sm font-medium tracking-wider uppercase cursor-not-allowed opacity-60">
-        Evento Lleno
-      </div>
-    );
-  }
-
   // Componente para mostrar el contador de lugares disponibles
   const SpotsCounter = () => {
     // No mostrar si no hay límite de participantes o si el evento está lleno
@@ -280,6 +252,37 @@ export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventT
       </div>
     );
   };
+
+  if (loading) {
+    return (
+      <div className="block w-full bg-foreground text-background px-6 py-4 text-center text-sm font-medium tracking-wider uppercase opacity-50">
+        Cargando...
+      </div>
+    );
+  }
+
+  if (isRegistered) {
+    return (
+      <>
+        <Link
+          href="/miembros/dashboard"
+          className="block w-full bg-green-500 text-white px-6 py-4 text-center text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-green-600"
+        >
+          Ya estás registrado - Ver en Dashboard
+        </Link>
+        <SpotsCounter />
+      </>
+    );
+  }
+
+  // Si el evento está lleno, mostrar botón deshabilitado
+  if (isEventFull && buttonText === 'REGÍSTRATE') {
+    return (
+      <div className="block w-full bg-muted text-muted-foreground px-6 py-4 text-center text-sm font-medium tracking-wider uppercase cursor-not-allowed opacity-60">
+        Evento Lleno
+      </div>
+    );
+  }
 
   if (isAuthenticated && buttonText === 'REGÍSTRATE') {
     return (
