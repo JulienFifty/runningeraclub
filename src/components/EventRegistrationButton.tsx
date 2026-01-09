@@ -29,6 +29,33 @@ export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventT
   const [spotsRemaining, setSpotsRemaining] = useState<number | null>(null);
   const supabase = createClient();
 
+  // Componente para mostrar el contador de lugares disponibles
+  // Definido aquí para que esté disponible en todos los returns
+  const SpotsCounter = () => {
+    // No mostrar si no hay límite de participantes o si el evento está lleno
+    if (!maxParticipants || isEventFull) {
+      return null;
+    }
+
+    // Si spotsRemaining es null o 0, no mostrar
+    if (spotsRemaining === null || spotsRemaining === 0) {
+      return null;
+    }
+
+    // Mostrar siempre la información de lugares disponibles
+    return (
+      <div className="mt-3 text-center">
+        <p className="text-xs text-muted-foreground">
+          {spotsRemaining === 1 
+            ? '⚠️ Solo queda 1 lugar disponible' 
+            : spotsRemaining <= 10
+            ? `⚠️ Solo quedan ${spotsRemaining} lugares disponibles`
+            : `${spotsRemaining} lugares disponibles`}
+        </p>
+      </div>
+    );
+  };
+
   useEffect(() => {
     checkAuthAndRegistration();
     checkEventCapacity();
@@ -225,32 +252,6 @@ export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventT
       });
       setRegistering(false);
     }
-  };
-
-  // Componente para mostrar el contador de lugares disponibles
-  const SpotsCounter = () => {
-    // No mostrar si no hay límite de participantes o si el evento está lleno
-    if (!maxParticipants || isEventFull) {
-      return null;
-    }
-
-    // Si spotsRemaining es null o 0, no mostrar
-    if (spotsRemaining === null || spotsRemaining === 0) {
-      return null;
-    }
-
-    // Mostrar siempre la información de lugares disponibles
-    return (
-      <div className="mt-3 text-center">
-        <p className="text-xs text-muted-foreground">
-          {spotsRemaining === 1 
-            ? '⚠️ Solo queda 1 lugar disponible' 
-            : spotsRemaining <= 10
-            ? `⚠️ Solo quedan ${spotsRemaining} lugares disponibles`
-            : `${spotsRemaining} lugares disponibles`}
-        </p>
-      </div>
-    );
   };
 
   if (loading) {
