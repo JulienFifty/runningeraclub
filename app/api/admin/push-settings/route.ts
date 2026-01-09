@@ -36,6 +36,25 @@ export async function GET() {
       .order('setting_key', { ascending: true });
 
     if (settingsError) {
+      // Si la tabla no existe, devolver configuración por defecto
+      if (settingsError.code === '42P01' || settingsError.message?.includes('does not exist')) {
+        console.warn('[Push Settings] Tabla push_notification_settings no existe. Usando configuración por defecto.');
+        return NextResponse.json({
+          settings: [
+            { id: 'default', setting_key: 'new_event', enabled: true, description: 'Notificar cuando se crea un nuevo evento' },
+            { id: 'default', setting_key: 'payment_success', enabled: true, description: 'Notificar cuando se confirma un pago exitoso' },
+            { id: 'default', setting_key: 'event_nearly_full', enabled: true, description: 'Notificar cuando quedan pocos lugares disponibles (10 o menos)' },
+            { id: 'default', setting_key: 'free_event_registration', enabled: true, description: 'Notificar cuando se registra a un evento gratuito' },
+          ],
+          settingsMap: {
+            new_event: true,
+            payment_success: true,
+            event_nearly_full: true,
+            free_event_registration: true,
+          },
+          warning: 'La tabla push_notification_settings no existe. Por favor, ejecuta el script SQL en Supabase.',
+        });
+      }
       throw settingsError;
     }
 
