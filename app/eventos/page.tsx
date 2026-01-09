@@ -12,6 +12,7 @@ import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { optimizeCloudinaryUrl, getResponsiveImageSizes } from '@/lib/image-optimizer';
+import { SEOHead } from '@/components/SEOHead';
 
 interface Event {
   id: string;
@@ -245,6 +246,12 @@ export default function EventosPage() {
 
   return (
     <main className="min-h-screen bg-background">
+      <SEOHead
+        title="Eventos | Todos los Eventos de RUNNING ERA"
+        description="Descubre nuestros eventos exclusivos y únete a la comunidad de corredores más vibrante de Puebla. Carreras, entrenamientos, experiencias únicas y eventos premium. Encuentra el evento perfecto para ti."
+        image="/assets/hero-runners.jpg"
+        url="https://runningera.mx/eventos"
+      />
       <Header />
       
       {/* Hero Section */}

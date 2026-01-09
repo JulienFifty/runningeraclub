@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Leaderboard } from '@/components/leaderboard/Leaderboard';
 import { ArrowLeft, Calendar, Trophy } from 'lucide-react';
+import { SEOHead } from '@/components/SEOHead';
 
 export default function LeaderboardPage() {
   const [period, setPeriod] = useState<'alltime' | 'year' | 'month'>('alltime');
@@ -16,6 +17,12 @@ export default function LeaderboardPage() {
 
   return (
     <main className="min-h-screen bg-background">
+      <SEOHead
+        title="Leaderboard | Clasificación de Corredores"
+        description="Clasificación de los corredores más activos del club RUNNING ERA. Conecta tu Strava y compite por el primer lugar en nuestro leaderboard. Ver rankings mensuales, anuales e históricos."
+        image="/assets/logo-running-era.png"
+        url="https://runningera.mx/leaderboard"
+      />
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-primary/10 via-background to-background border-b border-border">
         <div className="container-premium py-16 md:py-24">
