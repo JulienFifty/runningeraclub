@@ -14,13 +14,23 @@ interface PushSubscriptionState {
 }
 
 export function usePushNotifications() {
-  // Detectar si es iOS
-  const isIOS = typeof window !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
-  // Detectar si está instalado como PWA
-  const isStandalone = typeof window !== 'undefined' && 
-    (window.matchMedia('(display-mode: standalone)').matches || 
-     (window.navigator as any).standalone === true ||
-     document.referrer.includes('android-app://'));
+  // Detectar si es iOS de forma segura
+  const isIOS = typeof window !== 'undefined' && 
+    typeof navigator !== 'undefined' && 
+    /iPad|iPhone|iPod/.test(navigator.userAgent || '');
+  
+  // Detectar si está instalado como PWA de forma segura
+  const isStandalone = typeof window !== 'undefined' && (() => {
+    try {
+      return (
+        window.matchMedia('(display-mode: standalone)').matches ||
+        (window.navigator as any).standalone === true ||
+        (typeof document !== 'undefined' && document.referrer.includes('android-app://'))
+      );
+    } catch {
+      return false;
+    }
+  })();
 
   const [state, setState] = useState<PushSubscriptionState>({
     isSupported: false,
@@ -36,35 +46,93 @@ export function usePushNotifications() {
   // Verificar soporte y permisos
   useEffect(() => {
     const checkSupport = async () => {
-      if (typeof window === 'undefined') {
-        setState(prev => ({ ...prev, isSupported: false, isLoading: false }));
-        return;
-      }
+      try {
+        if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+          setState(prev => ({ 
+            ...prev, 
+            isSupported: false, 
+            isLoading: false,
+            isIOS,
+            isStandalone,
+          }));
+          return;
+        }
 
       // En iOS, las notificaciones push solo funcionan si está instalado como PWA
       if (isIOS && !isStandalone) {
         // iOS requiere instalación como PWA para notificaciones push
+        let permission: NotificationPermission = 'default';
+        try {
+          permission = Notification.permission || 'default';
+        } catch (e) {
+          // Si Notification no está disponible, usar default
+          console.warn('[PushNotifications] Notification API no disponible:', e);
+        }
         setState(prev => ({ 
           ...prev, 
           isSupported: false, 
           isLoading: false,
-          permission: Notification.permission,
+          permission,
           isIOS,
           isStandalone,
         }));
         return;
       }
 
-      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-        setState(prev => ({ ...prev, isSupported: false, isLoading: false }));
+      // Verificar soporte de forma segura
+      const hasServiceWorker = typeof navigator !== 'undefined' && 'serviceWorker' in navigator;
+      const hasPushManager = typeof window !== 'undefined' && 'PushManager' in window;
+      
+      if (!hasServiceWorker || !hasPushManager) {
+        setState(prev => ({ 
+          ...prev, 
+          isSupported: false, 
+          isLoading: false,
+          isIOS,
+          isStandalone,
+        }));
         return;
       }
 
-      const permission = Notification.permission;
-      setState(prev => ({ ...prev, isSupported: true, permission }));
+      // Obtener permisos de forma segura
+      let permission: NotificationPermission = 'default';
+      try {
+        permission = Notification.permission || 'default';
+      } catch (e) {
+        console.warn('[PushNotifications] Error obteniendo permisos:', e);
+        setState(prev => ({ 
+          ...prev, 
+          isSupported: false, 
+          isLoading: false,
+          permission: 'default',
+          isIOS,
+          isStandalone,
+        }));
+        return;
+      }
+
+      setState(prev => ({ 
+        ...prev, 
+        isSupported: true, 
+        permission,
+        isIOS,
+        isStandalone,
+      }));
 
       // Verificar si ya hay una suscripción
       try {
+        // Verificar que el service worker esté disponible
+        if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) {
+          setState(prev => ({ 
+            ...prev, 
+            isSubscribed: false, 
+            isLoading: false,
+            isIOS,
+            isStandalone,
+          }));
+          return;
+        }
+
         // Intentar obtener el service worker, pero no esperar indefinidamente
         let registration: ServiceWorkerRegistration | undefined;
         try {
@@ -85,7 +153,13 @@ export function usePushNotifications() {
           ]).catch(() => registration) as ServiceWorkerRegistration | undefined; // Si falla, usar el registration que tenemos
           
           if (!readyRegistration) {
-            setState(prev => ({ ...prev, isSubscribed: false, isLoading: false }));
+            setState(prev => ({ 
+              ...prev, 
+              isSubscribed: false, 
+              isLoading: false,
+              isIOS,
+              isStandalone,
+            }));
             return;
           }
           
@@ -107,6 +181,8 @@ export function usePushNotifications() {
                   ...prev,
                   isSubscribed: !!existingSubscription,
                   isLoading: false,
+                  isIOS,
+                  isStandalone,
                 }));
               } catch (dbError) {
                 console.error('Error checking subscription in DB:', dbError);
@@ -114,27 +190,62 @@ export function usePushNotifications() {
                   ...prev,
                   isSubscribed: false,
                   isLoading: false,
+                  isIOS,
+                  isStandalone,
                 }));
               }
             } else {
-              setState(prev => ({ ...prev, isLoading: false }));
+              setState(prev => ({ 
+                ...prev, 
+                isLoading: false,
+                isIOS,
+                isStandalone,
+              }));
             }
           } else {
-            setState(prev => ({ ...prev, isSubscribed: false, isLoading: false }));
+            setState(prev => ({ 
+              ...prev, 
+              isSubscribed: false, 
+              isLoading: false,
+              isIOS,
+              isStandalone,
+            }));
           }
         } catch (swError) {
           console.error('Error with service worker:', swError);
           // Si hay error con el service worker, aún permitir que el usuario intente suscribirse
-          setState(prev => ({ ...prev, isSubscribed: false, isLoading: false }));
+          setState(prev => ({ 
+            ...prev, 
+            isSubscribed: false, 
+            isLoading: false,
+            isIOS,
+            isStandalone,
+          }));
         }
       } catch (error) {
         console.error('Error checking subscription:', error);
-        setState(prev => ({ ...prev, isLoading: false }));
+        setState(prev => ({ 
+          ...prev, 
+          isLoading: false,
+          isIOS,
+          isStandalone,
+        }));
+      }
+      } catch (error) {
+        console.error('[PushNotifications] Error en checkSupport:', error);
+        setState(prev => ({
+          ...prev,
+          isSupported: false,
+          isLoading: false,
+          isSubscribed: false,
+          isIOS,
+          isStandalone,
+        }));
       }
     };
 
     checkSupport();
-  }, [supabase]);
+  }, [supabase, isIOS, isStandalone]);
 
   // Convertir clave VAPID de base64 a Uint8Array
   const urlBase64ToUint8Array = (base64String: string): Uint8Array => {

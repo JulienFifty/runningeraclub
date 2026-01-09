@@ -17,23 +17,48 @@ export function NotificationPermissionButton({
   variant = 'outline',
   size = 'default',
 }: NotificationPermissionButtonProps) {
-  const { isSupported, isSubscribed, isLoading, subscribe, unsubscribe, isIOS, isStandalone } = usePushNotifications();
+  let isSupported = false;
+  let isSubscribed = false;
+  let isLoading = true;
+  let subscribe: (() => Promise<boolean>) | null = null;
+  let unsubscribe: (() => Promise<boolean>) | null = null;
+  let isIOS = false;
+  let isStandalone = false;
+
+  try {
+    const hookResult = usePushNotifications();
+    isSupported = hookResult.isSupported ?? false;
+    isSubscribed = hookResult.isSubscribed ?? false;
+    isLoading = hookResult.isLoading ?? true;
+    subscribe = hookResult.subscribe;
+    unsubscribe = hookResult.unsubscribe;
+    isIOS = hookResult.isIOS ?? false;
+    isStandalone = hookResult.isStandalone ?? false;
+  } catch (error) {
+    console.error('[NotificationButton] Error inicializando hook:', error);
+    // Usar valores por defecto si hay error
+  }
+
   const [isToggling, setIsToggling] = useState(false);
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
 
   // Debug: Log para verificar soporte (solo en desarrollo)
   useEffect(() => {
     if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-      console.log('[NotificationButton] Debug:', {
-        isSupported,
-        isLoading,
-        isSubscribed,
-        isIOS,
-        isStandalone,
-        hasServiceWorker: 'serviceWorker' in navigator,
-        hasPushManager: 'PushManager' in window,
-        notificationPermission: Notification.permission,
-      });
+      try {
+        console.log('[NotificationButton] Debug:', {
+          isSupported,
+          isLoading,
+          isSubscribed,
+          isIOS,
+          isStandalone,
+          hasServiceWorker: typeof navigator !== 'undefined' && 'serviceWorker' in navigator,
+          hasPushManager: typeof window !== 'undefined' && 'PushManager' in window,
+          notificationPermission: typeof Notification !== 'undefined' ? Notification.permission : 'unavailable',
+        });
+      } catch (error) {
+        console.error('[NotificationButton] Error en debug:', error);
+      }
     }
   }, [isSupported, isLoading, isSubscribed, isIOS, isStandalone]);
 
@@ -93,8 +118,8 @@ export function NotificationPermissionButton({
   }
 
   const handleToggle = async () => {
-    if (isLoading || isToggling) {
-      return; // No hacer nada si está cargando o procesando
+    if (isLoading || isToggling || !subscribe || !unsubscribe) {
+      return; // No hacer nada si está cargando, procesando o las funciones no están disponibles
     }
     
     setIsToggling(true);
