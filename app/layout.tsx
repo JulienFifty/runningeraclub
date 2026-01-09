@@ -55,9 +55,46 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${inter.variable} ${playfair.variable} ${oswald.variable}`} suppressHydrationWarning>
       <head>
+        {/* DNS Prefetch y Preconnect para recursos externos */}
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        
+        {/* Preload de recursos críticos */}
+        <link rel="preload" href="/assets/logo-running-era.png" as="image" />
+        <link rel="preload" href="/assets/hero-runners.jpg" as="image" />
+        
         <link rel="icon" href="/assets/logo-running-era.png" type="image/png" />
         <link rel="apple-touch-icon" href="/assets/logo-running-era.png" />
         <link rel="canonical" href="https://runningera.mx" />
+        
+        {/* CSS crítico inline para reducir render-blocking y mejorar LCP */}
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            /* CSS crítico para LCP - Hero section */
+            .hero-critical {
+              font-family: var(--font-title);
+              font-weight: 700;
+              color: white;
+              opacity: 1 !important;
+              transform: none !important;
+              will-change: auto;
+            }
+            /* Prevenir layout shift */
+            body {
+              margin: 0;
+              padding: 0;
+            }
+            /* Optimizar renderizado inicial */
+            section[id="inicio"] {
+              contain: layout style paint;
+            }
+          `
+        }} />
+        
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

@@ -170,14 +170,11 @@ export const Hero = () => {
           loop
           muted
           playsInline
-          preload="metadata"
+          preload="none"
           className="w-full h-full object-cover"
-          initial={{ scale: 1.4, filter: "blur(10px)" }}
+          initial={{ scale: 1, filter: "blur(0px)" }}
           animate={{ scale: 1, filter: "blur(0px)" }}
-          transition={{ 
-            duration: 2,
-            ease: [0.25, 0.46, 0.45, 0.94]
-          }}
+          transition={{ duration: 0 }}
         >
           {/* WebM - Mejor compresión, carga más rápida */}
           <source src={heroVideoWebM} type="video/webm" />
@@ -323,25 +320,16 @@ export const Hero = () => {
               Puebla Running Club
             </motion.span>
 
-            {/* Main Title with powerful reveal */}
+            {/* Main Title with powerful reveal - Optimizado para LCP */}
             <motion.h1
-              initial={{ opacity: 0, y: 60, scale: 0.9 }}
+              initial={{ opacity: 1, y: 0, scale: 1 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ 
-                duration: 1,
-                delay: 0.3,
-                ease: [0.25, 0.46, 0.45, 0.94]
-              }}
-              className="font-title text-4xl md:text-6xl lg:text-7xl text-white font-bold leading-[0.95] mb-4 uppercase tracking-tight"
+              transition={{ duration: 0 }}
+              className="font-title text-4xl md:text-6xl lg:text-7xl text-white font-bold leading-[0.95] mb-4 uppercase tracking-tight hero-critical"
             >
-              <motion.span
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, delay: 0.5 }}
-                className="block font-title text-4xl md:text-6xl lg:text-7xl text-white font-[700] leading-[0.95] uppercase tracking-tight"
-              >
+              <span className="block font-title text-4xl md:text-6xl lg:text-7xl text-white font-[700] leading-[0.95] uppercase tracking-tight">
                 Running Era Club
-              </motion.span>
+              </span>
             </motion.h1>
 
             {/* Buttons with stagger effect */}
