@@ -69,24 +69,18 @@ export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventT
     }
 
     try {
-      // Contar solo registros con pago exitoso (paid), NO contar pendientes
-      const { count: registrationsCount } = await supabase
-        .from('event_registrations')
-        .select('*', { count: 'exact', head: true })
-        .eq('event_id', eventId)
-        .eq('payment_status', 'paid');
-
-      const { count: attendeesCount } = await supabase
-        .from('attendees')
-        .select('*', { count: 'exact', head: true })
-        .eq('event_id', eventId)
-        .eq('payment_status', 'paid');
-
-      const totalRegistered = (registrationsCount || 0) + (attendeesCount || 0);
-      const remaining = maxParticipants - totalRegistered;
+      // Usar la API route para obtener el conteo correcto (bypass RLS)
+      const response = await fetch(`/api/events/${eventId}/capacity`);
       
-      setIsEventFull(totalRegistered >= maxParticipants);
-      setSpotsRemaining(remaining > 0 ? remaining : 0);
+      if (!response.ok) {
+        console.error('Error obteniendo capacidad del evento');
+        return;
+      }
+
+      const data = await response.json();
+      
+      setIsEventFull(data.isFull || false);
+      setSpotsRemaining(data.spotsRemaining || 0);
     } catch (error) {
       console.error('Error checking event capacity:', error);
     }
