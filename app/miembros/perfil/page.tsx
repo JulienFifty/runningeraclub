@@ -327,11 +327,12 @@ export default function MemberProfile() {
         <div className="bg-card border-t border-b md:border md:border-border p-4 md:p-6 md:rounded-lg space-y-4 md:space-y-6">
           {/* Información de Membresía */}
           <div className="pb-4 md:pb-6 border-b border-border">
-            <div className="flex items-center justify-between mb-3 md:mb-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3 md:mb-4">
               <h2 className="font-display text-lg md:text-xl text-foreground">Información de Membresía</h2>
               <NotificationPermissionButton
                 variant="outline"
                 size="default"
+                className="w-full sm:w-auto text-xs md:text-sm"
               />
             </div>
             <div className="grid md:grid-cols-2 gap-3 md:gap-4">

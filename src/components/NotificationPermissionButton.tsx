@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Bell, BellOff, Loader2 } from 'lucide-react';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { Button } from '@/components/ui/button';
@@ -20,8 +20,35 @@ export function NotificationPermissionButton({
   const { isSupported, isSubscribed, isLoading, subscribe, unsubscribe } = usePushNotifications();
   const [isToggling, setIsToggling] = useState(false);
 
+  // Debug: Log para verificar soporte (solo en desarrollo)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+      console.log('[NotificationButton] Debug:', {
+        isSupported,
+        isLoading,
+        isSubscribed,
+        hasServiceWorker: 'serviceWorker' in navigator,
+        hasPushManager: 'PushManager' in window,
+        notificationPermission: Notification.permission,
+      });
+    }
+  }, [isSupported, isLoading, isSubscribed]);
+
   if (!isSupported) {
-    return null; // No mostrar si no está soportado
+    // En mobile, mostrar el botón pero deshabilitado para que se vea
+    return (
+      <Button
+        variant={variant}
+        size={size}
+        className={cn('gap-2 opacity-50 cursor-not-allowed', className)}
+        disabled
+        type="button"
+      >
+        <BellOff className="w-4 h-4" />
+        <span className="hidden sm:inline">No Soportado</span>
+        <span className="sm:hidden">No Soportado</span>
+      </Button>
+    );
   }
 
   const handleToggle = async () => {

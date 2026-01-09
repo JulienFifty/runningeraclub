@@ -453,24 +453,24 @@ function DashboardContent() {
                 </div>
                 
                 {/* Actions */}
-                <div className="flex items-center gap-2 w-full flex-wrap">
+                <div className="flex items-stretch gap-2 w-full flex-wrap">
                   <Link
                     href="/miembros/perfil"
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-foreground text-background rounded-lg hover:bg-foreground/90 transition-colors text-xs md:text-sm min-w-[120px]"
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-3 md:px-4 py-2 bg-foreground text-background rounded-lg hover:bg-foreground/90 transition-colors text-xs md:text-sm min-w-[100px]"
                   >
                     <User className="w-4 h-4" />
                     <span className="hidden sm:inline">Editar </span>Perfil
                   </Link>
-                  <div className="flex-1 min-w-[160px]">
+                  <div className="flex-1 min-w-[100px]">
                     <NotificationPermissionButton
                       variant="outline"
                       size="default"
-                      className="w-full"
+                      className="w-full text-xs md:text-sm"
                     />
                   </div>
                   <button
                     onClick={handleLogout}
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-3 md:px-4 py-2 border border-border rounded-lg hover:bg-card transition-colors text-xs md:text-sm min-w-[100px]"
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-3 md:px-4 py-2 border border-border rounded-lg hover:bg-card transition-colors text-xs md:text-sm min-w-[80px]"
                   >
                     <LogOut className="w-4 h-4" />
                     Salir
