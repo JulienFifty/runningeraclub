@@ -9,14 +9,26 @@ interface PushSubscriptionState {
   isSubscribed: boolean;
   isLoading: boolean;
   permission: NotificationPermission | null;
+  isIOS?: boolean;
+  isStandalone?: boolean;
 }
 
 export function usePushNotifications() {
+  // Detectar si es iOS
+  const isIOS = typeof window !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
+  // Detectar si está instalado como PWA
+  const isStandalone = typeof window !== 'undefined' && 
+    (window.matchMedia('(display-mode: standalone)').matches || 
+     (window.navigator as any).standalone === true ||
+     document.referrer.includes('android-app://'));
+
   const [state, setState] = useState<PushSubscriptionState>({
     isSupported: false,
     isSubscribed: false,
     isLoading: true,
     permission: null,
+    isIOS,
+    isStandalone,
   });
 
   const supabase = createClient();
@@ -24,7 +36,26 @@ export function usePushNotifications() {
   // Verificar soporte y permisos
   useEffect(() => {
     const checkSupport = async () => {
-      if (typeof window === 'undefined' || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+      if (typeof window === 'undefined') {
+        setState(prev => ({ ...prev, isSupported: false, isLoading: false }));
+        return;
+      }
+
+      // En iOS, las notificaciones push solo funcionan si está instalado como PWA
+      if (isIOS && !isStandalone) {
+        // iOS requiere instalación como PWA para notificaciones push
+        setState(prev => ({ 
+          ...prev, 
+          isSupported: false, 
+          isLoading: false,
+          permission: Notification.permission,
+          isIOS,
+          isStandalone,
+        }));
+        return;
+      }
+
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
         setState(prev => ({ ...prev, isSupported: false, isLoading: false }));
         return;
       }
@@ -253,6 +284,8 @@ export function usePushNotifications() {
     ...state,
     subscribe,
     unsubscribe,
+    isIOS,
+    isStandalone,
   };
 }
 

@@ -17,8 +17,9 @@ export function NotificationPermissionButton({
   variant = 'outline',
   size = 'default',
 }: NotificationPermissionButtonProps) {
-  const { isSupported, isSubscribed, isLoading, subscribe, unsubscribe } = usePushNotifications();
+  const { isSupported, isSubscribed, isLoading, subscribe, unsubscribe, isIOS, isStandalone } = usePushNotifications();
   const [isToggling, setIsToggling] = useState(false);
+  const [showIOSInstructions, setShowIOSInstructions] = useState(false);
 
   // Debug: Log para verificar soporte (solo en desarrollo)
   useEffect(() => {
@@ -27,15 +28,55 @@ export function NotificationPermissionButton({
         isSupported,
         isLoading,
         isSubscribed,
+        isIOS,
+        isStandalone,
         hasServiceWorker: 'serviceWorker' in navigator,
         hasPushManager: 'PushManager' in window,
         notificationPermission: Notification.permission,
       });
     }
-  }, [isSupported, isLoading, isSubscribed]);
+  }, [isSupported, isLoading, isSubscribed, isIOS, isStandalone]);
 
   if (!isSupported) {
-    // En mobile, mostrar el botón pero deshabilitado para que se vea
+    // En iOS sin PWA, mostrar instrucciones
+    if (isIOS && !isStandalone) {
+      return (
+        <div className="relative">
+          <Button
+            variant={variant}
+            size={size}
+            className={cn('gap-2', className)}
+            onClick={() => setShowIOSInstructions(!showIOSInstructions)}
+            type="button"
+          >
+            <BellOff className="w-4 h-4" />
+            <span className="hidden sm:inline">Instalar App</span>
+            <span className="sm:hidden">Instalar</span>
+          </Button>
+          {showIOSInstructions && (
+            <div className="absolute z-50 mt-2 p-4 bg-card border border-border rounded-lg shadow-lg max-w-xs right-0">
+              <div className="space-y-2">
+                <h4 className="font-semibold text-sm text-foreground">Instalar App para Notificaciones</h4>
+                <ol className="text-xs text-muted-foreground space-y-1 list-decimal list-inside">
+                  <li>Abre en Safari (no Chrome)</li>
+                  <li>Toca el botón de compartir</li>
+                  <li>Selecciona "Añadir a pantalla de inicio"</li>
+                  <li>Abre la app desde tu pantalla de inicio</li>
+                </ol>
+                <button
+                  onClick={() => setShowIOSInstructions(false)}
+                  className="text-xs text-foreground underline mt-2"
+                >
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Otros casos, mostrar botón deshabilitado
     return (
       <Button
         variant={variant}
@@ -71,14 +112,15 @@ export function NotificationPermissionButton({
   };
 
   return (
-    <Button
-      onClick={handleToggle}
-      disabled={isToggling}
-      variant={variant}
-      size={size}
-      className={cn('gap-2', className)}
-      type="button"
-    >
+    <div className="relative">
+      <Button
+        onClick={handleToggle}
+        disabled={isToggling}
+        variant={variant}
+        size={size}
+        className={cn('gap-2', className)}
+        type="button"
+      >
       {isToggling ? (
         <>
           <Loader2 className="w-4 h-4 animate-spin" />
@@ -98,6 +140,7 @@ export function NotificationPermissionButton({
         </>
       )}
     </Button>
+    </div>
   );
 }
 
