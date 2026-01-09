@@ -55,6 +55,25 @@ export async function GET() {
           warning: 'La tabla push_notification_settings no existe. Por favor, ejecuta el script SQL en Supabase (supabase/quick-setup-push-notifications.sql).',
         }, { status: 200 }); // Retornar 200 con warning en lugar de error
       }
+      // Si es un error de permisos, retornar un error específico con instrucciones
+      if (settingsError.code === '42501' || settingsError.message?.includes('permission denied')) {
+        console.error('[Push Settings] Error de permisos al obtener configuración:', settingsError);
+        return NextResponse.json({
+          settings: [
+            { id: 'default-1', setting_key: 'new_event', enabled: true, description: 'Notificar cuando se crea un nuevo evento' },
+            { id: 'default-2', setting_key: 'payment_success', enabled: true, description: 'Notificar cuando se confirma un pago exitoso' },
+            { id: 'default-3', setting_key: 'event_nearly_full', enabled: true, description: 'Notificar cuando quedan pocos lugares disponibles (10 o menos)' },
+            { id: 'default-4', setting_key: 'free_event_registration', enabled: true, description: 'Notificar cuando se registra a un evento gratuito' },
+          ],
+          settingsMap: {
+            new_event: true,
+            payment_success: true,
+            event_nearly_full: true,
+            free_event_registration: true,
+          },
+          warning: 'Error de permisos en las políticas RLS. Por favor, ejecuta el script SQL actualizado (supabase/quick-setup-push-notifications.sql) para corregir las políticas.',
+        }, { status: 200 });
+      }
       // Para otros errores, retornar error 500
       console.error('[Push Settings] Error obteniendo configuración:', settingsError);
       return NextResponse.json(

@@ -48,17 +48,23 @@ ON CONFLICT (setting_key) DO NOTHING;
 -- Paso 7: Habilitar Row Level Security (RLS)
 ALTER TABLE push_notification_settings ENABLE ROW LEVEL SECURITY;
 
--- Paso 8: Eliminar políticas antiguas si existen (para evitar duplicados)
+-- Paso 8: Crear función helper para obtener email del usuario autenticado (si no existe)
+CREATE OR REPLACE FUNCTION auth_user_email()
+RETURNS TEXT AS $$
+  SELECT email FROM auth.users WHERE id = auth.uid();
+$$ LANGUAGE sql SECURITY DEFINER;
+
+-- Paso 9: Eliminar políticas antiguas si existen (para evitar duplicados)
 DROP POLICY IF EXISTS "Admins can view push notification settings" ON push_notification_settings;
 DROP POLICY IF EXISTS "Admins can update push notification settings" ON push_notification_settings;
 DROP POLICY IF EXISTS "Admins can insert push notification settings" ON push_notification_settings;
 
--- Paso 9: Crear políticas RLS para administradores
+-- Paso 10: Crear políticas RLS para administradores usando la función helper
 CREATE POLICY "Admins can view push notification settings" ON push_notification_settings
   FOR SELECT USING (
     EXISTS (
       SELECT 1 FROM admins
-      WHERE admins.email = (SELECT email FROM auth.users WHERE id = auth.uid())
+      WHERE admins.email = auth_user_email()
     )
   );
 
@@ -66,7 +72,7 @@ CREATE POLICY "Admins can update push notification settings" ON push_notificatio
   FOR UPDATE USING (
     EXISTS (
       SELECT 1 FROM admins
-      WHERE admins.email = (SELECT email FROM auth.users WHERE id = auth.uid())
+      WHERE admins.email = auth_user_email()
     )
   );
 
@@ -74,11 +80,11 @@ CREATE POLICY "Admins can insert push notification settings" ON push_notificatio
   FOR INSERT WITH CHECK (
     EXISTS (
       SELECT 1 FROM admins
-      WHERE admins.email = (SELECT email FROM auth.users WHERE id = auth.uid())
+      WHERE admins.email = auth_user_email()
     )
   );
 
--- Paso 10: Verificar que todo se creó correctamente
+-- Paso 11: Verificar que todo se creó correctamente
 SELECT 
   setting_key, 
   enabled, 

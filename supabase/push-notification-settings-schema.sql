@@ -39,15 +39,26 @@ WHERE NOT EXISTS (
   SELECT 1 FROM push_notification_settings WHERE push_notification_settings.setting_key = v.setting_key
 );
 
+-- Crear función helper para obtener email del usuario autenticado (si no existe)
+CREATE OR REPLACE FUNCTION auth_user_email()
+RETURNS TEXT AS $$
+  SELECT email FROM auth.users WHERE id = auth.uid();
+$$ LANGUAGE sql SECURITY DEFINER;
+
 -- Habilitar Row Level Security (RLS)
 ALTER TABLE push_notification_settings ENABLE ROW LEVEL SECURITY;
 
--- Política: Solo administradores pueden ver y editar configuración
+-- Eliminar políticas antiguas si existen (para evitar duplicados)
+DROP POLICY IF EXISTS "Admins can view push notification settings" ON push_notification_settings;
+DROP POLICY IF EXISTS "Admins can update push notification settings" ON push_notification_settings;
+DROP POLICY IF EXISTS "Admins can insert push notification settings" ON push_notification_settings;
+
+-- Política: Solo administradores pueden ver y editar configuración usando la función helper
 CREATE POLICY "Admins can view push notification settings" ON push_notification_settings
   FOR SELECT USING (
     EXISTS (
       SELECT 1 FROM admins
-      WHERE admins.email = (SELECT email FROM auth.users WHERE id = auth.uid())
+      WHERE admins.email = auth_user_email()
     )
   );
 
@@ -55,7 +66,7 @@ CREATE POLICY "Admins can update push notification settings" ON push_notificatio
   FOR UPDATE USING (
     EXISTS (
       SELECT 1 FROM admins
-      WHERE admins.email = (SELECT email FROM auth.users WHERE id = auth.uid())
+      WHERE admins.email = auth_user_email()
     )
   );
 
@@ -63,7 +74,7 @@ CREATE POLICY "Admins can insert push notification settings" ON push_notificatio
   FOR INSERT WITH CHECK (
     EXISTS (
       SELECT 1 FROM admins
-      WHERE admins.email = (SELECT email FROM auth.users WHERE id = auth.uid())
+      WHERE admins.email = auth_user_email()
     )
   );
 
