@@ -287,6 +287,18 @@ export async function POST(request: Request) {
         );
       }
 
+      // Enviar notificación push al usuario cuando se registra a un evento gratuito
+      try {
+        const { notifyPaymentSuccess } = await import('@/lib/push-notifications');
+        await notifyPaymentSuccess(user.id, {
+          title: event.title,
+          slug: event.slug,
+        });
+      } catch (pushError) {
+        // No fallar el registro si falla la notificación
+        console.error('[Register Event] Error enviando notificación push:', pushError);
+      }
+
       return NextResponse.json({
         success: true,
         requires_payment: false,
