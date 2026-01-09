@@ -371,13 +371,14 @@ export default async function EventPage({ params }: PageProps) {
       <WhatsAppButton />
       
       {/* Botón de registro fijo en mobile */}
-      <div className="fixed bottom-0 left-0 right-0 md:hidden z-50 bg-background border-t border-border p-4 shadow-lg">
+      <div className="fixed bottom-0 left-0 right-0 md:hidden z-50 bg-background border-t border-border p-4 shadow-lg space-y-3">
         <EventRegistrationButtonWrapper 
           eventId={event.id} 
           eventSlug={event.slug} 
           buttonText={event.buttonText} 
           eventTitle={event.title} 
-          eventPrice={event.price} 
+          eventPrice={event.price}
+          maxParticipants={event.maxParticipants}
         />
       </div>
     </main>
