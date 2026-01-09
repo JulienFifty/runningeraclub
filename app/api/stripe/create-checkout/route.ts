@@ -65,9 +65,24 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Verificar si queda solo 1 cupo
-      if (totalRegistered === event.max_participants - 1) {
-        console.log('⚠️ Último cupo disponible para evento:', event_id);
+      // Verificar si quedan pocos lugares (10 o menos) y enviar notificación
+      const spotsRemaining = event.max_participants - totalRegistered;
+      if (spotsRemaining > 0 && spotsRemaining <= 10) {
+        console.log(`⚠️ Quedan ${spotsRemaining} lugares disponibles para evento:`, event_id);
+        
+        // Enviar notificación push a todos los usuarios cuando quedan pocos lugares
+        try {
+          const { notifyEventNearlyFull } = await import('@/lib/push-notifications');
+          await notifyEventNearlyFull({
+            id: event.id,
+            slug: event.slug,
+            title: event.title,
+            spotsRemaining: spotsRemaining,
+          });
+        } catch (pushError) {
+          // No fallar el checkout si falla la notificación
+          console.error('[Create Checkout] Error enviando notificación push:', pushError);
+        }
       }
     }
 

@@ -137,6 +137,27 @@ export async function POST(request: NextRequest) {
               console.error('❌ Error updating event registration:', updateError);
             } else {
               console.log('✅ Event registration updated successfully:', updateData);
+              
+              // Enviar notificación push al usuario cuando se confirma el pago
+              try {
+                // Obtener información del evento
+                const { data: eventData } = await supabase
+                  .from('events')
+                  .select('title, slug')
+                  .eq('id', event_id)
+                  .single();
+
+                if (eventData) {
+                  const { notifyPaymentSuccess } = await import('@/lib/push-notifications');
+                  await notifyPaymentSuccess(member_id, {
+                    title: eventData.title,
+                    slug: eventData.slug,
+                  });
+                }
+              } catch (pushError) {
+                // No fallar el webhook si falla la notificación
+                console.error('[Webhook] Error enviando notificación push:', pushError);
+              }
             }
           } else {
             // Si no existe, crearlo (fallback)
@@ -175,6 +196,27 @@ export async function POST(request: NextRequest) {
                 console.error('❌ Error creating event registration:', createError);
               } else {
                 console.log('✅ Event registration created successfully:', newRegistration);
+                
+                // Enviar notificación push al usuario cuando se confirma el pago
+                try {
+                  // Obtener información del evento
+                  const { data: eventData } = await supabase
+                    .from('events')
+                    .select('title, slug')
+                    .eq('id', event_id)
+                    .single();
+
+                  if (eventData) {
+                    const { notifyPaymentSuccess } = await import('@/lib/push-notifications');
+                    await notifyPaymentSuccess(member_id, {
+                      title: eventData.title,
+                      slug: eventData.slug,
+                    });
+                  }
+                } catch (pushError) {
+                  // No fallar el webhook si falla la notificación
+                  console.error('[Webhook] Error enviando notificación push:', pushError);
+                }
               }
             }
           }
@@ -276,6 +318,27 @@ export async function POST(request: NextRequest) {
                     console.error('❌ Error updating registration:', updateError);
                   } else {
                     console.log('✅ Registration updated successfully:', existingReg.id);
+                    
+                    // Enviar notificación push al usuario cuando se confirma el pago
+                    try {
+                      // Obtener información del evento
+                      const { data: eventData } = await supabase
+                        .from('events')
+                        .select('title, slug')
+                        .eq('id', metadata.event_id)
+                        .single();
+
+                      if (eventData) {
+                        const { notifyPaymentSuccess } = await import('@/lib/push-notifications');
+                        await notifyPaymentSuccess(metadata.member_id, {
+                          title: eventData.title,
+                          slug: eventData.slug,
+                        });
+                      }
+                    } catch (pushError) {
+                      // No fallar el webhook si falla la notificación
+                      console.error('[Webhook] Error enviando notificación push:', pushError);
+                    }
                   }
                 } else {
                   // Crear registro si no existe
@@ -412,6 +475,27 @@ export async function POST(request: NextRequest) {
               })
               .eq('member_id', member_id)
               .eq('event_id', event_id);
+            
+            // Enviar notificación push al usuario cuando se confirma el pago asíncrono
+            try {
+              // Obtener información del evento
+              const { data: eventData } = await supabase
+                .from('events')
+                .select('title, slug')
+                .eq('id', event_id)
+                .single();
+
+              if (eventData) {
+                const { notifyPaymentSuccess } = await import('@/lib/push-notifications');
+                await notifyPaymentSuccess(member_id, {
+                  title: eventData.title,
+                  slug: eventData.slug,
+                });
+              }
+            } catch (pushError) {
+              // No fallar el webhook si falla la notificación
+              console.error('[Webhook] Error enviando notificación push:', pushError);
+            }
           }
         }
         break;

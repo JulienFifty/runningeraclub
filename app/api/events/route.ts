@@ -39,6 +39,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // Enviar notificación push automática a todos los usuarios
+    try {
+      const { notifyNewEvent } = await import('@/lib/push-notifications');
+      await notifyNewEvent({
+        id: data.id,
+        slug: data.slug,
+        title: data.title,
+        date: data.date,
+        location: data.location,
+      });
+    } catch (pushError) {
+      // No fallar la creación del evento si falla la notificación
+      console.error('[Events API] Error enviando notificación push:', pushError);
+    }
+
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
     return NextResponse.json(
