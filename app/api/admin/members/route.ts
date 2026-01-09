@@ -3,7 +3,7 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const supabase = createSupabaseClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,61 +16,59 @@ export async function GET() {
       }
     );
 
-    // Obtener todos los miembros sin límite
-    let allMembers: any[] = [];
-    let from = 0;
-    const pageSize = 1000;
-    let hasMore = true;
+    // Obtener parámetros de búsqueda
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get('email');
 
-    while (hasMore) {
-      const { data, error } = await supabase
-        .from('members')
-        .select(`
-          id,
-          email,
-          full_name,
-          phone,
-          instagram,
-          membership_type,
-          membership_status,
-          created_at
-        `)
-        .order('created_at', { ascending: false })
-        .range(from, from + pageSize - 1);
+    let query = supabase
+      .from('members')
+      .select(`
+        id,
+        email,
+        full_name,
+        phone,
+        instagram,
+        membership_type,
+        membership_status,
+        created_at
+      `);
 
-      if (error) {
-        console.error('Error fetching members:', error);
-        return NextResponse.json(
-          { error: 'Error al obtener miembros', details: error.message },
-          { status: 500 }
-        );
-      }
-
-      if (data && data.length > 0) {
-        allMembers = [...allMembers, ...data];
-        from += pageSize;
-        hasMore = data.length === pageSize;
-      } else {
-        hasMore = false;
-      }
+    // Si se proporciona un email, filtrar por él
+    if (email) {
+      query = query.ilike('email', `%${email}%`).limit(10);
+    } else {
+      query = query.order('created_at', { ascending: false }).limit(100);
     }
 
-    // Obtener conteo de registros para cada miembro
-    const membersWithCounts = await Promise.all(
-      allMembers.map(async (member) => {
-        const { count } = await supabase
-          .from('event_registrations')
-          .select('*', { count: 'exact', head: true })
-          .eq('member_id', member.id);
+    const { data: members, error } = await query;
 
-        return {
-          ...member,
-          _count: {
-            registrations: count || 0,
-          },
-        };
-      })
-    );
+    if (error) {
+      console.error('Error fetching members:', error);
+      return NextResponse.json(
+        { error: 'Error al obtener miembros', details: error.message },
+        { status: 500 }
+      );
+    }
+
+    // Si no hay filtro por email, obtener conteo de registros para cada miembro
+    let membersWithCounts = members || [];
+    if (!email) {
+      membersWithCounts = await Promise.all(
+        (members || []).map(async (member) => {
+          const { count } = await supabase
+            .from('event_registrations')
+            .select('*', { count: 'exact', head: true })
+            .eq('member_id', member.id);
+
+          return {
+            ...member,
+            _count: {
+              registrations: count || 0,
+            },
+          };
+        })
+      );
+    }
 
     return NextResponse.json({
       members: membersWithCounts,

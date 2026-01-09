@@ -45,10 +45,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = await request.json();
-    const { title, body, url, icon, tag, user_id, all_users } = body;
+    const requestBody = await request.json();
+    const { title, body: messageBody, url, icon, tag, user_id, all_users } = requestBody;
 
-    if (!title || !body) {
+    if (!title || !messageBody) {
       return NextResponse.json(
         { error: 'Título y cuerpo son requeridos' },
         { status: 400 }
@@ -88,32 +88,21 @@ export async function POST(request: Request) {
     // Preparar payload
     const payload = JSON.stringify({
       title,
-      body,
+      body: messageBody,
       url: url || '/miembros/dashboard',
       icon: icon || '/assets/logo-running-era.png',
       tag: tag || 'notification',
     });
 
-    // Función para convertir base64url a Buffer
-    const base64UrlToBuffer = (base64url: string): Buffer => {
-      // Convertir base64url a base64
-      let base64 = base64url.replace(/-/g, '+').replace(/_/g, '/');
-      // Agregar padding si es necesario
-      while (base64.length % 4) {
-        base64 += '=';
-      }
-      return Buffer.from(base64, 'base64');
-    };
-
     // Enviar notificaciones
     const sendPromises = subscriptions.map(async (sub) => {
       try {
-        // Convertir keys de base64url a Buffer
+        // web-push espera las keys como strings (base64url)
         const subscription = {
           endpoint: sub.endpoint,
           keys: {
-            p256dh: base64UrlToBuffer(sub.keys.p256dh),
-            auth: base64UrlToBuffer(sub.keys.auth),
+            p256dh: sub.keys.p256dh,
+            auth: sub.keys.auth,
           },
         };
 

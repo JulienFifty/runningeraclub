@@ -9,13 +9,13 @@ import { cn } from '@/lib/utils';
 interface NotificationPermissionButtonProps {
   className?: string;
   variant?: 'default' | 'outline' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'default' | 'lg' | 'icon';
 }
 
 export function NotificationPermissionButton({
   className,
   variant = 'outline',
-  size = 'md',
+  size = 'default',
 }: NotificationPermissionButtonProps) {
   const { isSupported, isSubscribed, isLoading, subscribe, unsubscribe } = usePushNotifications();
   const [isToggling, setIsToggling] = useState(false);

@@ -3,6 +3,8 @@
  * Esta función puede ser llamada desde cualquier lugar del servidor
  */
 
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+
 interface SendPushNotificationOptions {
   title: string;
   body: string;
@@ -14,11 +16,59 @@ interface SendPushNotificationOptions {
 }
 
 /**
+ * Verifica si una notificación automática está habilitada
+ * @param settingKey - Clave de la configuración (ej: 'new_event', 'payment_success')
+ * @returns true si está habilitada, false si no
+ */
+async function isNotificationEnabled(settingKey: string): Promise<boolean> {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      return false;
+    }
+
+    const supabase = supabaseServiceKey
+      ? createSupabaseClient(supabaseUrl, supabaseServiceKey, {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false,
+          },
+        })
+      : createSupabaseClient(supabaseUrl, supabaseAnonKey);
+
+    const { data: setting, error } = await supabase
+      .from('push_notification_settings')
+      .select('enabled')
+      .eq('setting_key', settingKey)
+      .single();
+
+    if (error || !setting) {
+      // Si no existe la configuración, permitir por defecto
+      console.warn(`[Push Notifications] Configuración no encontrada para ${settingKey}, permitiendo por defecto`);
+      return true;
+    }
+
+    return setting.enabled;
+  } catch (error) {
+    console.error(`[Push Notifications] Error verificando configuración para ${settingKey}:`, error);
+    // En caso de error, permitir por defecto para no bloquear
+    return true;
+  }
+}
+
+/**
  * Envía una notificación push a un usuario específico o a todos los usuarios
  * @param options - Opciones de la notificación
+ * @param skipConfigCheck - Si es true, no verifica la configuración (útil para notificaciones manuales)
  * @returns Promise con el resultado del envío
  */
-export async function sendPushNotification(options: SendPushNotificationOptions): Promise<{
+export async function sendPushNotification(
+  options: SendPushNotificationOptions,
+  skipConfigCheck: boolean = false
+): Promise<{
   success: boolean;
   sent?: number;
   failed?: number;
@@ -39,9 +89,16 @@ export async function sendPushNotification(options: SendPushNotificationOptions)
     }
 
     // Construir la URL base de la API
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}` 
-      : 'http://localhost:3000';
+    // En el servidor, usar URL absoluta
+    const isServer = typeof window === 'undefined';
+    let baseUrl: string;
+    
+    if (isServer) {
+      baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
+                (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+    } else {
+      baseUrl = window.location.origin;
+    }
 
     // Llamar a la API de envío de notificaciones
     const response = await fetch(`${baseUrl}/api/push/send`, {
@@ -92,13 +149,20 @@ export async function notifyNewEvent(event: {
   location?: string;
 }): Promise<void> {
   try {
+    // Verificar si la notificación está habilitada
+    const enabled = await isNotificationEnabled('new_event');
+    if (!enabled) {
+      console.log(`[Push Notifications] Notificación de nuevo evento deshabilitada: ${event.title}`);
+      return;
+    }
+
     await sendPushNotification({
       title: '🎉 ¡Nuevo evento disponible!',
       body: `${event.title} - ${event.date}`,
       url: `/eventos/${event.slug}`,
       tag: `event-${event.id}`,
       all_users: true,
-    });
+    }, true); // skipConfigCheck porque ya verificamos arriba
     console.log(`[Push Notifications] Notificación de nuevo evento enviada: ${event.title}`);
   } catch (error) {
     console.error('[Push Notifications] Error al notificar nuevo evento:', error);
@@ -113,13 +177,20 @@ export async function notifyPaymentSuccess(userId: string, event: {
   slug: string;
 }): Promise<void> {
   try {
+    // Verificar si la notificación está habilitada
+    const enabled = await isNotificationEnabled('payment_success');
+    if (!enabled) {
+      console.log(`[Push Notifications] Notificación de pago confirmado deshabilitada para usuario: ${userId}`);
+      return;
+    }
+
     await sendPushNotification({
       title: '✅ Pago confirmado',
       body: `Tu registro a "${event.title}" ha sido confirmado exitosamente`,
       url: `/miembros/dashboard`,
       tag: `payment-success-${userId}`,
       user_id: userId,
-    });
+    }, true); // skipConfigCheck porque ya verificamos arriba
     console.log(`[Push Notifications] Notificación de pago confirmado enviada al usuario: ${userId}`);
   } catch (error) {
     console.error('[Push Notifications] Error al notificar pago confirmado:', error);
@@ -136,13 +207,20 @@ export async function notifyEventNearlyFull(event: {
   spotsRemaining: number;
 }): Promise<void> {
   try {
+    // Verificar si la notificación está habilitada
+    const enabled = await isNotificationEnabled('event_nearly_full');
+    if (!enabled) {
+      console.log(`[Push Notifications] Notificación de evento casi lleno deshabilitada: ${event.title}`);
+      return;
+    }
+
     await sendPushNotification({
       title: '⚠️ Quedan pocos lugares',
       body: `Solo quedan ${event.spotsRemaining} lugares disponibles para "${event.title}"`,
       url: `/eventos/${event.slug}`,
       tag: `event-nearly-full-${event.id}`,
       all_users: true,
-    });
+    }, true); // skipConfigCheck porque ya verificamos arriba
     console.log(`[Push Notifications] Notificación de evento casi lleno enviada: ${event.title}`);
   } catch (error) {
     console.error('[Push Notifications] Error al notificar evento casi lleno:', error);
@@ -169,6 +247,34 @@ export async function notifyEventReminder(userId: string, event: {
     console.log(`[Push Notifications] Recordatorio de evento enviado al usuario: ${userId}`);
   } catch (error) {
     console.error('[Push Notifications] Error al enviar recordatorio:', error);
+  }
+}
+
+/**
+ * Notifica cuando se registra a un evento gratuito
+ */
+export async function notifyFreeEventRegistration(userId: string, event: {
+  title: string;
+  slug: string;
+}): Promise<void> {
+  try {
+    // Verificar si la notificación está habilitada
+    const enabled = await isNotificationEnabled('free_event_registration');
+    if (!enabled) {
+      console.log(`[Push Notifications] Notificación de registro gratuito deshabilitada para usuario: ${userId}`);
+      return;
+    }
+
+    await sendPushNotification({
+      title: '✅ Registro confirmado',
+      body: `Tu registro a "${event.title}" ha sido confirmado exitosamente`,
+      url: `/miembros/dashboard`,
+      tag: `free-registration-${userId}`,
+      user_id: userId,
+    }, true); // skipConfigCheck porque ya verificamos arriba
+    console.log(`[Push Notifications] Notificación de registro gratuito enviada al usuario: ${userId}`);
+  } catch (error) {
+    console.error('[Push Notifications] Error al notificar registro gratuito:', error);
   }
 }
 

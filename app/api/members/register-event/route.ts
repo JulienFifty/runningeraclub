@@ -289,8 +289,8 @@ export async function POST(request: Request) {
 
       // Enviar notificación push al usuario cuando se registra a un evento gratuito
       try {
-        const { notifyPaymentSuccess } = await import('@/lib/push-notifications');
-        await notifyPaymentSuccess(user.id, {
+        const { notifyFreeEventRegistration } = await import('@/lib/push-notifications');
+        await notifyFreeEventRegistration(user.id, {
           title: event.title,
           slug: event.slug,
         });

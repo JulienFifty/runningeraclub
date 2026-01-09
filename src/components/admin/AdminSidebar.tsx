@@ -12,6 +12,7 @@ import {
   LogOut,
   LayoutDashboard,
   MessageSquare,
+  Bell,
   X
 } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
@@ -62,6 +63,12 @@ const menuItems = [
     icon: MessageSquare,
     label: 'Reseñas',
     description: 'Moderar reseñas',
+  },
+  {
+    href: '/admin/notificaciones',
+    icon: Bell,
+    label: 'Notificaciones',
+    description: 'Gestionar notificaciones',
   },
 ];
 
