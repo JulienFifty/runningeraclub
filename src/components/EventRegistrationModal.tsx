@@ -110,44 +110,29 @@ export function EventRegistrationModal({
 
     try {
       if (requiresPayment) {
-        // Primero crear el attendee
-        const response = await fetch('/api/attendees', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            name: guestForm.name,
-            email: guestForm.email || null,
-            phone: guestForm.phone || null,
-            event_id: eventId,
-            tickets: 1,
-          }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          toast.error('Error al registrarse', {
-            description: data.error || 'No se pudo completar el registro',
-          });
-          setLoading(false);
-          return;
-        }
-
-        // Crear sesión de pago de Stripe
+        // NO crear el attendee todavía - solo crear la sesión de checkout
+        // El attendee se creará cuando el pago se complete (en el webhook)
+        // Esto evita que aparezcan registros sin pago en el check-in
+        
+        // Crear sesión de pago de Stripe directamente
+        // Pasar los datos del invitado en los metadata para que el webhook los use
         const checkoutResponse = await fetch('/api/stripe/create-checkout', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-        body: JSON.stringify({
-          event_id: eventId,
-          attendee_id: data.attendee.id,
-          is_guest: true,
-          coupon_code: guestForm.coupon || undefined,
-        }),
-      });
+          body: JSON.stringify({
+            event_id: eventId,
+            is_guest: true,
+            coupon_code: guestForm.coupon || undefined,
+            // Pasar datos del invitado para que el webhook los use al crear el attendee
+            guest_data: {
+              name: guestForm.name,
+              email: guestForm.email || null,
+              phone: guestForm.phone || null,
+            },
+          }),
+        });
 
         const checkoutData = await checkoutResponse.json();
 
@@ -160,6 +145,7 @@ export function EventRegistrationModal({
         }
 
         // Redirigir a Stripe Checkout
+        // El attendee se creará automáticamente en el webhook cuando el pago se complete
         if (checkoutData.url) {
           window.location.href = checkoutData.url;
         }

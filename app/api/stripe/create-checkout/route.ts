@@ -12,7 +12,8 @@ export async function POST(request: NextRequest) {
       is_guest, 
       coupon_code,
       user_email,
-      user_metadata
+      user_metadata,
+      guest_data // Datos del invitado para pago rápido sin cuenta
     } = await request.json();
 
     if (!event_id) {
@@ -327,6 +328,10 @@ export async function POST(request: NextRequest) {
         is_guest: is_guest ? 'true' : 'false',
         coupon_code: couponData ? couponData.code : '',
         discount_amount: discountAmount ? (discountAmount / 100).toString() : '0',
+        // Pasar datos del invitado en metadata si existe (para pago rápido sin cuenta)
+        guest_name: guest_data?.name || '',
+        guest_email: guest_data?.email || '',
+        guest_phone: guest_data?.phone || '',
       },
     };
 

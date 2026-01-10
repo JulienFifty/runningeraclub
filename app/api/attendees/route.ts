@@ -122,9 +122,12 @@ export async function GET(request: Request) {
     const eventId = searchParams.get('event_id');
 
     // Obtener attendees de la tabla attendees
+    // SOLO mostrar los que tienen payment_status = 'paid' (pagos completados)
+    // O los que son registros manuales (staff, cortesía) que ya tienen payment_status = 'paid'
     let attendeesQuery = supabase
       .from('attendees')
       .select('*')
+      .eq('payment_status', 'paid') // SOLO pagos completados
       .order('created_at', { ascending: false });
 
     if (eventId) {

@@ -49,13 +49,28 @@ export async function POST(request: NextRequest) {
       switch (event.type) {
       // ✅ EVENTO PRINCIPAL: Cuando el checkout se completa exitosamente
       case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session;
+        let session = event.data.object as Stripe.Checkout.Session;
+        
+        // Si no tenemos customer_details, hacer un retrieve para obtenerlos
+        if (!session.customer_details && session.id) {
+          try {
+            const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
+              expand: ['customer', 'customer_details'],
+            });
+            session = fullSession as Stripe.Checkout.Session;
+          } catch (retrieveError) {
+            console.error('⚠️ Error retrieving full session details:', retrieveError);
+            // Continuar con la sesión original
+          }
+        }
         
         console.log('✅ Checkout session completed:', {
           session_id: session.id,
           payment_status: session.payment_status,
           payment_intent: session.payment_intent,
           metadata: session.metadata,
+          customer_email: session.customer_details?.email || session.customer_email,
+          customer_name: session.customer_details?.name,
         });
 
         // Actualizar transacción
@@ -80,28 +95,82 @@ export async function POST(request: NextRequest) {
           break;
         }
 
-        const { event_id, member_id, attendee_id, is_guest } = metadata;
-        console.log('📋 Webhook metadata:', { event_id, member_id, attendee_id, is_guest });
+        const { event_id, member_id, attendee_id, is_guest, guest_name, guest_email, guest_phone } = metadata;
+        console.log('📋 Webhook metadata:', { event_id, member_id, attendee_id, is_guest, guest_name, guest_email });
 
-        if (is_guest === 'true' && attendee_id) {
-          // Actualizar attendee
-          const { data: updateData, error: updateError } = await supabase
-            .from('attendees')
-            .update({
-              payment_status: 'paid',
-              stripe_session_id: session.id,
-              stripe_payment_intent_id: session.payment_intent as string,
-              amount_paid: session.amount_total ? session.amount_total / 100 : 0,
-              currency: session.currency || 'mxn',
-              payment_method: session.payment_method_types?.[0] || 'card',
-            })
-            .eq('id', attendee_id)
-            .select();
+        if (is_guest === 'true') {
+          // Para pago rápido sin cuenta: crear o actualizar attendee cuando el pago se complete
+          if (attendee_id) {
+            // Si ya existe attendee_id (registro manual previo), actualizar
+            const { data: updateData, error: updateError } = await supabase
+              .from('attendees')
+              .update({
+                payment_status: 'paid',
+                stripe_session_id: session.id,
+                stripe_payment_intent_id: session.payment_intent as string,
+                amount_paid: session.amount_total ? session.amount_total / 100 : 0,
+                currency: session.currency || 'mxn',
+                payment_method: session.payment_method_types?.[0] || 'card',
+              })
+              .eq('id', attendee_id)
+              .select();
 
-          if (updateError) {
-            console.error('❌ Error updating attendee:', updateError);
+            if (updateError) {
+              console.error('❌ Error updating attendee:', updateError);
+            } else {
+              console.log('✅ Attendee updated successfully:', updateData);
+            }
           } else {
-            console.log('✅ Attendee updated successfully:', updateData);
+            // Si es pago rápido sin cuenta (no existe attendee_id), crear el attendee ahora que el pago está completo
+            // Obtener email del customer de Stripe (prioridad: metadata > customer_details > customer_email)
+            const customerEmail = guest_email || session.customer_details?.email || (session as any).customer_email || null;
+            const customerName = guest_name || session.customer_details?.name || 'Invitado';
+            
+            // IMPORTANTE: Solo crear si el pago está realmente completado
+            if (session.payment_status !== 'paid') {
+              console.warn('⚠️ Payment status is not "paid", skipping attendee creation:', session.payment_status);
+              break;
+            }
+            
+            // Solo crear si tenemos al menos un nombre
+            if (!customerName && !customerEmail) {
+              console.warn('⚠️ No se puede crear attendee: faltan nombre y email del customer');
+              break;
+            }
+            
+            console.log('🆕 Creating attendee for guest checkout:', { 
+              guest_name: customerName, 
+              guest_email: customerEmail, 
+              event_id,
+              session_id: session.id,
+              payment_status: session.payment_status
+            });
+            
+            const { data: newAttendee, error: createError } = await supabase
+              .from('attendees')
+              .insert({
+                event_id: event_id,
+                name: customerName || 'Invitado',
+                email: customerEmail,
+                phone: guest_phone || null,
+                tickets: 1,
+                status: 'registered',
+                payment_status: 'paid', // IMPORTANTE: solo crear cuando el pago está completo
+                stripe_session_id: session.id,
+                stripe_payment_intent_id: session.payment_intent as string,
+                amount_paid: session.amount_total ? session.amount_total / 100 : 0,
+                currency: session.currency || 'mxn',
+                payment_method: session.payment_method_types?.[0] || 'card',
+                notes: 'Registro rápido sin cuenta - Pago completado',
+              })
+              .select()
+              .single();
+
+            if (createError) {
+              console.error('❌ Error creating attendee for guest checkout:', createError);
+            } else {
+              console.log('✅ Attendee created successfully for guest checkout:', newAttendee);
+            }
           }
         } else if (member_id && event_id) {
           // Primero intentar actualizar el registro existente

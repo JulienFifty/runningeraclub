@@ -33,6 +33,39 @@ export default function AdminCheckIn() {
     checkAdminAuth();
   }, [router]);
 
+  // Registrar visita a la página de check-in cuando se carga y hay un evento seleccionado
+  useEffect(() => {
+    if (isAdmin && selectedEventId) {
+      // Solo registrar una vez por sesión/evento para evitar spam
+      const visitKey = `checkin_visit_${selectedEventId}`;
+      const lastVisit = sessionStorage.getItem(visitKey);
+      
+      if (!lastVisit) {
+        // Marcar como visitado en esta sesión
+        sessionStorage.setItem(visitKey, Date.now().toString());
+        trackCheckInVisit(selectedEventId);
+      }
+    }
+  }, [isAdmin, selectedEventId]);
+
+  const trackCheckInVisit = async (eventId: string) => {
+    try {
+      // Llamar al endpoint para registrar la visita
+      await fetch('/api/admin/track-checkin-visit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          event_id: eventId,
+        }),
+      });
+    } catch (error) {
+      console.error('Error tracking check-in visit:', error);
+      // No mostrar error al usuario, es solo tracking
+    }
+  };
+
   const checkAdminAuth = async () => {
     try {
       // 1. Verificar autenticación de Supabase

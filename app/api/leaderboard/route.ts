@@ -1,9 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    // Usar service role key para bypass RLS y obtener datos públicos del leaderboard
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      return NextResponse.json(
+        { error: 'Configuración de Supabase incompleta' },
+        { status: 500 }
+      );
+    }
+
+    // Usar service role key si está disponible (bypass RLS)
+    const supabase = supabaseServiceKey
+      ? createSupabaseClient(supabaseUrl, supabaseServiceKey, {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false,
+          },
+        })
+      : createSupabaseClient(supabaseUrl, supabaseAnonKey);
+
     const { searchParams } = request.nextUrl;
     const period = searchParams.get('period') || 'alltime'; // alltime, year, month
 
