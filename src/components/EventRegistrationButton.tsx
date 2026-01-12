@@ -42,15 +42,18 @@ export function EventRegistrationButton({ eventId, eventSlug, buttonText, eventT
       return null;
     }
 
-    // Mostrar siempre la información de lugares disponibles
+    // Solo mostrar cuando queden 5 lugares o menos
+    if (spotsRemaining > 5) {
+      return null;
+    }
+
+    // Mostrar la información de lugares disponibles solo cuando quedan 5 o menos
     return (
       <div className="mt-3 text-center">
         <p className="text-xs text-muted-foreground">
           {spotsRemaining === 1 
             ? '⚠️ Solo queda 1 lugar disponible' 
-            : spotsRemaining <= 10
-            ? `⚠️ Solo quedan ${spotsRemaining} lugares disponibles`
-            : `${spotsRemaining} lugares disponibles`}
+            : `⚠️ Solo quedan ${spotsRemaining} lugares disponibles`}
         </p>
       </div>
     );
