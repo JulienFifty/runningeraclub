@@ -34,11 +34,32 @@ export async function GET() {
     today.setMinutes(0, 0, 0);
     today.setSeconds(0, 0);
 
-    // Obtener todos los eventos (porque la columna date es TEXT y puede tener diferentes formatos)
-    const { data: allEvents, error: eventsError } = await supabase
+    // Obtener todos los eventos activos (no archivados) (porque la columna date es TEXT y puede tener diferentes formatos)
+    let { data: allEvents, error: eventsError } = await supabase
       .from('events')
-      .select('id, slug, title, date, max_participants')
+      .select('id, slug, title, date, max_participants, archived')
+      .eq('archived', false) // Solo eventos no archivados
       .order('date', { ascending: true });
+
+    // Si hay error por campo archived no existente, intentar sin filtro
+    if (eventsError && (eventsError.message?.includes('archived') || eventsError.code === '42703' || eventsError.code === 'PGRST116')) {
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from('events')
+        .select('id, slug, title, date, max_participants, archived')
+        .order('date', { ascending: true });
+      
+      if (fallbackError) {
+        console.error('Error fetching events:', fallbackError);
+        return NextResponse.json(
+          { error: 'Error al obtener eventos', details: fallbackError.message },
+          { status: 500 }
+        );
+      }
+      
+      // Filtrar eventos archivados en JavaScript
+      allEvents = (fallbackData || []).filter((e: any) => e.archived !== true);
+      eventsError = null;
+    }
 
     if (eventsError) {
       console.error('Error fetching events:', eventsError);

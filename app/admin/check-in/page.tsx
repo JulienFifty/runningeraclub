@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Calendar, Upload } from 'lucide-react';
+import { ArrowLeft, Calendar, Upload, Archive, ArchiveRestore } from 'lucide-react';
+import { formatEventDate } from '@/lib/date-utils';
 import { ImportAttendeesModal } from '@/components/admin/ImportAttendeesModal';
 import { CheckinDashboard } from '@/components/admin/CheckinDashboard';
 import { createClient } from '@/lib/supabase/client';
@@ -17,6 +18,7 @@ interface Event {
   title: string;
   date: string;
   slug: string;
+  archived?: boolean;
 }
 
 export default function AdminCheckIn() {
@@ -24,7 +26,9 @@ export default function AdminCheckIn() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [events, setEvents] = useState<Event[]>([]);
+  const [archivedEvents, setArchivedEvents] = useState<Event[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<string>('');
+  const [showArchived, setShowArchived] = useState<boolean>(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const supabase = createClient();
@@ -103,17 +107,30 @@ export default function AdminCheckIn() {
 
   const loadEvents = async () => {
     try {
-      const { data, error } = await supabase
+      // Cargar todos los eventos y separar en JavaScript
+      // Esto maneja el caso donde el campo archived no existe todavía
+      const { data: allData, error: allError } = await supabase
         .from('events')
-        .select('id, title, date, slug')
+        .select('id, title, date, slug, archived')
         .order('date', { ascending: false });
 
-      if (error) {
-        console.error('Error loading events:', error);
+      if (allError) {
+        console.error('Error loading events:', allError);
         return;
       }
 
-      setEvents(data || []);
+      // Separar activos y archivados
+      // Si archived no existe, asumir false (evento activo)
+      const allEvents = (allData || []).map(e => ({
+        ...e,
+        archived: e.archived === true
+      }));
+
+      const active = allEvents.filter(e => !e.archived);
+      const archived = allEvents.filter(e => e.archived);
+
+      setEvents(active);
+      setArchivedEvents(archived);
     } catch (error) {
       console.error('Error loading events:', error);
     }
@@ -146,18 +163,33 @@ export default function AdminCheckIn() {
 
           <div className="mb-6">
             <h1 className="font-sans text-4xl md:text-5xl text-foreground font-light mb-4">
-              Gestión de Check-in
+              {showArchived ? 'Check-in - Eventos Archivados' : 'Gestión de Check-in'}
             </h1>
             <p className="text-muted-foreground">
-              Importa asistentes y gestiona la entrada a eventos
+              {showArchived 
+                ? 'Consulta y gestiona el check-in de eventos archivados' 
+                : 'Importa asistentes y gestiona la entrada a eventos'}
             </p>
           </div>
 
           {/* Selector de evento */}
-          <div className="bg-card border border-border p-6 rounded-lg mb-6">
-            <label htmlFor="event-select" className="block text-sm font-medium text-foreground mb-2">
-              Filtrar por evento (opcional)
-            </label>
+          <div className="bg-card border border-border p-6 rounded-lg mb-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <label htmlFor="event-select" className="block text-sm font-medium text-foreground">
+                Filtrar por evento (opcional)
+              </label>
+              <button
+                onClick={() => setShowArchived(!showArchived)}
+                className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 text-sm ${
+                  showArchived 
+                    ? 'bg-foreground text-background' 
+                    : 'bg-background border border-border hover:bg-muted'
+                }`}
+              >
+                {showArchived ? <ArchiveRestore className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
+                {showArchived ? 'Mostrar Activos' : 'Mostrar Archivados'}
+              </button>
+            </div>
             <div className="relative">
               <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <select
@@ -166,12 +198,20 @@ export default function AdminCheckIn() {
                 onChange={(e) => setSelectedEventId(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-foreground"
               >
-                <option value="">Todos los eventos</option>
-                {events.map((event) => (
-                  <option key={event.id} value={event.id}>
-                    {event.title} - {event.date}
-                  </option>
-                ))}
+                <option value="">Todos los eventos {showArchived ? 'archivados' : 'activos'}</option>
+                {(showArchived ? archivedEvents : events).map((event) => {
+                  const displayDate = formatEventDate(event.date, {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                  }) || event.date;
+                  
+                  return (
+                    <option key={event.id} value={event.id}>
+                      {event.title} - {displayDate} {event.archived ? '(Archivado)' : ''}
+                    </option>
+                  );
+                })}
               </select>
             </div>
           </div>

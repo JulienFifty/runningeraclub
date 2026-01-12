@@ -52,6 +52,7 @@ export default function EventosPage() {
       const { data, error } = await supabase
         .from('events')
         .select('*')
+        .eq('archived', false) // Solo eventos no archivados
         .order('date', { ascending: true });
 
       if (error) {

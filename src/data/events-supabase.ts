@@ -62,12 +62,30 @@ function transformEvent(event: any): Event {
 export async function getEvents(): Promise<Event[]> {
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase
+    
+    // Intentar filtrar por archived, si falla (campo no existe), cargar todos y filtrar en JS
+    let { data, error } = await supabase
       .from('events')
       .select('*')
+      .eq('archived', false) // Solo eventos no archivados
       .order('date', { ascending: true });
 
-    if (error) {
+    // Si hay error por campo archived no existente, intentar sin filtro
+    if (error && (error.message?.includes('archived') || error.code === '42703' || error.code === 'PGRST116')) {
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from('events')
+        .select('*')
+        .order('date', { ascending: true });
+      
+      if (fallbackError) {
+        console.error('Error fetching events:', fallbackError);
+        return [];
+      }
+      
+      // Filtrar eventos archivados en JavaScript
+      // Si archived no existe, asumir false (evento activo)
+      data = (fallbackData || []).filter(e => e.archived !== true);
+    } else if (error) {
       console.error('Error fetching events:', error);
       return [];
     }
@@ -94,11 +112,34 @@ export async function getEventBySlug(slug: string, useStaticClient = false): Pro
       supabase = await createClient();
     }
     
-    const { data, error } = await supabase
+    // Intentar con filtro archived primero (si el campo existe)
+    let { data, error } = await supabase
       .from('events')
       .select('*')
       .eq('slug', slug)
+      .eq('archived', false) // Solo eventos no archivados en páginas públicas
       .single();
+    
+    // Si hay error por campo archived no existente, intentar sin filtro
+    if (error && (error.message?.includes('archived') || error.code === '42703' || error.code === 'PGRST116')) {
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from('events')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+      
+      if (fallbackError || !fallbackData) {
+        return undefined;
+      }
+      
+      // Filtrar en JavaScript si el evento está archivado
+      // Si archived no existe, asumir false (evento activo)
+      if (fallbackData.archived === true) {
+        return undefined; // No mostrar eventos archivados en páginas públicas
+      }
+      
+      return transformEvent(fallbackData);
+    }
 
     if (error || !data) {
       return undefined;
@@ -138,9 +179,25 @@ export async function getAllEventSlugs(): Promise<string[]> {
       return [];
     }
     
-    const { data, error } = await supabase
+    // Intentar filtrar por archived, si falla (campo no existe), cargar todos
+    let { data, error } = await supabase
       .from('events')
-      .select('slug');
+      .select('slug')
+      .eq('archived', false); // Solo slugs de eventos no archivados
+    
+    // Si hay error por campo archived no existente, intentar sin filtro
+    if (error && (error.message?.includes('archived') || error.code === '42703' || error.code === 'PGRST116')) {
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from('events')
+        .select('slug');
+      
+      if (fallbackError) {
+        return [];
+      }
+      
+      // Filtrar eventos archivados en JavaScript
+      data = (fallbackData || []).filter((e: any) => e.archived !== true);
+    }
 
     if (error || !data) {
       return [];

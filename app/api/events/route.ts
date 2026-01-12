@@ -1,23 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
-// GET - Obtener todos los eventos
+// GET - Obtener todos los eventos (solo no archivados para público)
 export async function GET() {
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase
+    
+    // Intentar filtrar por archived, si falla (campo no existe), cargar todos y filtrar en JS
+    let { data, error } = await supabase
       .from('events')
       .select('*')
+      .eq('archived', false) // Solo eventos no archivados
       .order('date', { ascending: true });
 
-    if (error) {
+    // Si hay error por campo archived no existente, intentar sin filtro
+    if (error && (error.message?.includes('archived') || error.code === '42703' || error.code === 'PGRST116')) {
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from('events')
+        .select('*')
+        .order('date', { ascending: true });
+      
+      if (fallbackError) {
+        return NextResponse.json({ error: fallbackError.message }, { status: 500 });
+      }
+      
+      // Filtrar eventos archivados en JavaScript
+      // Si archived no existe, asumir false (evento activo)
+      data = (fallbackData || []).filter((e: any) => e.archived !== true);
+    } else if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(data);
-  } catch (error) {
+    return NextResponse.json(data || []);
+  } catch (error: any) {
     return NextResponse.json(
-      { error: 'Error al obtener eventos' },
+      { error: 'Error al obtener eventos', details: error?.message },
       { status: 500 }
     );
   }

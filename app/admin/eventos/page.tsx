@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
-import { Plus, Edit, Trash2, ArrowLeft, Calendar, Clock, CheckCircle, Filter, X, List, LayoutGrid, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, ArrowLeft, Calendar, Clock, CheckCircle, Filter, X, List, LayoutGrid, Search, Archive, ArchiveRestore, Copy } from 'lucide-react';
 import { toast } from 'sonner';
+import { parseEventDate, formatEventDate } from '@/lib/date-utils';
 
 interface Event {
   id: string;
@@ -23,6 +24,7 @@ interface Event {
   difficulty?: 'Principiante' | 'Intermedio' | 'Avanzado';
   price?: string;
   max_participants?: number;
+  archived?: boolean;
 }
 
 export default function AdminEvents() {
@@ -35,6 +37,7 @@ export default function AdminEvents() {
   const [filterCategory, setFilterCategory] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [viewMode, setViewMode] = useState<'list' | 'card'>('list');
+  const [showArchived, setShowArchived] = useState<boolean>(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -86,7 +89,11 @@ export default function AdminEvents() {
         return;
       }
 
-      setEvents(data || []);
+      // Agregar archived = false por defecto si no existe (compatibilidad con eventos existentes)
+      setEvents((data || []).map(e => ({ 
+        ...e, 
+        archived: e.archived !== undefined ? e.archived : false 
+      })));
     } catch (error) {
       console.error('Error al cargar eventos:', error);
       toast.error('Error inesperado');
@@ -95,8 +102,61 @@ export default function AdminEvents() {
     }
   };
 
+  const handleArchive = async (id: string, archive: boolean) => {
+    const action = archive ? 'archivar' : 'desarchivar';
+    if (!confirm(`¿Estás seguro de que quieres ${action} este evento?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('events')
+        .update({ archived: archive })
+        .eq('id', id);
+
+      if (error) {
+        toast.error(`Error al ${action} el evento`);
+        console.error(error);
+        return;
+      }
+
+      setEvents(events.map(event => 
+        event.id === id ? { ...event, archived: archive } : event
+      ));
+      toast.success(`Evento ${archive ? 'archivado' : 'desarchivado'} exitosamente`);
+    } catch (error) {
+      console.error(`Error al ${action} evento:`, error);
+      toast.error('Error inesperado');
+    }
+  };
+
+  const handleDuplicate = async (event: Event) => {
+    try {
+      // Guardar datos del evento en localStorage para prellenar el formulario
+      const eventToDuplicate = {
+        ...event,
+        slug: '', // Generar nuevo slug
+        date: '', // Dejar fecha vacía para que el usuario la complete
+        title: `${event.title} (Copia)`, // Agregar indicador de copia
+      };
+
+      // Eliminar campos que no deben duplicarse
+      const { id, archived, ...eventData } = eventToDuplicate;
+      
+      // Guardar en localStorage
+      localStorage.setItem('duplicateEventData', JSON.stringify(eventData));
+      
+      // Redirigir a la página de nuevo evento
+      router.push('/admin/eventos/nuevo?duplicate=true');
+      toast.success('Datos del evento copiados. Completa la información y crea el nuevo evento.');
+    } catch (error) {
+      console.error('Error al duplicar evento:', error);
+      toast.error('Error al duplicar el evento');
+    }
+  };
+
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Estás seguro de que quieres eliminar este evento?')) {
+    if (!confirm('¿Estás seguro de que quieres eliminar este evento? Esta acción no se puede deshacer y eliminará toda la información del evento.')) {
       return;
     }
 
@@ -120,13 +180,19 @@ export default function AdminEvents() {
     }
   };
 
+
   const getStatusColor = (event: Event) => {
-    const eventDate = new Date(event.date);
-    const today = new Date();
+    const eventDate = parseEventDate(event.date);
+    if (!eventDate) return 'text-muted-foreground';
     
-    if (eventDate < today) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const eventDateOnly = new Date(eventDate);
+    eventDateOnly.setHours(0, 0, 0, 0);
+    
+    if (eventDateOnly < today) {
       return 'text-muted-foreground';
-    } else if (eventDate.toDateString() === today.toDateString()) {
+    } else if (eventDateOnly.getTime() === today.getTime()) {
       return 'text-green-600';
     } else {
       return 'text-blue-600';
@@ -134,12 +200,17 @@ export default function AdminEvents() {
   };
 
   const getStatusText = (event: Event) => {
-    const eventDate = new Date(event.date);
-    const today = new Date();
+    const eventDate = parseEventDate(event.date);
+    if (!eventDate) return 'Fecha inválida';
     
-    if (eventDate < today) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const eventDateOnly = new Date(eventDate);
+    eventDateOnly.setHours(0, 0, 0, 0);
+    
+    if (eventDateOnly < today) {
       return 'Finalizado';
-    } else if (eventDate.toDateString() === today.toDateString()) {
+    } else if (eventDateOnly.getTime() === today.getTime()) {
       return 'Hoy';
     } else {
       return 'Próximo';
@@ -148,15 +219,51 @@ export default function AdminEvents() {
 
   // Filtros
   const filteredEvents = events.filter(event => {
+    // Manejar eventos sin campo archived (compatibilidad con eventos existentes)
+    const isArchived = event.archived === true;
+    const matchesArchived = showArchived ? isArchived : !isArchived;
+    
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          event.location.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesMonth = !filterMonth || event.date.startsWith(filterMonth);
+    const matchesMonth = !filterMonth || (() => {
+      const parsedDate = parseEventDate(event.date);
+      if (!parsedDate || isNaN(parsedDate.getTime())) {
+        // Si no se puede parsear, comparar directamente el string
+        return event.date && event.date.startsWith(filterMonth);
+      }
+      // Comparar año-mes del Date parseado
+      const year = parsedDate.getFullYear();
+      const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+      return `${year}-${month}` === filterMonth;
+    })();
     const matchesCategory = !filterCategory || event.category === filterCategory;
     
-    return matchesSearch && matchesMonth && matchesCategory;
+    return matchesArchived && matchesSearch && matchesMonth && matchesCategory;
   });
 
-  const uniqueMonths = Array.from(new Set(events.map(e => e.date.substring(0, 7)))).sort().reverse();
+  // Extraer meses únicos de las fechas, manejando diferentes formatos
+  const uniqueMonths = Array.from(
+    new Set(
+      events
+        .map(e => {
+          const parsedDate = parseEventDate(e.date);
+          if (!parsedDate || isNaN(parsedDate.getTime())) {
+            // Si no se puede parsear, intentar extraer YYYY-MM del formato string
+            if (e.date.match(/^\d{4}-\d{2}/)) {
+              return e.date.substring(0, 7);
+            }
+            // Si no coincide, usar el formato original si tiene al menos 7 caracteres
+            return e.date.length >= 7 ? e.date.substring(0, 7) : null;
+          }
+          // Usar el año y mes del Date parseado
+          const year = parsedDate.getFullYear();
+          const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+          return `${year}-${month}`;
+        })
+        .filter(Boolean) as string[]
+    )
+  ).sort().reverse();
+  
   const uniqueCategories = Array.from(new Set(events.map(e => e.category)));
 
   if (!isAuthenticated || !isAdmin) {
@@ -181,10 +288,12 @@ export default function AdminEvents() {
                 <span className="text-sm">Volver al Panel</span>
               </Link>
               <h1 className="font-sans text-4xl md:text-5xl text-foreground font-light mb-4">
-                Gestión de Eventos
+                {showArchived ? 'Eventos Archivados' : 'Gestión de Eventos'}
               </h1>
               <p className="text-muted-foreground">
-                Administra todos los eventos del club
+                {showArchived 
+                  ? 'Eventos pasados que han sido archivados. Toda la información (pagos, asistencia) se mantiene.' 
+                  : 'Administra todos los eventos del club'}
               </p>
             </div>
             <Link
@@ -256,6 +365,19 @@ export default function AdminEvents() {
               ))}
             </select>
 
+            {/* Toggle eventos archivados */}
+            <button
+              onClick={() => setShowArchived(!showArchived)}
+              className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                showArchived 
+                  ? 'bg-foreground text-background' 
+                  : 'bg-background border border-border hover:bg-muted'
+              }`}
+            >
+              {showArchived ? <ArchiveRestore className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
+              {showArchived ? 'Mostrar Activos' : 'Mostrar Archivados'}
+            </button>
+
             {/* Limpiar filtros */}
             {(filterMonth || filterCategory || searchQuery) && (
               <button
@@ -321,25 +443,32 @@ export default function AdminEvents() {
                 <div className={`${viewMode === 'card' ? 'p-6' : 'flex-1'}`}>
                   <div className="flex items-start justify-between gap-4 mb-4">
                     <div className="flex-1">
-                      <h3 className="text-xl font-semibold text-foreground mb-2">
+                      <h3 className="text-2xl md:text-3xl font-title font-semibold text-foreground mb-2 tracking-tight leading-tight uppercase">
                         {event.title}
                       </h3>
                       <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Calendar className="w-4 h-4" />
-                          {new Date(event.date).toLocaleDateString('es-ES', {
+                          {formatEventDate(event.date, {
                             day: '2-digit',
                             month: 'long',
                             year: 'numeric'
-                          })}
+                          }) || event.date}
                         </span>
                         <span>•</span>
                         <span>{event.location}</span>
                       </div>
                     </div>
-                    <span className={`text-xs font-medium px-2 py-1 rounded ${getStatusColor(event)} bg-muted`}>
-                      {getStatusText(event)}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {event.archived && (
+                        <span className="text-xs font-medium px-2 py-1 rounded text-orange-600 bg-orange-100">
+                          Archivado
+                        </span>
+                      )}
+                      <span className={`text-xs font-medium px-2 py-1 rounded ${getStatusColor(event)} bg-muted`}>
+                        {getStatusText(event)}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="flex flex-wrap gap-2 mb-4">
@@ -348,7 +477,7 @@ export default function AdminEvents() {
                     {event.difficulty && <span className="text-xs bg-muted px-2 py-1 rounded">{event.difficulty}</span>}
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     <Link
                       href={`/eventos/${event.slug}`}
                       target="_blank"
@@ -364,6 +493,33 @@ export default function AdminEvents() {
                       <Edit className="w-3 h-3" />
                       Editar
                     </Link>
+                    <button
+                      onClick={() => handleDuplicate(event)}
+                      className="px-3 py-2 text-xs border border-blue-500 text-blue-600 hover:bg-blue-50 rounded transition-colors flex items-center gap-1"
+                    >
+                      <Copy className="w-3 h-3" />
+                      Duplicar
+                    </button>
+                    <button
+                      onClick={() => handleArchive(event.id, !event.archived)}
+                      className={`px-3 py-2 text-xs border rounded transition-colors flex items-center gap-1 ${
+                        event.archived
+                          ? 'border-green-500 text-green-600 hover:bg-green-50'
+                          : 'border-orange-500 text-orange-600 hover:bg-orange-50'
+                      }`}
+                    >
+                      {event.archived ? (
+                        <>
+                          <ArchiveRestore className="w-3 h-3" />
+                          Desarchivar
+                        </>
+                      ) : (
+                        <>
+                          <Archive className="w-3 h-3" />
+                          Archivar
+                        </>
+                      )}
+                    </button>
                     <button
                       onClick={() => handleDelete(event.id)}
                       className="px-3 py-2 text-xs border border-red-500 text-red-500 hover:bg-red-50 rounded transition-colors flex items-center gap-1"

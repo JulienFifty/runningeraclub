@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Save, CheckCircle } from 'lucide-react';
 import { DatePicker } from '@/components/ui/date-picker';
@@ -37,10 +37,12 @@ interface EventFormData {
 
 export default function NewEvent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
   const supabase = createClient();
   const [formData, setFormData] = useState<EventFormData>({
     slug: '',
@@ -67,9 +69,79 @@ export default function NewEvent() {
     },
   });
 
+  const generateSlug = (title: string) => {
+    return title
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+  };
+
+  const loadDuplicateData = () => {
+    const duplicateData = localStorage.getItem('duplicateEventData');
+    if (duplicateData) {
+      try {
+        const eventData = JSON.parse(duplicateData);
+        
+        // Prellenar el formulario con los datos duplicados
+        setFormData({
+          slug: generateSlug(eventData.title || ''),
+          title: eventData.title || '',
+          date: '', // Dejar fecha vacía
+          location: eventData.location || '',
+          description: eventData.description || '',
+          short_description: eventData.short_description || '',
+          image: eventData.image || '',
+          button_text: eventData.button_text || 'REGÍSTRATE',
+          category: eventData.category || '',
+          duration: eventData.duration || '',
+          distance: eventData.distance || '',
+          difficulty: Array.isArray(eventData.difficulty) ? eventData.difficulty : (eventData.difficulty ? [eventData.difficulty] : []),
+          price: eventData.price || '',
+          max_participants: eventData.max_participants || undefined,
+          requirements: Array.isArray(eventData.requirements) && eventData.requirements.length > 0 
+            ? eventData.requirements 
+            : [''],
+          schedule: Array.isArray(eventData.schedule) && eventData.schedule.length > 0
+            ? eventData.schedule
+            : [{ time: '', activity: '' }],
+          highlights: Array.isArray(eventData.highlights) && eventData.highlights.length > 0
+            ? eventData.highlights
+            : [''],
+          contact_info: eventData.contact_info || { email: '', phone: '', whatsapp: '' },
+        });
+
+        // Limpiar localStorage después de cargar
+        localStorage.removeItem('duplicateEventData');
+        setDataLoaded(true);
+        
+        toast.success('Datos del evento duplicado cargados. Completa la información y crea el nuevo evento.');
+      } catch (error) {
+        console.error('Error al cargar datos duplicados:', error);
+        toast.error('Error al cargar datos del evento a duplicar');
+      }
+    }
+  };
+
   useEffect(() => {
     checkAdminAuth();
   }, [router]);
+
+  const handleTitleChange = (title: string) => {
+    setFormData({
+      ...formData,
+      title,
+      slug: generateSlug(title),
+    });
+  };
+
+  // Cargar datos de duplicación si existen
+  useEffect(() => {
+    if (isAdmin && !dataLoaded && searchParams?.get('duplicate') === 'true') {
+      loadDuplicateData();
+    }
+  }, [isAdmin, dataLoaded, searchParams]);
 
   const checkAdminAuth = async () => {
     try {
@@ -101,23 +173,6 @@ export default function NewEvent() {
       console.error('Error checking admin auth:', error);
       router.push('/admin/login');
     }
-  };
-
-  const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-  };
-
-  const handleTitleChange = (title: string) => {
-    setFormData({
-      ...formData,
-      title,
-      slug: generateSlug(title),
-    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -236,8 +291,13 @@ export default function NewEvent() {
         </Link>
 
         <h1 className="font-sans text-4xl md:text-5xl text-foreground font-light mb-8">
-          Nuevo Evento
+          {searchParams?.get('duplicate') === 'true' ? 'Duplicar Evento' : 'Nuevo Evento'}
         </h1>
+        {searchParams?.get('duplicate') === 'true' && (
+          <p className="text-sm text-muted-foreground mb-6 -mt-6">
+            Se han copiado los datos del evento. Completa la información y crea el nuevo evento.
+          </p>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Información Básica */}

@@ -21,6 +21,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { formatEventDate } from '@/lib/date-utils';
 
 interface Member {
   id: string;
@@ -426,11 +427,11 @@ export default function AdminMemberDetail() {
                             <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                               <span className="flex items-center gap-2">
                                 <Calendar className="w-4 h-4" />
-                                {new Date(reg.event.date).toLocaleDateString('es-ES', {
+                                {formatEventDate(reg.event.date, {
                                   year: 'numeric',
                                   month: 'long',
                                   day: 'numeric'
-                                })}
+                                }) || reg.event.date}
                               </span>
                               <span>{reg.event.location}</span>
                               {reg.event.price && <span>{reg.event.price}</span>}
