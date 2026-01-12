@@ -36,10 +36,39 @@ export const Events = () => {
   const fetchEvents = async () => {
     try {
       const supabase = createClient();
-      const { data, error } = await supabase
+      
+      // Intentar filtrar por archived, si falla (campo no existe), cargar todos y filtrar en JS
+      let { data, error } = await supabase
         .from('events')
         .select('*')
+        .eq('archived', false) // Solo eventos no archivados
         .order('date', { ascending: true });
+
+      // Si hay error por campo archived no existente, intentar sin filtro
+      if (error && (error.message?.includes('archived') || error.code === '42703' || error.code === 'PGRST116')) {
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('events')
+          .select('*')
+          .order('date', { ascending: true });
+        
+        if (fallbackError) {
+          console.error('Error fetching events:', {
+            message: fallbackError.message,
+            details: fallbackError.details,
+            hint: fallbackError.hint,
+            code: fallbackError.code,
+            fullError: JSON.stringify(fallbackError, Object.getOwnPropertyNames(fallbackError)),
+          });
+          setEvents([]);
+          setLoading(false);
+          return;
+        }
+        
+        // Filtrar eventos archivados en JavaScript
+        // Si archived no existe, asumir false (evento activo)
+        data = (fallbackData || []).filter((e: any) => e.archived !== true);
+        error = null;
+      }
 
       if (error) {
         console.error('Error fetching events:', {
@@ -54,7 +83,10 @@ export const Events = () => {
       }
 
       if (data) {
-        const transformedEvents = data.map(event => ({
+        // Filtrar eventos archivados por si acaso (doble seguridad)
+        const filteredData = data.filter((event: any) => event.archived !== true);
+        
+        const transformedEvents = filteredData.map((event: any) => ({
           id: event.id,
           slug: event.slug,
           title: event.title,
