@@ -377,14 +377,14 @@ export default function CouponsManagement() {
               <div>
                 <Label htmlFor="event_id">Evento Específico (Opcional)</Label>
                 <Select
-                  value={formData.event_id}
-                  onValueChange={(value) => setFormData({ ...formData, event_id: value })}
+                  value={formData.event_id || "all"}
+                  onValueChange={(value) => setFormData({ ...formData, event_id: value === "all" ? "" : value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Todos los eventos" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos los eventos</SelectItem>
+                    <SelectItem value="all">Todos los eventos</SelectItem>
                     {events.map((event) => (
                       <SelectItem key={event.id} value={event.id}>
                         {event.title}
