@@ -12,20 +12,19 @@ const footerLinks = {
   'Comunidad': [
     { name: 'Únete al Club', href: '/proximamente' },
     { name: 'Miembros', href: '/proximamente' },
-    { name: 'Testimonios', href: '/proximamente' },
-    { name: 'Galería', href: '/proximamente' },
+    { name: 'Testimonios', href: '/#reseñas' },
+    { name: 'Galería', href: '/#galeria' },
   ],
   'Eventos': [
     { name: 'Calendario', href: '/proximamente' },
-    { name: 'Night Runs', href: '/proximamente' },
-    { name: 'Trail Runs', href: '/proximamente' },
-    { name: 'Colaboraciones', href: '/proximamente' },
+    { name: 'Long Runs', href: '/proximamente' },
+    { name: 'Social Runs', href: '/proximamente' },
   ],
   'Entrenamientos': [
     { name: 'Horarios', href: '/proximamente' },
     { name: 'Ubicaciones', href: '/proximamente' },
-    { name: 'Coaches', href: '/proximamente' },
     { name: 'Programas', href: '/proximamente' },
+    { name: 'Paquetes', href: '/proximamente' },
   ],
 };
 

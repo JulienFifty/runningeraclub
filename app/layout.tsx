@@ -72,8 +72,10 @@ export default function RootLayout({
         <link rel="canonical" href="https://runningera.mx" />
         
         {/* CSS crítico inline para reducir render-blocking y mejorar LCP */}
-        <style dangerouslySetInnerHTML={{
-          __html: `
+        <style 
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: `
             /* CSS crítico para LCP - Hero section */
             .hero-critical {
               font-family: var(--font-title);
@@ -93,7 +95,8 @@ export default function RootLayout({
               contain: layout style paint;
             }
           `
-        }} />
+          }} 
+        />
         
         <script
           type="application/ld+json"

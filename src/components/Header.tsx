@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Phone, MapPin, Instagram, User, LogOut, LayoutDashboard, Trophy } from 'lucide-react';
+import { Menu, X, User, LogOut, LayoutDashboard, Trophy } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import {
   DropdownMenu,
@@ -19,10 +19,10 @@ const navLinks = [
   { name: 'Inicio', href: '/' },
   { name: 'Comunidad', href: '/comunidad' },
   { name: 'Eventos', href: '/eventos' },
-  { name: 'Leaderboard', href: '/leaderboard' },
-  { name: 'Experiencias', href: '/experiencias' },
+  { name: 'Beneficios', href: '/beneficios' },
+  { name: 'Marcas', href: '/marcas' },
   { name: 'Galería', href: '/galeria' },
-  { name: 'Contacto', href: '/contacto' },
+  { name: 'Contacto', href: 'https://wa.me/522215815902', external: true },
 ];
 
 export const Header = () => {
@@ -175,50 +175,25 @@ export const Header = () => {
           transition={{ duration: 0.3 }}
           className="fixed top-0 left-0 right-0 z-50"
         >
-          {/* Top Bar */}
-          <div className="bg-card border-b border-border/30">
-            <div className="container-premium py-2 flex items-center justify-between text-xs tracking-wider text-foreground">
-              <div className="hidden md:flex items-center gap-6">
-                <a href="tel:+522215815902" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                  <Phone className="w-3 h-3" />
-                  <span>+52 221 581 5902</span>
-                </a>
-                <span className="flex items-center gap-2">
-                  <MapPin className="w-3 h-3" />
-                  <span>Puebla, México</span>
-                </span>
-              </div>
-              <div className="hidden md:flex items-center gap-4 mx-auto md:mx-0">
-                <a 
-                  href="https://www.instagram.com/runningera_club/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="hover:opacity-80 transition-opacity"
-                >
-                  <Instagram className="w-4 h-4" />
-                </a>
-                <span className="hidden sm:inline">Síguenos @runningera</span>
-              </div>
-            </div>
-          </div>
-
           {/* Main Header */}
           <div className="bg-background/95 backdrop-blur-md border-b border-border/30">
-            <div className="container-premium py-4 flex items-center justify-between">
+            <div className="container-premium py-2.5 flex items-center justify-between">
               {/* Logo */}
               <a href="/" className="flex items-center gap-2">
-                <span className="font-display text-2xl md:text-3xl font-semibold tracking-tight">
+                <span className="font-display text-xl md:text-2xl font-semibold tracking-tight">
                   RUNNING <span className="font-light italic">ERA</span>
                 </span>
               </a>
 
               {/* Desktop Navigation */}
-              <nav className="hidden lg:flex items-center gap-8">
+              <nav className="hidden lg:flex items-center gap-6">
                 {navLinks.map((link) => (
                   <a
                     key={link.name}
                     href={link.href}
-                    className="text-sm font-medium tracking-wider uppercase text-muted-foreground hover:text-foreground transition-colors link-underline"
+                    target={link.external ? "_blank" : undefined}
+                    rel={link.external ? "noopener noreferrer" : undefined}
+                    className="text-xs font-medium tracking-wider uppercase text-muted-foreground hover:text-foreground transition-colors link-underline"
                   >
                     {link.name}
                   </a>
@@ -232,13 +207,13 @@ export const Header = () => {
                     {isAuthenticated ? (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <button className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-muted transition-colors">
-                            <Avatar className="w-8 h-8">
+                          <button className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-muted transition-colors">
+                            <Avatar className="w-7 h-7">
                               <AvatarFallback className="bg-foreground text-background text-xs">
                                 {getInitials()}
                               </AvatarFallback>
                             </Avatar>
-                            <span className="text-sm font-medium">{getUserName()}</span>
+                            <span className="text-xs font-medium">{getUserName()}</span>
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-56">
@@ -273,7 +248,7 @@ export const Header = () => {
                     ) : (
                       <a
                         href="/miembros/login"
-                        className="hidden md:inline-flex btn-premium text-xs py-3 px-6"
+                        className="hidden md:inline-flex btn-premium text-xs py-2 px-4"
                       >
                         Iniciar Sesión
                       </a>
@@ -305,6 +280,8 @@ export const Header = () => {
                     <a
                       key={link.name}
                       href={link.href}
+                      target={link.external ? "_blank" : undefined}
+                      rel={link.external ? "noopener noreferrer" : undefined}
                       onClick={() => setIsMenuOpen(false)}
                       className="text-lg font-medium tracking-wider text-foreground hover:text-muted-foreground transition-colors py-2"
                     >

@@ -44,9 +44,9 @@ export const WhyChooseUs = () => {
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
   return (
-    <section ref={ref} className="section-padding bg-card relative overflow-hidden">
-      {/* Decorative gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black via-card to-black opacity-50" />
+    <section ref={ref} className="section-padding bg-white relative overflow-hidden">
+      {/* Decorative gradient background - Light version */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50 opacity-50" />
       
       <div className="container-premium relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
@@ -61,7 +61,7 @@ export const WhyChooseUs = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="inline-block text-foreground/60 text-xs tracking-[0.4em] uppercase font-light"
+              className="inline-block text-gray-600 text-xs tracking-[0.4em] uppercase font-light"
             >
               Por qué elegirnos
             </motion.span>
@@ -70,18 +70,18 @@ export const WhyChooseUs = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="font-display text-4xl md:text-5xl lg:text-6xl text-foreground font-bold leading-[1.1] uppercase tracking-tight"
+              className="font-display text-4xl md:text-5xl lg:text-6xl text-black font-bold leading-[1.1] uppercase tracking-tight"
             >
               Más que un Club,
               <br />
-              <span className="text-foreground/80">una Familia</span>
+              <span className="text-gray-800">una Familia</span>
             </motion.h2>
 
             <motion.p
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="text-foreground/70 text-base md:text-lg font-light leading-relaxed max-w-lg"
+              className="text-gray-700 text-base md:text-lg font-light leading-relaxed max-w-lg"
             >
               En RUNNING ERA creemos que correr es solo el inicio. Lo que realmente
               nos define es la comunidad, las experiencias compartidas y el crecimiento
@@ -104,10 +104,10 @@ export const WhyChooseUs = () => {
                 transition={{ duration: 0.6, delay: 0.4 + index * 0.1 }}
                 className="group relative"
               >
-                <div className="flex items-start gap-6 p-6 border border-foreground/10 hover:border-foreground/30 bg-card/50 backdrop-blur-sm transition-all duration-500 hover:bg-card/80">
+                <div className="flex items-start gap-6 p-6 border border-gray-200 hover:border-gray-400 bg-white/80 backdrop-blur-sm transition-all duration-500 hover:bg-gray-50 shadow-sm hover:shadow-md">
                   {/* Number Badge */}
-                  <div className="flex-shrink-0 w-16 h-16 flex items-center justify-center border border-foreground/20 bg-foreground/5 group-hover:bg-foreground/10 transition-all duration-500">
-                    <span className="text-foreground/40 font-display text-xl font-bold group-hover:text-foreground/60 transition-colors">
+                  <div className="flex-shrink-0 w-16 h-16 flex items-center justify-center border border-gray-300 bg-gray-100 group-hover:bg-gray-200 transition-all duration-500">
+                    <span className="text-gray-500 font-display text-xl font-bold group-hover:text-gray-700 transition-colors">
                       {benefit.number}
                     </span>
                   </div>
@@ -115,12 +115,12 @@ export const WhyChooseUs = () => {
                   {/* Content */}
                   <div className="flex-1 pt-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <benefit.icon className="w-5 h-5 text-foreground/60 group-hover:text-foreground transition-colors" />
-                      <h3 className="font-display text-lg md:text-xl text-foreground font-bold">
+                      <benefit.icon className="w-5 h-5 text-gray-600 group-hover:text-black transition-colors" />
+                      <h3 className="font-display text-lg md:text-xl text-black font-bold">
                         {benefit.title}
                       </h3>
                     </div>
-                    <p className="text-foreground/60 text-sm font-light leading-relaxed">
+                    <p className="text-gray-600 text-sm font-light leading-relaxed">
                       {benefit.description}
                     </p>
                   </div>

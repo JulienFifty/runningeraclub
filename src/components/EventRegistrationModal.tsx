@@ -198,10 +198,11 @@ export function EventRegistrationModal({
     onClose();
     // Pasar información del evento para mantener el contexto después de la confirmación
     const params = new URLSearchParams();
+    params.set('signup', 'true'); // Forzar modo de registro
     if (eventSlug) params.set('event_slug', eventSlug);
     if (eventTitle) params.set('event_title', eventTitle);
     
-    const url = params.toString() ? `/miembros/login?${params.toString()}` : '/miembros/login';
+    const url = `/miembros/login?${params.toString()}`;
     router.push(url);
   };
 

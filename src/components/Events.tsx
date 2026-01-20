@@ -126,7 +126,7 @@ export const Events = () => {
   // Auto-play
   useEffect(() => {
     if (events.length > 0) {
-      const interval = setInterval(nextSlide, 6000);
+      const interval = setInterval(nextSlide, 10000);
       return () => clearInterval(interval);
     }
   }, [events.length]);

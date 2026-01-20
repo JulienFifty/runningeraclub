@@ -109,11 +109,13 @@ export const Community = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              href="#contacto"
-              className="inline-flex items-center gap-2 lg:gap-3 px-6 lg:px-8 py-3 lg:py-4 border-2 border-foreground/20 text-foreground text-xs lg:text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:border-foreground hover:bg-foreground hover:text-background group"
+              href="#"
+              onClick={(e) => e.preventDefault()}
+              className="inline-flex items-center gap-2 lg:gap-3 px-6 lg:px-8 py-3 lg:py-4 border-2 border-foreground/20 text-foreground text-xs lg:text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:border-foreground/40 hover:bg-foreground/5 opacity-75 cursor-not-allowed"
+              title="Próximamente"
             >
               Conoce Nuestra Historia
-              <ArrowRight className="w-3 h-3 lg:w-4 lg:h-4 group-hover:translate-x-1 transition-transform" />
+              <span className="text-[10px] lg:text-xs ml-1 opacity-70">(Próximamente)</span>
             </motion.a>
           </div>
         </motion.div>

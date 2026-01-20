@@ -15,20 +15,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { LayoutDashboard, Trophy, LogOut } from 'lucide-react';
-const heroImage = '/assets/hero-runners.jpg';
-// CDN Cloudinary - Video optimizado con transformaciones automáticas
-// MP4 con optimización automática
-const heroVideoMP4 = 'https://res.cloudinary.com/dhqq37qlu/video/upload/f_auto,q_auto:low,w_1920/v1767493735/Creaci%C3%B3n_de_Video_Din%C3%A1mico_para_Social_Club_lqyunz.mp4';
-// WebM para mejor compresión (navegadores modernos)
-const heroVideoWebM = 'https://res.cloudinary.com/dhqq37qlu/video/upload/f_webm,q_auto:low,w_1920/v1767493735/Creaci%C3%B3n_de_Video_Din%C3%A1mico_para_Social_Club_lqyunz.mp4';
+// CDN Cloudinary - Imagen de fondo del hero
+const heroImage = 'https://res.cloudinary.com/dhqq37qlu/image/upload/v1767661563/_VXV9510-Enhanced-NR_qhsic0.jpg';
 const logoRunningEra = '/assets/logo-running-era.png';
 
 const categoryItems = [
   { icon: Dumbbell, label: 'Entrenamientos', href: '/entrenamientos' },
   { icon: Calendar, label: 'Eventos', href: '#eventos' },
   { icon: Gift, label: 'Beneficios', href: '/beneficios' },
-  { icon: Handshake, label: 'Marcas &', sublabel: 'Patrocinios', href: '/marcas' },
   { icon: ShoppingBag, label: 'Tienda', href: '/tienda' },
+  { icon: Handshake, label: 'Marcas &', sublabel: 'Patrocinios', href: '/marcas' },
   { icon: Users, label: 'Comunidad', href: '/comunidad' },
 ];
 
@@ -164,29 +160,14 @@ export const Hero = () => {
           opacity: { duration: 1.2 }
         }}
       >
-        <motion.video
-          poster={heroImage}
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="none"
+        <motion.img
+          src={heroImage}
+          alt="Corredores de RUNNING ERA"
           className="w-full h-full object-cover"
           initial={{ scale: 1, filter: "blur(0px)" }}
           animate={{ scale: 1, filter: "blur(0px)" }}
           transition={{ duration: 0 }}
-        >
-          {/* WebM - Mejor compresión, carga más rápida */}
-          <source src={heroVideoWebM} type="video/webm" />
-          {/* MP4 - Fallback para compatibilidad */}
-          <source src={heroVideoMP4} type="video/mp4" />
-          {/* Fallback a imagen si el video no carga */}
-          <img
-            src={heroImage}
-            alt="Corredores de RUNNING ERA"
-            className="w-full h-full object-cover"
-          />
-        </motion.video>
+        />
         <motion.div 
           className="absolute inset-0 bg-black/60"
           initial={{ opacity: 0.8 }}
@@ -344,7 +325,7 @@ export const Hero = () => {
               className="flex flex-col sm:flex-row gap-3 mb-8 md:mb-12 justify-center items-center"
             >
               <motion.a
-                href="/unirme-al-club"
+                href="/miembros/login?signup=true"
                 className="inline-flex items-center justify-center gap-3 px-6 py-3 bg-white text-black text-sm font-medium tracking-wider uppercase transition-all duration-300 hover:bg-white/90 hover:gap-4"
                 whileHover={{ scale: 1.05, boxShadow: "0 10px 30px rgba(255,255,255,0.3)" }}
                 whileTap={{ scale: 0.95 }}
