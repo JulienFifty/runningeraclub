@@ -138,7 +138,7 @@ export async function GET() {
           let registeredCount = 0;
           let totalRevenue = 0;
 
-          // Obtener registros con pago exitoso (paid) de event_registrations (excluyendo staff)
+          // Obtener registros con pago exitoso (paid) de event_registrations (incluyendo staff)
           // Manejar caso donde la tabla no existe
           let registeredMemberIds: string[] = [];
           try {
@@ -149,12 +149,9 @@ export async function GET() {
               .eq('payment_status', 'paid');
 
             if (!regError && registrationsData) {
-              // Filtrar staff
-              const validRegistrations = registrationsData.filter(
-                (reg) => !reg.notes || !reg.notes.toLowerCase().includes('staff')
-              );
-              registeredCount += validRegistrations.length;
-              registeredMemberIds = validRegistrations.map((r) => r.member_id).filter(Boolean) as string[];
+              // No filtrar staff - todos cuentan en el cupo
+              registeredCount += registrationsData.length;
+              registeredMemberIds = registrationsData.map((r) => r.member_id).filter(Boolean) as string[];
             } else if (regError && regError.code !== 'PGRST116') { // PGRST116 = tabla no existe
               console.error(`Error counting registrations for event ${event.id}:`, regError);
             }
@@ -163,7 +160,7 @@ export async function GET() {
             console.warn('event_registrations table may not exist');
           }
 
-          // Obtener asistentes con pago exitoso (paid) de attendees (excluyendo staff y duplicados)
+          // Obtener asistentes con pago exitoso (paid) de attendees (incluyendo staff, evitando duplicados)
           try {
             const { data: attendeesData, error: attError } = await supabaseService
               .from('attendees')
@@ -172,10 +169,7 @@ export async function GET() {
               .eq('payment_status', 'paid');
 
             if (!attError && attendeesData) {
-              // Filtrar staff
-              const validAttendees = attendeesData.filter(
-                (att) => !att.notes || !att.notes.toLowerCase().includes('staff')
-              );
+              // No filtrar staff - todos cuentan en el cupo
 
               // Obtener emails de miembros registrados para evitar duplicados
               let registeredMemberEmails = new Set<string>();
@@ -190,8 +184,8 @@ export async function GET() {
                 );
               }
 
-              // Contar solo attendees que NO son miembros ya registrados
-              const uniqueAttendees = validAttendees.filter(
+              // Contar solo attendees que NO son miembros ya registrados (evitar duplicados)
+              const uniqueAttendees = attendeesData.filter(
                 (att) => !att.email || !registeredMemberEmails.has(att.email.toLowerCase())
               );
 

@@ -59,7 +59,7 @@ export async function GET(
       event.price.toString().toLowerCase().includes('gratis') ||
       event.price.toString().toLowerCase().includes('free');
 
-    // Obtener registros de miembros con pago exitoso (excluyendo staff)
+    // Obtener registros de miembros con pago exitoso (incluyendo staff)
     let registrationsQuery = supabase
       .from('event_registrations')
       .select('id, member_id, notes')
@@ -81,7 +81,7 @@ export async function GET(
       console.error('Error contando registros:', registrationsError);
     }
 
-    // Obtener invitados (attendees) con pago exitoso (excluyendo staff)
+    // Obtener invitados (attendees) con pago exitoso (incluyendo staff)
     let attendeesQuery = supabase
       .from('attendees')
       .select('id, email, notes')
@@ -99,29 +99,11 @@ export async function GET(
       console.error('Error contando invitados:', attendeesError);
     }
 
-    // Filtrar staff de ambos conjuntos
-    const validRegistrations = (registrationsData || []).filter(
-      (reg) => !reg.notes || !reg.notes.toLowerCase().includes('staff')
-    );
-    
-    const validAttendees = (attendeesData || []).filter(
-      (att) => !att.notes || !att.notes.toLowerCase().includes('staff')
-    );
+    // No filtrar staff - todos cuentan en el cupo
+    const validRegistrations = registrationsData || [];
+    const validAttendees = attendeesData || [];
 
-    // Crear un Set de emails de miembros registrados para evitar duplicados
-    const registeredMemberEmails = new Set<string>();
-    validRegistrations.forEach((reg) => {
-      // Obtener email del miembro si es posible
-      // Por ahora, solo contamos el registro
-    });
-
-    // Contar attendees que NO están ya en event_registrations (evitar duplicados)
-    // Si un attendee tiene el mismo email que un miembro registrado, no contarlo dos veces
-    const attendeeEmails = new Set(
-      validAttendees.map((att) => att.email?.toLowerCase()).filter(Boolean) as string[]
-    );
-
-    // Obtener emails de miembros registrados para comparar
+    // Obtener emails de miembros registrados para comparar y evitar duplicados
     const { data: membersData } = await supabase
       .from('members')
       .select('id, email')
@@ -131,7 +113,7 @@ export async function GET(
       (membersData || []).map((m) => m.email?.toLowerCase()).filter(Boolean) as string[]
     );
 
-    // Contar solo attendees que NO son miembros ya registrados
+    // Contar solo attendees que NO son miembros ya registrados (evitar duplicados)
     const uniqueAttendees = validAttendees.filter(
       (att) => !att.email || !registeredMemberEmailsSet.has(att.email.toLowerCase())
     );
