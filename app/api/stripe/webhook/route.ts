@@ -73,6 +73,10 @@ export async function POST(request: NextRequest) {
           customer_name: session.customer_details?.name,
         });
 
+        // Obtener metadata de la sesión
+        const metadata = session.metadata || {};
+        const { event_id, member_id, attendee_id, is_guest, guest_name, guest_email, guest_phone } = metadata;
+
         // Actualizar transacción
         // Si es guest checkout, actualizar metadata con el nombre del invitado
         const updateData: any = {
@@ -116,13 +120,11 @@ export async function POST(request: NextRequest) {
           console.log('✅ Transaction updated successfully');
         }
 
-        const metadata = session.metadata;
-        if (!metadata) {
-          console.error('❌ No metadata found in session:', session.id);
+        if (!metadata || !event_id) {
+          console.error('❌ No metadata or event_id found in session:', session.id);
           break;
         }
 
-        const { event_id, member_id, attendee_id, is_guest, guest_name, guest_email, guest_phone } = metadata;
         console.log('📋 Webhook metadata:', { event_id, member_id, attendee_id, is_guest, guest_name, guest_email });
 
         if (is_guest === 'true') {
