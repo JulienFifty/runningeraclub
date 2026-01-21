@@ -34,6 +34,7 @@ interface Member {
 export default function AdminMembers() {
   const router = useRouter();
   const [members, setMembers] = useState<Member[]>([]);
+  const [totalMembers, setTotalMembers] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -93,6 +94,9 @@ export default function AdminMembers() {
 
       const result = await response.json();
       const allMembers = result.members || [];
+
+      // Guardar el total de miembros (antes de aplicar filtros)
+      setTotalMembers(allMembers.length);
 
       // Aplicar filtros locales
       let filtered: Member[] = allMembers;
@@ -174,9 +178,22 @@ export default function AdminMembers() {
                 <ArrowLeft className="w-4 h-4" />
                 <span className="text-sm">Volver al Panel</span>
               </Link>
-              <h1 className="font-sans text-4xl md:text-5xl text-foreground font-light mb-4">
-                Gestión de Miembros
-              </h1>
+              <div className="flex items-center gap-4 mb-4">
+                <h1 className="font-sans text-4xl md:text-5xl text-foreground font-light">
+                  Gestión de Miembros
+                </h1>
+                {!loading && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-lg">
+                    <Users className="w-5 h-5 text-foreground" />
+                    <span className="font-sans text-lg font-semibold text-foreground">
+                      {totalMembers}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      {totalMembers === 1 ? 'miembro' : 'miembros'}
+                    </span>
+                  </div>
+                )}
+              </div>
               <p className="text-muted-foreground">
                 Administra todos los miembros del club
               </p>

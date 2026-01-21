@@ -3,7 +3,6 @@
 import { useState, useCallback } from 'react';
 import { Upload, FileSpreadsheet, X } from 'lucide-react';
 import { toast } from 'sonner';
-import * as XLSX from 'xlsx';
 
 interface CheckinImporterProps {
   eventId?: string;
@@ -22,6 +21,9 @@ export function CheckinImporter({ eventId, onImportComplete }: CheckinImporterPr
   const [isUploading, setIsUploading] = useState(false);
 
   const parseFile = async (file: File): Promise<AttendeeRow[]> => {
+    // Importar xlsx dinámicamente solo cuando se necesite
+    const XLSX = await import('xlsx');
+    
     return new Promise((resolve, reject) => {
       // Timeout de seguridad (30 segundos máximo)
       const timeout = setTimeout(() => {

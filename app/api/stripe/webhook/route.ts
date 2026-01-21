@@ -74,13 +74,40 @@ export async function POST(request: NextRequest) {
         });
 
         // Actualizar transacción
+        // Si es guest checkout, actualizar metadata con el nombre del invitado
+        const updateData: any = {
+          status: 'succeeded',
+          stripe_payment_intent_id: session.payment_intent as string,
+          payment_method: session.payment_method_types?.[0] || 'card',
+        };
+
+        // Si es guest checkout y tenemos el nombre, actualizar metadata
+        if (is_guest === 'true') {
+          const guestName = guest_name || session.customer_details?.name || null;
+          const guestEmail = guest_email || session.customer_details?.email || null;
+          
+          if (guestName || guestEmail) {
+            // Obtener metadata actual y actualizarlo
+            const { data: currentTransaction } = await supabase
+              .from('payment_transactions')
+              .select('metadata')
+              .eq('stripe_session_id', session.id)
+              .single();
+            
+            if (currentTransaction) {
+              updateData.metadata = {
+                ...(currentTransaction.metadata || {}),
+                guest_name: guestName || currentTransaction.metadata?.guest_name,
+                guest_email: guestEmail || currentTransaction.metadata?.guest_email,
+                is_guest: 'true',
+              };
+            }
+          }
+        }
+
         const { error: transactionError } = await supabase
           .from('payment_transactions')
-          .update({
-            status: 'succeeded',
-            stripe_payment_intent_id: session.payment_intent as string,
-            payment_method: session.payment_method_types?.[0] || 'card',
-          })
+          .update(updateData)
           .eq('stripe_session_id', session.id);
 
         if (transactionError) {
@@ -126,21 +153,37 @@ export async function POST(request: NextRequest) {
             const customerEmail = guest_email || session.customer_details?.email || (session as any).customer_email || null;
             const customerName = guest_name || session.customer_details?.name || 'Invitado';
             
+            console.log('🔍 Guest checkout - Datos disponibles:', {
+              metadata_guest_name: guest_name,
+              metadata_guest_email: guest_email,
+              session_customer_name: session.customer_details?.name,
+              session_customer_email: session.customer_details?.email,
+              final_name: customerName,
+              final_email: customerEmail,
+              payment_status: session.payment_status,
+            });
+            
             // IMPORTANTE: Solo crear si el pago está realmente completado
             if (session.payment_status !== 'paid') {
               console.warn('⚠️ Payment status is not "paid", skipping attendee creation:', session.payment_status);
               break;
             }
             
-            // Solo crear si tenemos al menos un nombre
-            if (!customerName && !customerEmail) {
-              console.warn('⚠️ No se puede crear attendee: faltan nombre y email del customer');
-              break;
+            // Solo crear si tenemos al menos un nombre o email
+            if (!customerName || customerName === 'Invitado') {
+              if (!customerEmail) {
+                console.warn('⚠️ No se puede crear attendee: faltan nombre y email del customer');
+                break;
+              }
+              // Si solo tenemos email, usar el email como nombre temporal
+              console.warn('⚠️ No hay nombre disponible, usando email como nombre');
             }
             
+            const finalName = (customerName && customerName !== 'Invitado') ? customerName : (customerEmail || 'Invitado');
+            
             console.log('🆕 Creating attendee for guest checkout:', { 
-              guest_name: customerName, 
-              guest_email: customerEmail, 
+              name: finalName,
+              email: customerEmail, 
               event_id,
               session_id: session.id,
               payment_status: session.payment_status
@@ -150,7 +193,7 @@ export async function POST(request: NextRequest) {
               .from('attendees')
               .insert({
                 event_id: event_id,
-                name: customerName || 'Invitado',
+                name: finalName,
                 email: customerEmail,
                 phone: guest_phone || null,
                 tickets: 1,
@@ -167,9 +210,102 @@ export async function POST(request: NextRequest) {
               .single();
 
             if (createError) {
-              console.error('❌ Error creating attendee for guest checkout:', createError);
+              console.error('❌ Error creating attendee for guest checkout:', {
+                error: createError,
+                message: createError.message,
+                details: createError.details,
+                hint: createError.hint,
+                data: {
+                  event_id,
+                  name: finalName,
+                  email: customerEmail,
+                  payment_status: 'paid',
+                }
+              });
             } else {
-              console.log('✅ Attendee created successfully for guest checkout:', newAttendee);
+              console.log('✅ Attendee created successfully for guest checkout:', {
+                id: newAttendee?.id,
+                name: newAttendee?.name,
+                email: newAttendee?.email,
+                event_id: newAttendee?.event_id,
+                payment_status: newAttendee?.payment_status,
+              });
+              
+              // IMPORTANTE: Si el email del guest coincide con un miembro existente,
+              // crear también el registro en event_registrations para que aparezca en su perfil
+              if (customerEmail) {
+                const { data: existingMember } = await supabase
+                  .from('members')
+                  .select('id, email, full_name')
+                  .eq('email', customerEmail)
+                  .maybeSingle();
+                
+                if (existingMember) {
+                  console.log('🔍 Guest email matches existing member, creating event_registrations:', {
+                    member_id: existingMember.id,
+                    member_email: existingMember.email,
+                    event_id,
+                  });
+                  
+                  // Verificar si ya existe un registro
+                  const { data: existingReg } = await supabase
+                    .from('event_registrations')
+                    .select('id')
+                    .eq('member_id', existingMember.id)
+                    .eq('event_id', event_id)
+                    .maybeSingle();
+                  
+                  if (!existingReg) {
+                    // Crear registro en event_registrations
+                    const { data: newRegistration, error: regError } = await supabase
+                      .from('event_registrations')
+                      .insert({
+                        member_id: existingMember.id,
+                        event_id: event_id,
+                        payment_status: 'paid',
+                        status: 'confirmed',
+                        stripe_session_id: session.id,
+                        stripe_payment_intent_id: session.payment_intent as string,
+                        amount_paid: session.amount_total ? session.amount_total / 100 : 0,
+                        currency: session.currency || 'mxn',
+                        payment_method: session.payment_method_types?.[0] || 'card',
+                        registration_date: new Date().toISOString(),
+                      })
+                      .select()
+                      .single();
+                    
+                    if (regError) {
+                      console.error('❌ Error creating event_registrations for guest member:', regError);
+                    } else {
+                      console.log('✅ Event registration created for guest member:', {
+                        registration_id: newRegistration?.id,
+                        member_id: existingMember.id,
+                        event_id,
+                      });
+                    }
+                  } else {
+                    // Actualizar registro existente
+                    const { error: updateRegError } = await supabase
+                      .from('event_registrations')
+                      .update({
+                        payment_status: 'paid',
+                        status: 'confirmed',
+                        stripe_session_id: session.id,
+                        stripe_payment_intent_id: session.payment_intent as string,
+                        amount_paid: session.amount_total ? session.amount_total / 100 : 0,
+                        currency: session.currency || 'mxn',
+                        payment_method: session.payment_method_types?.[0] || 'card',
+                      })
+                      .eq('id', existingReg.id);
+                    
+                    if (updateRegError) {
+                      console.error('❌ Error updating event_registrations for guest member:', updateRegError);
+                    } else {
+                      console.log('✅ Event registration updated for guest member');
+                    }
+                  }
+                }
+              }
             }
           }
         } else if (member_id && event_id) {

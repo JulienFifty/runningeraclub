@@ -59,10 +59,10 @@ export async function GET(
       event.price.toString().toLowerCase().includes('gratis') ||
       event.price.toString().toLowerCase().includes('free');
 
-    // Contar registros de miembros con pago exitoso
+    // Obtener registros de miembros con pago exitoso (excluyendo staff)
     let registrationsQuery = supabase
       .from('event_registrations')
-      .select('*', { count: 'exact', head: true })
+      .select('id, member_id, notes')
       .eq('event_id', eventId)
       .in('status', ['confirmed', 'registered']);
 
@@ -75,16 +75,16 @@ export async function GET(
       registrationsQuery = registrationsQuery.eq('payment_status', 'paid');
     }
 
-    const { count: registrationsCount, error: registrationsError } = await registrationsQuery;
+    const { data: registrationsData, error: registrationsError } = await registrationsQuery;
 
     if (registrationsError) {
       console.error('Error contando registros:', registrationsError);
     }
 
-    // Contar invitados (attendees) con pago exitoso
+    // Obtener invitados (attendees) con pago exitoso (excluyendo staff)
     let attendeesQuery = supabase
       .from('attendees')
-      .select('*', { count: 'exact', head: true })
+      .select('id, email, notes')
       .eq('event_id', eventId);
 
     if (isFreeEvent) {
@@ -93,13 +93,50 @@ export async function GET(
       attendeesQuery = attendeesQuery.eq('payment_status', 'paid');
     }
 
-    const { count: attendeesCount, error: attendeesError } = await attendeesQuery;
+    const { data: attendeesData, error: attendeesError } = await attendeesQuery;
 
     if (attendeesError) {
       console.error('Error contando invitados:', attendeesError);
     }
 
-    const totalRegistered = (registrationsCount || 0) + (attendeesCount || 0);
+    // Filtrar staff de ambos conjuntos
+    const validRegistrations = (registrationsData || []).filter(
+      (reg) => !reg.notes || !reg.notes.toLowerCase().includes('staff')
+    );
+    
+    const validAttendees = (attendeesData || []).filter(
+      (att) => !att.notes || !att.notes.toLowerCase().includes('staff')
+    );
+
+    // Crear un Set de emails de miembros registrados para evitar duplicados
+    const registeredMemberEmails = new Set<string>();
+    validRegistrations.forEach((reg) => {
+      // Obtener email del miembro si es posible
+      // Por ahora, solo contamos el registro
+    });
+
+    // Contar attendees que NO están ya en event_registrations (evitar duplicados)
+    // Si un attendee tiene el mismo email que un miembro registrado, no contarlo dos veces
+    const attendeeEmails = new Set(
+      validAttendees.map((att) => att.email?.toLowerCase()).filter(Boolean) as string[]
+    );
+
+    // Obtener emails de miembros registrados para comparar
+    const { data: membersData } = await supabase
+      .from('members')
+      .select('id, email')
+      .in('id', validRegistrations.map((r) => r.member_id).filter(Boolean));
+
+    const registeredMemberEmailsSet = new Set(
+      (membersData || []).map((m) => m.email?.toLowerCase()).filter(Boolean) as string[]
+    );
+
+    // Contar solo attendees que NO son miembros ya registrados
+    const uniqueAttendees = validAttendees.filter(
+      (att) => !att.email || !registeredMemberEmailsSet.has(att.email.toLowerCase())
+    );
+
+    const totalRegistered = validRegistrations.length + uniqueAttendees.length;
     const spotsRemaining = Math.max(0, event.max_participants - totalRegistered);
     const isFull = totalRegistered >= event.max_participants;
 

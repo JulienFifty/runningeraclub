@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
@@ -118,6 +119,18 @@ export async function GET() {
       return false;
     }).slice(0, 10); // Limitar a 10 eventos más próximos
 
+    // Crear cliente con service role para bypass RLS
+    const supabaseService = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
+    );
+
     // Para cada evento, calcular registros e ingresos
     const eventsWithStats = await Promise.all(
       (events || []).map(async (event) => {
@@ -125,18 +138,24 @@ export async function GET() {
           let registeredCount = 0;
           let totalRevenue = 0;
 
-          // Contar registros con pago exitoso (paid) de event_registrations
+          // Obtener registros con pago exitoso (paid) de event_registrations (excluyendo staff)
           // Manejar caso donde la tabla no existe
+          let registeredMemberIds: string[] = [];
           try {
-            const { count: registrationsCount, error: regError } = await supabase
+            const { data: registrationsData, error: regError } = await supabaseService
               .from('event_registrations')
-              .select('*', { count: 'exact', head: true })
+              .select('id, member_id, notes')
               .eq('event_id', event.id)
               .eq('payment_status', 'paid');
 
-            if (!regError) {
-              registeredCount += registrationsCount || 0;
-            } else if (regError.code !== 'PGRST116') { // PGRST116 = tabla no existe
+            if (!regError && registrationsData) {
+              // Filtrar staff
+              const validRegistrations = registrationsData.filter(
+                (reg) => !reg.notes || !reg.notes.toLowerCase().includes('staff')
+              );
+              registeredCount += validRegistrations.length;
+              registeredMemberIds = validRegistrations.map((r) => r.member_id).filter(Boolean) as string[];
+            } else if (regError && regError.code !== 'PGRST116') { // PGRST116 = tabla no existe
               console.error(`Error counting registrations for event ${event.id}:`, regError);
             }
           } catch (e) {
@@ -144,17 +163,40 @@ export async function GET() {
             console.warn('event_registrations table may not exist');
           }
 
-          // Contar asistentes con pago exitoso (paid) de attendees
+          // Obtener asistentes con pago exitoso (paid) de attendees (excluyendo staff y duplicados)
           try {
-            const { count: attendeesCount, error: attError } = await supabase
+            const { data: attendeesData, error: attError } = await supabaseService
               .from('attendees')
-              .select('*', { count: 'exact', head: true })
+              .select('id, email, notes')
               .eq('event_id', event.id)
               .eq('payment_status', 'paid');
 
-            if (!attError) {
-              registeredCount += attendeesCount || 0;
-            } else if (attError.code !== 'PGRST116') {
+            if (!attError && attendeesData) {
+              // Filtrar staff
+              const validAttendees = attendeesData.filter(
+                (att) => !att.notes || !att.notes.toLowerCase().includes('staff')
+              );
+
+              // Obtener emails de miembros registrados para evitar duplicados
+              let registeredMemberEmails = new Set<string>();
+              if (registeredMemberIds.length > 0) {
+                const { data: membersData } = await supabaseService
+                  .from('members')
+                  .select('id, email')
+                  .in('id', registeredMemberIds);
+
+                registeredMemberEmails = new Set(
+                  (membersData || []).map((m) => m.email?.toLowerCase()).filter(Boolean) as string[]
+                );
+              }
+
+              // Contar solo attendees que NO son miembros ya registrados
+              const uniqueAttendees = validAttendees.filter(
+                (att) => !att.email || !registeredMemberEmails.has(att.email.toLowerCase())
+              );
+
+              registeredCount += uniqueAttendees.length;
+            } else if (attError && attError.code !== 'PGRST116') {
               console.error(`Error counting attendees for event ${event.id}:`, attError);
             }
           } catch (e) {
@@ -164,7 +206,7 @@ export async function GET() {
 
           // Calcular ingresos totales de payment_transactions
           try {
-            const { data: transactions, error: transError } = await supabase
+            const { data: transactions, error: transError } = await supabaseService
               .from('payment_transactions')
               .select('amount, status')
               .eq('event_id', event.id)

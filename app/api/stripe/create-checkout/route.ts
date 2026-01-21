@@ -382,6 +382,22 @@ export async function POST(request: NextRequest) {
         }
       );
 
+      // Preparar metadata con información del invitado si es guest checkout
+      const transactionMetadata: any = {
+        stripe_customer_id: stripeCustomerId,
+        coupon_code: couponData?.code,
+        discount_amount: discountAmount / 100,
+        original_amount: parseInt(priceMatch[0]),
+      };
+
+      // Si es guest checkout, agregar información del invitado a los metadata
+      if (is_guest && guest_data) {
+        transactionMetadata.guest_name = guest_data.name || '';
+        transactionMetadata.guest_email = guest_data.email || '';
+        transactionMetadata.guest_phone = guest_data.phone || '';
+        transactionMetadata.is_guest = 'true';
+      }
+
       const { error: transactionError } = await supabaseAdmin
         .from('payment_transactions')
         .insert({
@@ -393,12 +409,7 @@ export async function POST(request: NextRequest) {
           amount: amount / 100,
           currency: 'mxn',
           status: 'pending',
-          metadata: {
-            stripe_customer_id: stripeCustomerId,
-            coupon_code: couponData?.code,
-            discount_amount: discountAmount / 100,
-            original_amount: parseInt(priceMatch[0]),
-          },
+          metadata: transactionMetadata,
         });
 
       if (transactionError) {

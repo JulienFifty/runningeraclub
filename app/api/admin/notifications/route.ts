@@ -151,7 +151,14 @@ export async function GET() {
         }
 
         // Para pagos completados (succeeded, failed, refunded)
-        const memberName = member?.full_name || member?.email || 'Usuario';
+        // Si es guest checkout, obtener nombre de metadata, sino del member
+        let memberName = 'Usuario';
+        if (transaction.metadata?.is_guest === 'true' && transaction.metadata?.guest_name) {
+          memberName = transaction.metadata.guest_name;
+        } else if (member) {
+          memberName = member.full_name || member.email || 'Usuario';
+        }
+        
         const eventTitle = event?.title || 'Evento';
         const eventPrice = event?.price || (transaction.amount ? `$${Number(transaction.amount).toFixed(2)} MXN` : '');
         const amount = transaction.amount ? `$${Number(transaction.amount).toFixed(2)}` : '';
