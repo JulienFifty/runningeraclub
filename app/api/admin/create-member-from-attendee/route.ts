@@ -182,7 +182,7 @@ export async function POST(request: NextRequest) {
           // Verificar si ya existe un registro para este evento
           const { data: existingReg } = await supabase
             .from('event_registrations')
-            .select('id')
+            .select('id, stripe_session_id, stripe_payment_intent_id, amount_paid, currency, payment_method')
             .eq('member_id', results.member.id)
             .eq('event_id', att.event_id)
             .maybeSingle();
