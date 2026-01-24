@@ -95,8 +95,8 @@ export default function AdminMembers() {
       const result = await response.json();
       const allMembers = result.members || [];
 
-      // Guardar el total de miembros (antes de aplicar filtros)
-      setTotalMembers(allMembers.length);
+      // Usar el total del endpoint (conteo real sin límites)
+      setTotalMembers(result.total || allMembers.length);
 
       // Aplicar filtros locales
       let filtered: Member[] = allMembers;

@@ -33,11 +33,22 @@ export async function GET(request: Request) {
         created_at
       `);
 
+    // Obtener el conteo total de miembros primero (sin límite)
+    const { count: totalCount, error: countError } = await supabase
+      .from('members')
+      .select('*', { count: 'exact', head: true });
+
+    if (countError) {
+      console.error('Error counting members:', countError);
+    }
+
     // Si se proporciona un email, filtrar por él
     if (email) {
       query = query.ilike('email', `%${email}%`).limit(10);
     } else {
-      query = query.order('created_at', { ascending: false }).limit(100);
+      // Obtener todos los miembros sin límite (o usar paginación si hay muchos)
+      query = query.order('created_at', { ascending: false });
+      // Remover el límite para obtener todos
     }
 
     const { data: members, error } = await query;
@@ -72,7 +83,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       members: membersWithCounts,
-      total: membersWithCounts.length,
+      total: totalCount || membersWithCounts.length,
     });
   } catch (error: any) {
     console.error('Error in admin members API:', error);
