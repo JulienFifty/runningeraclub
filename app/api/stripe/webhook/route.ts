@@ -233,6 +233,48 @@ export async function POST(request: NextRequest) {
                 payment_status: newAttendee?.payment_status,
               });
               
+              // Enviar correo de confirmación al guest
+              if (customerEmail) {
+                try {
+                  // Obtener información del evento
+                  const { data: eventData } = await supabase
+                    .from('events')
+                    .select('title, date, location')
+                    .eq('id', event_id)
+                    .single();
+
+                  // Enviar correo de confirmación
+                  const emailResponse = await fetch(
+                    `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/api/email/send-event-confirmation`,
+                    {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({
+                        email: customerEmail,
+                        name: finalName,
+                        event_id: event_id,
+                        event_title: eventData?.title,
+                        event_date: eventData?.date,
+                        event_location: eventData?.location,
+                        amount: session.amount_total ? session.amount_total / 100 : 0,
+                        currency: session.currency?.toUpperCase() || 'MXN',
+                      }),
+                    }
+                  );
+
+                  if (emailResponse.ok) {
+                    console.log('✅ Email de confirmación enviado a:', customerEmail);
+                  } else {
+                    console.warn('⚠️ Error al enviar email de confirmación:', await emailResponse.text());
+                  }
+                } catch (emailError: any) {
+                  console.error('❌ Error enviando email de confirmación:', emailError);
+                  // No fallar el webhook si falla el email
+                }
+              }
+              
               // IMPORTANTE: Si el email del guest coincide con un miembro existente,
               // crear también el registro en event_registrations para que aparezca en su perfil
               if (customerEmail) {
