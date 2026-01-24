@@ -3,12 +3,18 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import dynamicImport from 'next/dynamic';
 import { ArrowLeft, Calendar, Upload, Archive, ArchiveRestore } from 'lucide-react';
 import { formatEventDate } from '@/lib/date-utils';
-import { ImportAttendeesModal } from '@/components/admin/ImportAttendeesModal';
 import { CheckinDashboard } from '@/components/admin/CheckinDashboard';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+
+// Cargar ImportAttendeesModal de forma dinámica para evitar problemas con xlsx
+const ImportAttendeesModal = dynamicImport(
+  () => import('@/components/admin/ImportAttendeesModal').then(mod => ({ default: mod.ImportAttendeesModal })),
+  { ssr: false }
+);
 
 // Forzar renderizado dinámico (evita prerender durante build)
 export const dynamic = 'force-dynamic';

@@ -121,17 +121,39 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const eventId = searchParams.get('event_id');
 
+    // Verificar si el evento es gratis
+    let isFreeEvent = false;
+    if (eventId) {
+      const { data: event } = await supabase
+        .from('events')
+        .select('price')
+        .eq('id', eventId)
+        .single();
+
+      if (event) {
+        const priceStr = event.price?.toString().toLowerCase() || '';
+        isFreeEvent = !event.price || 
+          event.price === '0' || 
+          priceStr.includes('gratis') ||
+          priceStr.includes('free');
+      }
+    }
+
     // Obtener attendees de la tabla attendees
-    // SOLO mostrar los que tienen payment_status = 'paid' (pagos completados)
-    // O los que son registros manuales (staff, cortesía) que ya tienen payment_status = 'paid'
+    // Para eventos GRATIS: mostrar TODOS los attendees (sin filtrar por payment_status)
+    // Para eventos de PAGO: SOLO mostrar los que tienen payment_status = 'paid'
     let attendeesQuery = supabase
       .from('attendees')
       .select('*')
-      .eq('payment_status', 'paid') // SOLO pagos completados
       .order('created_at', { ascending: false });
 
     if (eventId) {
       attendeesQuery = attendeesQuery.eq('event_id', eventId);
+    }
+
+    // Solo filtrar por payment_status si NO es evento gratis
+    if (!isFreeEvent) {
+      attendeesQuery = attendeesQuery.eq('payment_status', 'paid');
     }
 
     const { data: attendeesData, error: attendeesError } = await attendeesQuery;
@@ -145,8 +167,10 @@ export async function GET(request: Request) {
     let membersData: any[] = [];
     if (eventId) {
       try {
-        // Obtener registros de miembros con pago completado
-        const { data: registrationsData, error: registrationsError } = await supabase
+        // Obtener registros de miembros
+        // Para eventos GRATIS: mostrar todos los registros (paid, pending, o con stripe_session_id)
+        // Para eventos de PAGO: solo los que tienen payment_status = 'paid'
+        let registrationsQuery = supabase
           .from('event_registrations')
           .select(`
             id,
@@ -163,8 +187,15 @@ export async function GET(request: Request) {
             )
           `)
           .eq('event_id', eventId)
-          .eq('payment_status', 'paid')
           .in('status', ['registered', 'confirmed']);
+
+        // Solo filtrar por payment_status si NO es evento gratis
+        // Para eventos gratis, mostrar todos los registros (no filtrar por payment_status)
+        if (!isFreeEvent) {
+          registrationsQuery = registrationsQuery.eq('payment_status', 'paid');
+        }
+
+        const { data: registrationsData, error: registrationsError } = await registrationsQuery;
 
         if (!registrationsError && registrationsData) {
           // Obtener emails de los attendees existentes para evitar duplicados

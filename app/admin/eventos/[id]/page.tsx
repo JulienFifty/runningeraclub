@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Save, CheckCircle, Download } from 'lucide-react';
 import { DatePicker } from '@/components/ui/date-picker';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { toast } from 'sonner';
@@ -165,6 +165,50 @@ export default function EditEvent() {
       title,
       slug: generateSlug(title),
     });
+  };
+
+  const handleExport = async () => {
+    try {
+      const response = await fetch(`/api/admin/export-event-attendees?event_id=${eventId}`);
+      
+      if (!response.ok) {
+        const error = await response.json();
+        toast.error('Error al exportar lista', {
+          description: error.error || 'Hubo un problema al generar el archivo',
+        });
+        return;
+      }
+
+      // Obtener el nombre del archivo del header Content-Disposition
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = 'asistentes.csv';
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+
+      // Descargar el archivo
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.success('Lista exportada exitosamente', {
+        description: `Se descargó el archivo ${filename}`,
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Error al exportar lista', {
+        description: 'Hubo un problema al generar el archivo. Por favor intenta de nuevo.',
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -671,7 +715,15 @@ export default function EditEvent() {
           </div>
 
           {/* Botones */}
-          <div className="flex gap-4">
+          <div className="flex gap-4 flex-wrap">
+            <button
+              type="button"
+              onClick={handleExport}
+              className="inline-flex items-center gap-2 border border-border text-foreground px-6 py-3 rounded-lg hover:bg-muted transition-colors"
+            >
+              <Download className="w-4 h-4" />
+              Exportar Lista de Asistentes
+            </button>
             <button
               type="submit"
               disabled={saving}
