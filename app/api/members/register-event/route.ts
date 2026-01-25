@@ -299,6 +299,48 @@ export async function POST(request: Request) {
         console.error('[Register Event] Error enviando notificación push:', pushError);
       }
 
+      // Enviar correo de confirmación para eventos gratuitos
+      if (member?.email) {
+        try {
+          // Obtener información completa del evento
+          const { data: eventData } = await supabase
+            .from('events')
+            .select('title, date, location')
+            .eq('id', event_id)
+            .single();
+
+          // Enviar correo de confirmación
+          const emailResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/api/email/send-event-confirmation`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                email: member.email,
+                name: member.full_name,
+                event_id: event_id,
+                event_title: eventData?.title || event.title,
+                event_date: eventData?.date,
+                event_location: eventData?.location,
+                amount: 0, // Evento gratuito
+                currency: 'MXN',
+              }),
+            }
+          );
+
+          if (emailResponse.ok) {
+            console.log('✅ Email de confirmación enviado para evento gratuito a:', member.email);
+          } else {
+            console.warn('⚠️ Error al enviar email de confirmación:', await emailResponse.text());
+          }
+        } catch (emailError: any) {
+          console.error('❌ Error enviando email de confirmación para evento gratuito:', emailError);
+          // No fallar el registro si falla el email
+        }
+      }
+
       return NextResponse.json({
         success: true,
         requires_payment: false,
